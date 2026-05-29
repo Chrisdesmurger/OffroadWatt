@@ -194,6 +194,7 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
+  altOn: false, altAmps: 20, altHours: 2,
   aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
 }
@@ -203,17 +204,21 @@ let S = {
 const set = (u) => { Object.assign(S, u); render() }
 const sunH = () => S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 4.5) : SUN_ZONES[S.sunIdx].h
 
+const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
+
 function calc() {
   const active = S.apps.filter(a => a.on)
   const cons = active.reduce((s, a) => s + a.w * a.h, 0)
   const solar = S.solW * S.solNb * sunH() * S.solEff
-  const net = Math.max(0, cons - solar)
+  const alt = S.altOn ? S.altAmps * S.bat.v * S.altHours * ALT_EFF : 0
+  const recharge = solar + alt
+  const net = Math.max(0, cons - recharge)
   const batWhUnit = S.bat.ah * S.bat.v
   const batWhTotal = batWhUnit * S.batNb
   const usable = batWhTotal * S.dod
   const autDays = net > 0 ? usable / net : Infinity
-  const solCovPct = cons > 0 ? Math.min(100, solar / cons * 100) : 100
-  return { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
+  const solCovPct = cons > 0 ? Math.min(100, recharge / cons * 100) : 100
+  return { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
 }
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
@@ -320,7 +325,7 @@ function buildAppsCard() {
 }
 
 function buildEnergyTab() {
-  const { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
+  const { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
   const isDanger = net > usable
   const autStr = isFinite(autDays) ? (autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ' j') : '∞'
 
@@ -370,6 +375,38 @@ function buildEnergyTab() {
       </div>
 
       <div class="card">
+        <div class="ct alt"><i class="ti ti-engine"></i>Recharge alternateur
+          <button class="tog${S.altOn ? ' on' : ''}" id="alt-toggle" style="margin-left:auto"></button>
+        </div>
+        ${S.altOn ? `
+        <div class="sol-config">
+          <div class="scf">
+            <label>Ampérage dédié batteries</label>
+            <div style="display:flex;align-items:center;gap:5px">
+              <input id="alt-amps" type="number" min="5" max="200" value="${S.altAmps}" style="width:70px">
+              <span style="font-size:11px;color:var(--t3)">A</span>
+            </div>
+          </div>
+          <div class="scf">
+            <label>Heures de roulage / jour</label>
+            <div style="display:flex;align-items:center;gap:5px">
+              <input id="alt-hours" type="number" min="0.5" max="12" step="0.5" value="${S.altHours}" style="width:70px">
+              <span style="font-size:11px;color:var(--t3)">h/j</span>
+            </div>
+          </div>
+        </div>
+        <div class="sol-summary" style="background:rgba(167,139,250,.06);border-color:#4c3680">
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${S.altAmps} A</div><div class="ssl">Ampérage</div></div>
+          <div style="width:1px;background:var(--b1)"></div>
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${S.altHours} h</div><div class="ssl">Roulage / jour</div></div>
+          <div style="width:1px;background:var(--b1)"></div>
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${Math.round(S.altAmps * S.bat.v * S.altHours * ALT_EFF)} Wh</div><div class="ssl">Recharge / jour</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);margin-top:4px">Rendement câbles + régulateur : 70%</div>` :
+        `<div style="font-size:12px;color:var(--t3);padding:6px 0">Activez pour comptabiliser la recharge en roulant.</div>`}
+      </div>
+
+      <div class="card">
         <div class="ct sol"><i class="ti ti-sun"></i>Panneaux solaires</div>
         <div class="spgrid">
           ${PANELS.map(w => `<div class="spo${S.solW === w ? ' on' : ''}" data-panel="${w}"><div class="spw">${w}</div><div class="spl">Wc</div></div>`).join('')}
@@ -409,13 +446,14 @@ function buildEnergyTab() {
 
       <div class="card">
         <div class="ct te"><i class="ti ti-activity"></i>Bilan énergétique journalier</div>
-        <div class="ef-grid">
-          <div class="ef sol"><div class="en">${Math.round(solar)}</div><div class="el">Wh produits / jour</div></div>
+        <div class="ef-grid${S.altOn ? ' ef-grid-4' : ''}">
+          <div class="ef sol"><div class="en">${Math.round(solar)}</div><div class="el">Wh solaire / jour</div></div>
+          ${S.altOn ? `<div class="ef alt"><div class="en">${Math.round(alt)}</div><div class="el">Wh alternateur / jour</div></div>` : ''}
           <div class="ef bat"><div class="en">${Math.round(usable)}</div><div class="el">Wh utilisables</div></div>
           <div class="ef net ${isDanger ? 'bad' : 'ok'}"><div class="en">${Math.round(net)}</div><div class="el">Wh déficit / jour</div></div>
         </div>
         <div style="font-size:10px;color:var(--t3);display:flex;justify-content:space-between;margin-top:6px;margin-bottom:2px">
-          <span>Couverture solaire</span>
+          <span>Couverture totale (solaire${S.altOn ? ' + alternateur' : ''})</span>
           <span style="font-family:var(--mono);color:var(--so)">${Math.round(solCovPct)}%</span>
         </div>
         <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden">
@@ -427,7 +465,7 @@ function buildEnergyTab() {
         <div class="ct te"><i class="ti ti-clock"></i>Autonomie</div>
         <div class="ab-grid">
           <div class="ab-item">
-            <div class="abn">Sans soleil (batterie seule)</div>
+            <div class="abn">${S.altOn ? 'Avec alternateur + batterie' : 'Sans soleil (batterie seule)'}</div>
             <div class="abv" style="color:${isDanger ? 'var(--rd)' : 'var(--te)'}">${autStr}</div>
             <div class="abu">${isFinite(autDays) && autDays >= 1 ? 'jours' : isFinite(autDays) ? 'heures' : 'illimité'}</div>
             <div class="tag ${isDanger ? 'twarn' : 'tok'}">
@@ -455,6 +493,7 @@ function buildEnergyTab() {
           ${breakdown.length > 6 ? `<div class="bkrow"><span class="bkn">+${breakdown.length - 6} autres</span><span class="bkv">${breakdown.slice(6).reduce((s, a) => s + a.wh, 0)} Wh/j</span></div>` : ''}
           <div class="bkrow"><span>Total consommé</span><span class="bkv" style="color:var(--am)">${Math.round(cons)} Wh/j</span></div>
           <div class="bkrow"><span>Production solaire</span><span class="bkv" style="color:var(--so)">− ${Math.round(Math.min(solar, cons))} Wh/j</span></div>
+          ${S.altOn ? `<div class="bkrow"><span>Recharge alternateur</span><span class="bkv" style="color:var(--pu)">− ${Math.round(Math.min(alt, Math.max(0, cons - solar)))} Wh/j</span></div>` : ''}
           <div class="bkrow" style="border-top:1px solid var(--b2);margin-top:2px">
             <span style="font-weight:500">Déficit batterie</span>
             <span class="bkv" style="color:${isDanger ? 'var(--rd)' : 'var(--te)'}">${Math.round(net)} Wh/j</span>
@@ -680,6 +719,10 @@ function bindEvents() {
     const id = parseInt(el.dataset.del)
     set({ apps: S.apps.filter(a => a.id !== id) })
   }))
+  // Alternateur
+  document.getElementById('alt-toggle')?.addEventListener('click', () => set({ altOn: !S.altOn }))
+  document.getElementById('alt-amps')?.addEventListener('change', e => set({ altAmps: Math.max(5, parseFloat(e.target.value) || 20) }))
+  document.getElementById('alt-hours')?.addEventListener('change', e => set({ altHours: Math.max(0.5, parseFloat(e.target.value) || 2) }))
   // Battery options
   document.querySelectorAll('[data-bat]').forEach(el => el.addEventListener('click', () => {
     const b = BATS[parseInt(el.dataset.bat)]

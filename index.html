@@ -42,7 +42,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 @media(max-width:660px){.col3{grid-template-columns:1fr}}
 .card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px}
 .ct{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:5px}
-.ct i{font-size:13px;color:var(--am)}.ct.sol i{color:var(--so)}.ct.te i{color:var(--te)}
+.ct i{font-size:13px;color:var(--am)}.ct.sol i{color:var(--so)}.ct.te i{color:var(--te)}.ct.alt i{color:var(--pu)}.ct.alt{display:flex;align-items:center}
 .catf{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
 .cf{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:3px 9px;font-size:10px;font-family:var(--mono);color:var(--t3);cursor:pointer;transition:all .1s;text-transform:uppercase;letter-spacing:.4px}
 .cf.on{border-color:var(--am);color:var(--am);background:rgba(240,160,48,.07)}
@@ -93,10 +93,11 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .ss-item .ssl{font-size:10px;color:var(--t3)}
 .energy-panel{display:flex;flex-direction:column;gap:10px}
 .ef-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:2px}
+.ef-grid-4{grid-template-columns:repeat(4,1fr)}
 .ef{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;text-align:center}
-.ef.sol{border-color:var(--so3)}.ef.bat{border-color:var(--te3)}.ef.net.ok{border-color:var(--te3)}.ef.net.bad{border-color:#7f2929}
+.ef.sol{border-color:var(--so3)}.ef.bat{border-color:var(--te3)}.ef.net.ok{border-color:var(--te3)}.ef.net.bad{border-color:#7f2929}.ef.alt{border-color:#4c3680}
 .ef .en{font-family:var(--mono);font-size:17px;font-weight:700}
-.ef.sol .en{color:var(--so)}.ef.bat .en{color:var(--te)}.ef.net.ok .en{color:var(--gr)}.ef.net.bad .en{color:var(--rd)}
+.ef.sol .en{color:var(--so)}.ef.bat .en{color:var(--te)}.ef.net.ok .en{color:var(--gr)}.ef.net.bad .en{color:var(--rd)}.ef.alt .en{color:var(--pu)}
 .ef .el{font-size:10px;color:var(--t3);margin-top:1px}
 .ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ab-item .abn{font-size:10px;color:var(--t3);margin-bottom:2px}
