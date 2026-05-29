@@ -9,7 +9,7 @@ Ce fichier documente l'état complet du projet **OffroadWatt** pour permettre un
 **OffroadWatt** est un calculateur d'autonomie électrique pour camping-car, caravane et van.
 
 L'utilisateur configure :
-- ses **appareils consommateurs** (watts, heures/jour)
+- ses **appareils consommateurs** (watts, heures/jour, multi-modes 12V/Gaz)
 - sa **banque de batteries** (Ah, voltage, nombre en parallèle, profondeur de décharge)
 - ses **panneaux solaires** (Wc, nombre, rendement MPPT, zone géographique)
 
@@ -20,7 +20,7 @@ L'application calcule en temps réel :
 - l'**autonomie en jours** (sans soleil)
 - des recommandations de batterie du marché
 
-Une fonctionnalité **Recherche IA** (Anthropic Claude API + web search) permet de trouver des composants réels avec leur consommation exacte.
+Une fonctionnalité **Recherche IA** (Anthropic Claude API via Edge Function Vercel) permet de trouver des composants réels avec leur consommation exacte. Les résultats sont sauvegardés dans un **catalogue partagé Supabase**.
 
 ---
 
@@ -34,7 +34,9 @@ Une fonctionnalité **Recherche IA** (Anthropic Claude API + web search) permet 
 | Icônes | Tabler Icons (CDN webfont) |
 | Polices | Google Fonts (Space Mono + DM Sans) CDN |
 | Déploiement | **Vercel** (buildCommand: `npm run build`, output: `dist/`) |
-| API IA | **Anthropic Claude API** (`claude-sonnet-4-20250514`) + tool `web_search` |
+| API IA | **Anthropic Claude API** (`claude-haiku-4-5-20251001`) via Edge Function |
+| Base de données | **Supabase** `ofjpskrjlwfebaqomijm` (eu-west-3 / Paris) |
+| Node.js | `20.x` (fixé dans `package.json` engines) |
 
 **Aucune dépendance runtime** — uniquement `vite` en devDependency.
 
@@ -44,12 +46,14 @@ Une fonctionnalité **Recherche IA** (Anthropic Claude API + web search) permet 
 
 ```
 OffroadWatt/
-├── index.html          ← HTML shell + tout le CSS (CSS vars, ~170 lignes)
+├── index.html          ← HTML shell + tout le CSS (~200 lignes)
 ├── src/
-│   └── main.js         ← Toute la logique applicative (~665 lignes)
-├── package.json        ← { "vite": "^5.4.0" } devDependency
+│   └── main.js         ← Toute la logique applicative (~750 lignes)
+├── api/
+│   └── search.js       ← Vercel Edge Function — proxy Anthropic + streaming SSE
+├── package.json        ← { "vite": "^5.4.0" }, engines: node 20.x
 ├── vite.config.js      ← Config minimale (root: '.', outDir: 'dist')
-├── vercel.json         ← buildCommand + outputDirectory
+├── vercel.json         ← buildCommand + outputDirectory + Edge Function config
 ├── .gitignore          ← node_modules/, dist/, .env.local
 ├── README.md           ← Documentation utilisateur
 └── CLAUDE.md           ← Ce fichier (briefing technique)
@@ -59,16 +63,15 @@ OffroadWatt/
 
 ## 4. Architecture du code (`src/main.js`)
 
-### 4.1 Données statiques (en tête de fichier)
+### 4.1 Données statiques
 
 ```js
-const BATS    // 9 modèles de batteries {ah, v, label, type}
-const DOD     // Profondeur de décharge par type: {AGM:0.5, GEL:0.5, LI:0.8}
-const PANELS  // Puissances disponibles: [80,100,150,200,250,300,400,500] Wc
+const BATS       // 9 modèles de batteries {ah, v, label, type}
+const DOD        // Profondeur de décharge par type: {AGM:0.5, GEL:0.5, LI:0.8}
+const PANELS     // Puissances disponibles: [80,100,150,200,250,300,400,500] Wc
 const SUN_ZONES  // 41 zones géographiques mondiales {r, n, h, eg}
 const CATALOG    // 33 appareils preset {n, icon, w, h, cat}
-const CATS    // ['Tout','Cuisine','Confort','Tech','Eau','Éclairage','Système']
-const API_KEY // import.meta.env.VITE_ANTHROPIC_KEY || ''
+const CATS       // ['Tout','Cuisine','Confort','Tech','Eau','Éclairage','Système']
 ```
 
 ### 4.2 État global
@@ -76,115 +79,140 @@ const API_KEY // import.meta.env.VITE_ANTHROPIC_KEY || ''
 ```js
 let S = {
   vtype: 'campervan',       // 'campervan' | 'caravan' | 'van'
-  apps: [...],              // [{id, n, icon, w, h, on, cat}]
-  bat: BATS[4],             // batterie sélectionnée {ah:200, v:12, type:'LI'}
-  batNb: 1,                 // nombre de batteries en parallèle (1-10)
-  dod: 0.8,                 // profondeur de décharge (0.4 à 1.0)
-  solW: 200,                // puissance d'un panneau en Wc
-  solNb: 2,                 // nombre de panneaux
-  solEff: 0.85,             // rendement MPPT (0.6 à 0.98)
-  sunIdx: 3,                // index dans SUN_ZONES (3 = Paris 4.0h)
-  customSunH: '',           // heures perso si sunIdx = dernier (Personnalisé)
-  aiQuery: '',              // texte de recherche IA
-  aiResults: [],            // [{name, brand, watts, voltage, price_eur, description, type, efficiency}]
+  apps: [...],              // [{id, n, icon, w, h, on, cat, modes?, activeMode?}]
+  bat: BATS[4],             // batterie sélectionnée
+  batNb: 1,                 // batteries en parallèle
+  dod: 0.8,                 // profondeur de décharge
+  solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
+  aiQuery: '',
+  aiResults: [],            // merge catalogue + online
+  aiCatalogResults: [],     // résultats depuis Supabase
+  aiOnlineResults: [],      // résultats nouveaux depuis l'API
   aiLoading: false,
-  modal: null,              // null | {type:'catalog', catFilter:'Cuisine'} | {type:'custom'}
-  tab: 'apps',              // 'apps' | 'energy' | 'ai' | 'deploy'
-  catFilter: 'Tout',        // filtre catégorie onglet Appareils
+  aiError: null,
+  modal: null,
+  tab: 'energy',            // onglet par défaut
+  catFilter: 'Tout',
 }
 ```
 
-### 4.3 Pattern de mise à jour
+### 4.3 Multi-modes appareils
+
+Les appareils issus de la recherche IA peuvent avoir plusieurs modes de consommation :
 
 ```js
-const set = (updates) => { Object.assign(S, updates); render() }
-// Exemple: set({ tab: 'energy', batNb: 3 })
-```
-
-**Il n'y a pas de système de diff/virtual DOM** — `render()` régénère tout l'innerHTML de `#root` à chaque changement, puis `bindEvents()` re-attache les listeners. C'est simple et fonctionnel pour cette taille d'app.
-
-### 4.4 Fonction de calcul centrale
-
-```js
-function calc() {
-  const cons = Σ(app.w × app.h) pour apps actifs          // Wh/jour
-  const solar = solW × solNb × sunH() × solEff            // Wh/jour
-  const net = max(0, cons - solar)                         // Wh déficit/jour
-  const batWhUnit = bat.ah × bat.v                         // Wh par batterie
-  const batWhTotal = batWhUnit × batNb                     // Wh total banc
-  const usable = batWhTotal × dod                          // Wh utilisables
-  const autDays = net > 0 ? usable / net : Infinity        // jours d'autonomie
-  const solCovPct = min(100, solar / cons × 100)           // % couverture solaire
-  return { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown }
+// Exemple : chauffage diesel Webasto
+{
+  id: 123, n: 'Webasto Air Top 2000 STC', w: 10, h: 8, on: true, cat: 'Confort',
+  modes: [
+    { label: 'Veille / allumage', watts: 10 },
+    { label: 'Puissance min', watts: 30 },
+    { label: 'Puissance max', watts: 80 },
+  ],
+  activeMode: 0,
 }
 ```
 
-### 4.5 Fonctions de rendu
+Le switch de mode se fait **directement dans la carte du dashboard** via des boutons inline. Changer de mode met à jour `w` et recalcule l'autonomie en temps réel.
+
+### 4.4 Fonctions de rendu principales
 
 | Fonction | Rôle |
 |---|---|
-| `buildHTML()` | Assemblage complet (header + tabs + tab actif + modal) |
-| `buildHeader()` | Logo + sélecteur véhicule |
-| `buildTabs()` | Navigation 4 onglets |
-| `buildAppsTab()` | Liste appareils + filtres catégorie + footer total |
-| `buildEnergyTab()` | Batteries (grille + parallèle + DoD + résumé) + Solaire + Bilan + Comparatif |
-| `buildAITab()` | Recherche composants via Claude API |
-| `buildDeployTab()` | Feuille de route statique |
-| `buildModal()` | Modal catalogue OU modal appareil custom |
+| `buildEnergyTab()` | Dashboard principal — layout 3 colonnes |
+| `buildAppsCard()` | Carte appareils avec `buildAppRow()` pour le multi-modes |
+| `buildAITab()` | Recherche IA — sections catalogue Supabase + résultats en ligne |
+| `buildAIResultCard(r, i, source)` | Card résultat avec badge 'catalog' ou 'online' |
+| `buildAppsTab()` | Onglet secondaire — délègue à `buildAppsCard()` |
 
-### 4.6 Gestion des événements
+### 4.5 Navigation
 
-`bindEvents()` utilise **data-attributes** pour éviter les handlers inline :
-
-```html
-<!-- Dans le HTML généré -->
-<div data-tab="energy">Énergie</div>
-<button data-toggle="3"></button>     <!-- toggle app id=3 -->
-<div data-bat="4"></div>              <!-- sélectionner batterie index 4 -->
-<div data-nb="2"></div>              <!-- 2 batteries en parallèle -->
-<div data-panel="200"></div>         <!-- panneau 200Wc -->
-<div data-catalog="0"></div>         <!-- ajouter item 0 du catalogue -->
-<button data-del="5"></button>        <!-- supprimer app id=5 -->
-<button data-ai="1"></button>         <!-- ajouter résultat IA index 1 -->
 ```
-
-### 4.7 Recherche IA
-
-```js
-async function searchAI(q) {
-  // Appel direct à l'API Anthropic depuis le navigateur
-  // Header 'anthropic-dangerous-direct-browser-access': 'true' requis
-  // Model: claude-sonnet-4-20250514
-  // Tool: web_search_20250305
-  // Réponse: JSON parsé depuis le bloc text
-}
+Onglet 1 : Dashboard (energy) ← onglet par défaut
+Onglet 2 : Appareils (apps)   ← vue dédiée secondaire
+Onglet 3 : Recherche IA (ai)
+Onglet 4 : Déploiement (deploy)
 ```
-
-⚠️ **L'appel se fait côté client** (navigateur). En production, migrer vers une API Route Vercel (`api/search.js`) pour ne pas exposer la clé.
 
 ---
 
-## 5. Configuration Vercel
+## 5. API Edge Function (`api/search.js`)
+
+```js
+export const config = { runtime: 'edge' }  // Vercel Edge Runtime
+```
+
+**Fonctionnement :**
+1. Reçoit `{ query }` en POST
+2. Appelle Anthropic avec `stream: true` et `claude-haiku-4-5-20251001`
+3. Transforme le flux SSE Anthropic → extrait les `text_delta` → stream vers le client
+4. Le client accumule le texte et parse le JSON à la fin du flux
+
+**Avantages Edge vs Serverless :**
+- Pas de cold start (~50ms vs 2-3s)
+- Timeout sur le premier octet — contourne la limite 10s du plan gratuit Vercel
+- Streaming natif avec Web Streams API (TransformStream)
+
+**Variable d'environnement requise dans Vercel :**
+- `ANTHROPIC_KEY` = `sk-ant-...` (sans préfixe VITE_, côté serveur uniquement)
+
+---
+
+## 6. Catalogue Supabase
+
+**Projet :** `ofjpskrjlwfebaqomijm` — OffroadWatt — eu-west-3 (Paris)
+**URL :** `https://ofjpskrjlwfebaqomijm.supabase.co`
+**Clé anon publique :** dans `src/main.js` constants `SB_URL` / `SB_KEY`
+
+### Table `equipment_catalog`
+
+```sql
+id uuid primary key default gen_random_uuid()
+name text not null
+brand text
+voltage integer default 12
+price_eur integer
+description text
+type text
+efficiency text
+modes jsonb              -- [{label, watts}, ...]
+search_keywords text[]
+created_at timestamptz
+updated_at timestamptz
+unique (name, brand)
+```
+
+Index full-text PostgreSQL `tsvector` français sur name+brand+type+description.
+RLS : lecture + insertion publiques anonymes (catalogue communautaire).
+
+### Flux de recherche
+
+1. `searchCatalog(q)` → full-text Supabase, résultats instantanés (badge vert "Catalogue")
+2. Appel `api/search` en streaming → Anthropic haiku
+3. Nouveaux résultats upsertés dans Supabase automatiquement (badge jaune "Nouveau")
+4. Cache mémoire 60s pour éviter les requêtes répétées dans la session
+
+---
+
+## 7. Configuration Vercel
 
 ```json
-// vercel.json
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "vite"
+  "framework": "vite",
+  "functions": {
+    "api/search.js": { "maxDuration": 10 }
+  }
 }
 ```
 
-**Variable d'environnement requise dans Vercel :**
-- Nom : `VITE_ANTHROPIC_KEY`
-- Valeur : `sk-ant-api03-...`
-- Scope : Production + Preview
-
-En local : créer `.env.local` à la racine avec `VITE_ANTHROPIC_KEY=sk-ant-...`
+**Variables d'environnement requises :**
+- `ANTHROPIC_KEY` — clé Anthropic server-side
 
 ---
 
-## 6. Commandes
+## 8. Commandes
 
 ```bash
 npm install       # installer les dépendances (vite)
@@ -195,58 +223,51 @@ npm run preview   # prévisualiser le build
 
 ---
 
-## 7. Ce qui fonctionne actuellement
+## 9. Ce qui fonctionne
 
-- [x] Onglet **Appareils** — liste complète, filtre par catégorie, toggle on/off, édition watts/heures inline, suppression, ajout depuis catalogue (33 items), ajout custom
-- [x] Onglet **Énergie** — sélection batterie (9 modèles), batteries en parallèle 1-10, DoD slider, résumé Wh exact (Ah×V×N), panneaux solaires (8 puissances), rendement MPPT, 41 zones géographiques mondiales groupées par région, zone personnalisée, bilan Wh/jour correct, autonomie en jours/heures, comparatif batteries marché
-- [x] Onglet **Recherche IA** — recherche via Claude API + web_search, ajout direct au calcul
-- [x] Onglet **Déploiement** — feuille de route statique
-- [x] Sélecteur véhicule (camping-car / caravane / van) — visuel uniquement pour l'instant
-- [x] Build Vite fonctionnel, déployable sur Vercel
-
----
-
-## 8. Pistes d'amélioration prioritaires
-
-### Court terme
-- [ ] **Sécuriser la clé API** : créer `api/search.js` (Vercel Serverless Function) pour proxifier les appels Anthropic
-- [ ] **Persistance locale** : sauvegarder `S` dans `localStorage` pour retrouver sa configuration après rechargement
-- [ ] **Export PDF** : générer un rapport de bilan (jsPDF ou print CSS)
-- [ ] **Type de véhicule** : ajuster les presets d'appareils selon camping-car / van / caravane
-
-### Moyen terme
-- [ ] **Migration React + TypeScript** : découper en composants (`ApplianceManager`, `BatteryConfig`, `SolarConfig`, `ResultDashboard`)
-- [ ] **Supabase** : authentification + sauvegarde de configurations en base
-- [ ] **Partage de configuration** : URL avec state encodé en base64
-- [ ] **Source de recharge alternateur** : ajouter les Ah rechargés en roulant
-
-### Long terme
-- [ ] **PWA** : installable sur mobile (vite-plugin-pwa)
-- [ ] **Monitoring BLE** : intégration Victron Connect
-- [ ] **Communauté** : partage de configurations entre utilisateurs
+- [x] **Dashboard** — onglet principal, layout 3 colonnes (appareils | batteries+solaire | bilan)
+- [x] **Appareils** — toggle, édition watts/heures, filtre catégorie, catalogue 33 items, custom
+- [x] **Multi-modes** — appareils avec modes 12V/Gaz switchables inline dans le dashboard
+- [x] **Batteries** — 9 modèles, parallèle 1-10, DoD slider, résumé Wh exact
+- [x] **Solaire** — 8 puissances, rendement MPPT, 41 zones géographiques mondiales
+- [x] **Bilan** — autonomie jours/heures, couverture solaire %, comparatif batteries marché
+- [x] **Recherche IA** — Edge Function streaming, haiku model, résultats en ~3-5s
+- [x] **Catalogue Supabase** — partagé communautaire, enrichissement automatique par les recherches
+- [x] **Build Vite** — déployable sur Vercel
 
 ---
 
-## 9. Repo GitHub
+## 10. Repo GitHub
 
 - **URL** : https://github.com/Chrisdesmurger/OffroadWatt
 - **Branche principale** : `main`
-- **Dernier commit** : `c2ca6a5` — migration Vite
-
-```bash
-# Cloner et démarrer
-git clone https://github.com/Chrisdesmurger/OffroadWatt.git
-cd OffroadWatt
-npm install
-npm run dev
-```
 
 ---
 
-## 10. Points d'attention pour la suite
+## 11. Points d'attention
 
-1. **Pas de framework** — le rendu est du vanilla JS qui réécrit l'innerHTML à chaque `set()`. Pour scaler, migrer vers React.
-2. **État non persistant** — rafraîchir la page remet tout à zéro. Implémenter `localStorage` en priorité.
-3. **Clé API exposée** — acceptable en dev, à corriger avant mise en production publique.
-4. **CSS inline dans index.html** — fonctionne bien avec Vite mais à migrer dans `src/style.css` si le fichier grossit.
-5. **`vtype` (camping-car/van/caravane)** — stocké en state mais pas encore utilisé dans les calculs ni dans les presets d'appareils.
+1. **Pas de framework** — `render()` réécrit l'innerHTML à chaque `set()`. Pour scaler, migrer vers React.
+2. **État non persistant** — rafraîchir remet à zéro. Implémenter `localStorage` pour la config utilisateur.
+3. **Catalogue communautaire** — pas d'auth. Si besoin de contrôle, ajouter auth Supabase + RLS par user.
+4. **Edge Function** — Web APIs uniquement (pas de `require`, pas de `https` Node.js). `fetch` natif.
+5. **`vtype`** — stocké en state mais pas encore utilisé dans les calculs ni les presets d'appareils.
+6. **Streaming timeout** — Edge Function avec streaming contourne la limite 10s Vercel plan gratuit.
+
+---
+
+## 12. Pistes d'amélioration
+
+### Court terme
+- [ ] **Persistance localStorage** — sauvegarder la config `apps` + batteries + solaire entre sessions
+- [ ] **Auth utilisateur** — Supabase Auth pour configs personnelles sauvegardées en base
+- [ ] **Export PDF** — rapport de bilan (print CSS ou jsPDF)
+- [ ] **vtype actif** — ajuster presets et calculs selon camping-car / van / caravane
+
+### Moyen terme
+- [ ] **Migration React + TypeScript** — composants `ApplianceManager`, `BatteryConfig`, etc.
+- [ ] **Partage de configuration** — URL avec state encodé en base64
+- [ ] **Source recharge alternateur** — Ah rechargés en roulant
+
+### Long terme
+- [ ] **PWA** — installable mobile (vite-plugin-pwa)
+- [ ] **Monitoring BLE** — intégration Victron Connect
