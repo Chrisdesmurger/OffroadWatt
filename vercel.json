@@ -4,7 +4,7 @@
   "framework": "vite",
   "functions": {
     "api/search.js": {
-      "maxDuration": 30
+      "maxDuration": 10
     }
   }
 }
