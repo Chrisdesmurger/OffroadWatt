@@ -105,8 +105,77 @@ const CATICONS = {
 }
 
 // ─── API KEY ──────────────────────────────────────────────────────────────────
-// En production, utilisez une API Route Vercel (cf. onglet Déploiement)
 const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || ''
+
+// ─── SUPABASE CATALOG ────────────────────────────────────────────────────────
+
+const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
+const SB_HDR  = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+
+// Cache mémoire pour éviter des requêtes répétées à Supabase dans la session
+let _catalogCache = null
+let _catalogCacheAt = 0
+
+async function loadCatalogFromDB() {
+  if (_catalogCache && Date.now() - _catalogCacheAt < 60_000) return _catalogCache
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/equipment_catalog?select=*&order=created_at.desc&limit=500`, { headers: SB_HDR })
+    if (!res.ok) return []
+    _catalogCache = await res.json()
+    _catalogCacheAt = Date.now()
+    return _catalogCache
+  } catch { return [] }
+}
+
+async function searchCatalog(q) {
+  if (!q.trim()) return []
+  const terms = q.toLowerCase().split(/\s+/).filter(t => t.length > 2)
+  if (!terms.length) return []
+
+  // Recherche via full-text Postgres (rapide)
+  const tsQuery = terms.join(' | ')
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/equipment_catalog?select=*&fts=search_vector.phfts(french).${encodeURIComponent(tsQuery)}&limit=10`,
+      { headers: SB_HDR }
+    )
+    if (res.ok) {
+      const rows = await res.json()
+      if (rows.length) return rows
+    }
+  } catch {}
+
+  // Fallback : filtre client sur le cache
+  const catalog = await loadCatalogFromDB()
+  return catalog.filter(r => {
+    const hay = [r.name, r.brand, r.type, r.description].join(' ').toLowerCase()
+    return terms.some(t => hay.includes(t))
+  })
+}
+
+async function mergeIntoCatalog(newResults) {
+  if (!newResults.length) return
+  const rows = newResults.map(r => ({
+    name: r.name,
+    brand: r.brand || null,
+    voltage: r.voltage || 12,
+    price_eur: r.price_eur || null,
+    description: r.description || null,
+    type: r.type || null,
+    efficiency: r.efficiency || null,
+    modes: r.modes || null,
+    search_keywords: [r.name, r.brand, r.type].filter(Boolean).map(s => s.toLowerCase()),
+  }))
+  try {
+    await fetch(`${SB_URL}/rest/v1/equipment_catalog`, {
+      method: 'POST',
+      headers: { ...SB_HDR, 'Prefer': 'resolution=ignore-duplicates' },
+      body: JSON.stringify(rows),
+    })
+    _catalogCache = null // invalider le cache
+  } catch {}
+}
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
@@ -125,8 +194,8 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
-  aiQuery: '', aiResults: [], aiLoading: false,
-  modal: null, tab: 'apps', catFilter: 'Tout',
+  aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
+  modal: null, tab: 'energy', catFilter: 'Tout',
 }
 
 // ─── CORE ────────────────────────────────────────────────────────────────────
@@ -185,7 +254,7 @@ function buildHeader() {
 function buildTabs() {
   return `
   <div class="tabs">
-    ${[['apps','ti-plug','Appareils'],['energy','ti-bolt','Énergie'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
+    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
       <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${lb}</div>`).join('')}
   </div>`
 }
@@ -193,38 +262,54 @@ function buildTabs() {
 // ── APPS TAB ─────────────────────────────────────────────────────────────────
 
 function buildAppsTab() {
+  return buildAppsCard()
+}
+
+// ── ENERGY TAB ───────────────────────────────────────────────────────────────
+
+function buildAppRow(a) {
+  const hasModes = a.modes && a.modes.length > 1
+  return `
+  <div class="arow${!a.on ? ' off' : ''}${hasModes ? ' has-modes' : ''}">
+    <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
+    <i class="${a.icon} ai"></i>
+    <span class="an" title="${a.n}">${a.n}</span>
+    ${hasModes ? `
+      <div class="mode-btns" style="grid-column:span 2">
+        ${a.modes.map((m, mi) => `
+          <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}" title="${m.label}">
+            ${m.label.length > 14 ? m.label.slice(0, 13) + '…' : m.label}
+            <span class="modew">${m.watts} W</span>
+          </button>`).join('')}
+      </div>` : `
+      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>`}
+    <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
+    <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
+  </div>`
+}
+
+function buildAppsCard() {
   const filtered = S.catFilter === 'Tout' ? S.apps : S.apps.filter(a => a.cat === S.catFilter)
   const total = S.apps.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
   const active = S.apps.filter(a => a.on)
   return `
   <div class="card">
-    <div class="ct"><i class="ti ti-plug"></i>Gestion des appareils consommateurs</div>
+    <div class="ct"><i class="ti ti-plug"></i>Appareils consommateurs</div>
     <div class="catf">
       ${CATS.map(c => `<div class="cf${S.catFilter === c ? ' on' : ''}" data-cat="${c}"><i class="ti ${CATICONS[c]}" style="font-size:10px;margin-right:3px"></i>${c}</div>`).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:28px 16px 1fr 70px 90px 52px 24px;gap:7px;padding:0 10px 5px;font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b1);margin-bottom:4px">
-      <span></span><span></span><span>Appareil</span><span>Watts</span><span>Heures/jour</span><span style="text-align:right">Wh/j</span><span></span>
-    </div>
     <div class="applist">
-      ${filtered.map(a => `
-        <div class="arow${!a.on ? ' off' : ''}">
-          <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
-          <i class="${a.icon} ai"></i>
-          <span class="an" title="${a.n}">${a.n}</span>
-          <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-          <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
-          <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
-          <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
-        </div>`).join('')}
+      ${filtered.map(a => buildAppRow(a)).join('')}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-      <button class="addbtn" style="flex:1;min-width:180px" id="open-catalog"><i class="ti ti-book"></i>Ajouter depuis le catalogue</button>
-      <button class="addbtn" style="flex:1;min-width:180px" id="open-custom"><i class="ti ti-plus"></i>Appareil personnalisé</button>
+      <button class="addbtn" style="flex:1;min-width:140px" id="open-catalog"><i class="ti ti-book"></i>Catalogue</button>
+      <button class="addbtn" style="flex:1;min-width:140px" id="open-custom"><i class="ti ti-plus"></i>Personnalisé</button>
     </div>
     <div class="cons-footer">
       <div>
-        <div style="font-size:11px;color:var(--t2)">${active.length} appareil(s) actif(s) sur ${S.apps.length}</div>
-        <div style="font-size:10px;color:var(--t3)">Les appareils désactivés sont exclus du calcul</div>
+        <div style="font-size:11px;color:var(--t2)">${active.length} actif(s) sur ${S.apps.length}</div>
+        <div style="font-size:10px;color:var(--t3)">Désactivés exclus du calcul</div>
       </div>
       <div style="text-align:right">
         <div class="cf-num">${Math.round(total)} <span style="font-size:11px;font-weight:400;color:var(--t2)">Wh/jour</span></div>
@@ -233,8 +318,6 @@ function buildAppsTab() {
     </div>
   </div>`
 }
-
-// ── ENERGY TAB ───────────────────────────────────────────────────────────────
 
 function buildEnergyTab() {
   const { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
@@ -251,7 +334,11 @@ function buildEnergyTab() {
   })()
 
   return `
-  <div class="col2">
+  <div class="col3">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${buildAppsCard()}
+    </div>
+
     <div style="display:flex;flex-direction:column;gap:10px">
 
       <div class="card">
@@ -318,7 +405,7 @@ function buildEnergyTab() {
 
     </div>
 
-    <div class="energy-panel">
+    <div style="display:flex;flex-direction:column;gap:10px">
 
       <div class="card">
         <div class="ct te"><i class="ti ti-activity"></i>Bilan énergétique journalier</div>
@@ -403,47 +490,72 @@ function buildEnergyTab() {
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
 
+function buildAIResultCard(r, i, source) {
+  const modes = r.modes && r.modes.length > 1 ? r.modes : null
+  const mainWatts = modes ? modes[0]?.watts : (r.watts ?? null)
+  const canAdd = mainWatts != null || modes
+
+  return `
+  <div class="ai-item">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}
+        ${source === 'catalog' ? `<span class="src-badge catalog"><i class="ti ti-database"></i></span>` : source === 'online' ? `<span class="src-badge online"><i class="ti ti-world"></i> Nouveau</span>` : ''}
+      </div>
+      ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono);white-space:nowrap">${r.efficiency}</span>` : ''}
+    </div>
+    <div class="aimeta">
+      ${r.voltage ? `<span>${r.voltage}V</span>` : ''}
+      ${r.price_eur ? `<span class="aip">~${r.price_eur} €</span>` : ''}
+      ${r.type ? `<span style="color:var(--t3)">${r.type}</span>` : ''}
+    </div>
+    <div class="aid">${r.description}</div>
+    ${modes ? `
+      <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">
+        ${modes.map(m => `<span style="background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:2px 7px;font-size:10px;font-family:var(--mono)"><span style="color:var(--am)">${m.watts} W</span> <span style="color:var(--t3)">${m.label}</span></span>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px">← Switchable depuis le dashboard</div>` :
+      mainWatts != null ? `<div class="aimeta" style="margin-top:4px"><span class="aiw">${mainWatts} W</span><span style="font-size:10px;color:var(--t3)">12V</span></div>` : ''}
+    ${canAdd ? `<button class="aiadd" data-ai="${i}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter au dashboard</button>` : ''}
+  </div>`
+}
+
 function buildAITab() {
-  const hasKey = API_KEY && API_KEY.length > 10
+  const catalogSize = _catalogCache ? _catalogCache.length : '…'
+  const catResults = S.aiCatalogResults
+  const onlResults = S.aiOnlineResults
+  const allResults = S.aiResults
+
   return `
   <div class="card">
-    <div class="ct"><i class="ti ti-sparkles"></i>Recherche d'équipements par IA</div>
-    ${!hasKey ? `
-      <div class="api-warn">
-        <strong>⚠️ Clé API manquante</strong> — Ajoutez <code>VITE_ANTHROPIC_KEY=sk-ant-…</code>
-        dans les variables d'environnement Vercel (Settings → Environment Variables).
-      </div>` : ''}
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Cherchez un composant réel — l'IA récupère les caractéristiques (consommation, prix, modèle).</p>
+    <div class="ct">
+      <i class="ti ti-sparkles"></i>Recherche d'équipements par IA
+      ${catalogSize > 0 ? `<span class="cat-badge"><i class="ti ti-database" style="font-size:10px"></i> ${catalogSize} en catalogue</span>` : ''}
+    </div>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Catalogue partagé Supabase — recherche instantanée, puis en ligne pour les nouveaux modèles. Chaque résultat enrichit la base commune.</p>
     <div class="ai-row">
-      <input class="ai-in" id="aiq" type="text" placeholder="Ex: réfrigérateur 12V Dometic, chauffage diesel Webasto…" value="${S.aiQuery}">
-      <button class="aibtn" id="ai-search" ${S.aiLoading || !hasKey ? 'disabled' : ''}>
+      <input class="ai-in" id="aiq" type="text" placeholder="Ex: chauffage diesel Webasto, réfrigérateur 12V Dometic, pompe eau Shurflo…" value="${S.aiQuery}">
+      <button class="aibtn" id="ai-search" ${S.aiLoading ? 'disabled' : ''}>
         ${S.aiLoading ? '<div class="loading"><span></span><span></span><span></span></div>' : '<i class="ti ti-search"></i> Chercher'}
       </button>
     </div>
-    ${S.aiResults.length
-      ? S.aiResults.map((r, i) => `
-        <div class="ai-item">
-          <div style="display:flex;justify-content:space-between">
-            <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}</div>
-            ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono)">${r.efficiency}</span>` : ''}
-          </div>
-          <div class="aimeta">
-            ${r.watts ? `<span class="aiw">${r.watts}W</span>` : ''}
-            ${r.voltage ? `<span>${r.voltage}V</span>` : ''}
-            ${r.price_eur ? `<span class="aip">~${r.price_eur}€</span>` : ''}
-          </div>
-          <div class="aid">${r.description}</div>
-          ${r.watts ? `<button class="aiadd" data-ai="${i}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter au calcul</button>` : ''}
-        </div>`).join('')
-      : S.aiLoading
-        ? `<div style="text-align:center;padding:20px;color:var(--t3)">
-            <div class="loading" style="justify-content:center"><span></span><span></span><span></span></div>
-            <div style="margin-top:6px;font-size:11px">Recherche…</div>
-           </div>`
-        : `<div style="text-align:center;padding:28px;color:var(--t3)">
-            <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
-            <div style="font-size:11px">${hasKey ? 'Tapez un composant pour lancer la recherche' : 'Configurez la clé API pour activer la recherche'}</div>
-           </div>`}
+    ${S.aiError ? `<div class="api-warn" style="margin-top:8px"><strong>⚠️ Erreur</strong> — ${S.aiError}</div>` : ''}
+
+    ${catResults.length ? `
+      <div class="ai-section-hd"><i class="ti ti-database"></i> Catalogue hors ligne — ${catResults.length} résultat(s)</div>
+      ${catResults.map((r, i) => buildAIResultCard(r, i, 'catalog')).join('')}` : ''}
+
+    ${S.aiLoading ? `
+      <div class="ai-section-hd" style="color:var(--so)"><i class="ti ti-world"></i> Recherche en ligne…
+        <div class="loading" style="display:inline-flex;margin-left:6px"><span></span><span></span><span></span></div>
+      </div>` : onlResults.length ? `
+      <div class="ai-section-hd" style="color:var(--te)"><i class="ti ti-world"></i> Résultats en ligne — ${onlResults.length} nouveau(x)</div>
+      ${onlResults.map((r, i) => buildAIResultCard(r, catResults.length + i, 'online')).join('')}` : ''}
+
+    ${!catResults.length && !onlResults.length && !S.aiLoading && !S.aiError ? `
+      <div style="text-align:center;padding:28px;color:var(--t3)">
+        <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
+        <div style="font-size:11px">Tapez un équipement — catalogue local d'abord, puis recherche IA en ligne</div>
+      </div>` : ''}
   </div>`
 }
 
@@ -589,6 +701,15 @@ function bindEvents() {
     const q = document.getElementById('aiq')?.value?.trim()
     if (q) { S.aiQuery = q; searchAI(q) }
   })
+  // Mode switch on appliance card
+  document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
+    const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)
+    set({ apps: S.apps.map(a => {
+      if (a.id !== id) return a
+      const newW = a.modes[mi]?.watts ?? a.w
+      return { ...a, activeMode: mi, w: newW }
+    })})
+  }))
   // Add from AI results
   document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
   // Open modals
@@ -603,7 +724,7 @@ function bindEvents() {
   // Add from catalog
   document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
     const item = CATALOG[parseInt(el.dataset.catalog)]
-    set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'apps' })
+    set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
   }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
@@ -621,45 +742,83 @@ function confirmCustom() {
 
 function addFromAI(i) {
   const r = S.aiResults[i]
-  const cats = { réfrigérateur: 'Cuisine', chauffage: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine' }
+  const modes = r.modes && r.modes.length > 1 ? r.modes : null
+  const watts = modes ? (modes[0]?.watts ?? 0) : (r.watts ?? 0)
+  const name = r.name + (r.brand ? ` (${r.brand})` : '')
+  const cats = { réfrigérateur: 'Cuisine', frigo: 'Cuisine', chauffage: 'Confort', clim: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine', convertisseur: 'Système', régulateur: 'Système' }
   const cat = Object.entries(cats).find(([k]) => r.type?.toLowerCase().includes(k))?.[1] || 'Tech'
   const icons = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-  set({ apps: [...S.apps, { id: Date.now(), n: r.name + (r.brand ? ' (' + r.brand + ')' : ''), icon: icons[cat] || 'ti-plug', w: r.watts || 0, h: 4, on: true, cat }], tab: 'apps' })
+  set({ apps: [...S.apps, { id: Date.now(), n: name, icon: icons[cat] || 'ti-plug', w: watts, h: 4, on: true, cat, modes, activeMode: 0 }], tab: 'energy' })
 }
 
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
 
 async function searchAI(q) {
-  if (!API_KEY || API_KEY.length < 10) return
-  set({ aiLoading: true, aiResults: [] })
+  // 1. Recherche dans Supabase (instantanée)
+  set({ aiLoading: true, aiError: null, aiCatalogResults: [], aiOnlineResults: [], aiResults: [] })
+  const catalogHits = await searchCatalog(q)
+  if (catalogHits.length) {
+    set({ aiCatalogResults: catalogHits, aiResults: catalogHits })
+  }
+
+  // 2. Appel API en streaming
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/search', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: `Expert équipements camping-car/van. Recherche: "${q}". Retourne UNIQUEMENT du JSON valide sans markdown:\n{"results":[{"name":"Nom complet","brand":"Marque","watts":45,"voltage":12,"price_eur":299,"description":"1-2 phrases","type":"catégorie","efficiency":"A+++"}]}\n3-4 produits réels marché européen avec consommation précise en watts.` }],
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q }),
     })
-    const data = await res.json()
-    const textBlock = data.content?.find(b => b.type === 'text')
-    if (textBlock) {
-      const parsed = JSON.parse(textBlock.text.replace(/```json|```/g, '').trim())
-      set({ aiResults: parsed.results || [], aiLoading: false })
-    } else {
-      set({ aiLoading: false })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || `HTTP ${res.status}`)
     }
+
+    // Lire le flux progressivement
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let accumulated = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      accumulated += decoder.decode(value, { stream: true })
+    }
+
+    // Parser le JSON complet une fois le flux terminé
+    const cleaned = accumulated.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) throw new Error('Réponse IA non parsable.')
+    const data = JSON.parse(jsonMatch[0])
+    const onlineResults = data.results || []
+
+    // Ne garder que les résultats nouveaux (absents du catalogue)
+    const catalogKeys = new Set(catalogHits.map(r => (r.name + (r.brand || '')).toLowerCase().replace(/\s/g, '')))
+    const newResults = onlineResults.filter(r => {
+      const k = (r.name + (r.brand || '')).toLowerCase().replace(/\s/g, '')
+      return !catalogKeys.has(k)
+    })
+
+    // Sauvegarder en base
+    mergeIntoCatalog(onlineResults)
+
+    set({
+      aiLoading: false,
+      aiOnlineResults: newResults,
+      aiCatalogResults: catalogHits,
+      aiResults: [...catalogHits, ...newResults],
+      aiError: (!catalogHits.length && !onlineResults.length) ? 'Aucun résultat trouvé.' : null,
+    })
   } catch (e) {
-    set({ aiLoading: false, aiResults: [{ name: 'Erreur', brand: '', watts: 0, description: 'Vérifiez la clé API et la connexion.', type: '', price_eur: 0 }] })
+    set({
+      aiLoading: false,
+      aiError: catalogHits.length ? null : (e.message || 'Erreur de recherche en ligne'),
+      aiOnlineResults: [],
+    })
   }
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 render()
+// Précharger le catalogue Supabase en arrière-plan pour afficher le compteur
+loadCatalogFromDB().then(() => render())
