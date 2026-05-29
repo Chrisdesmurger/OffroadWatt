@@ -125,7 +125,7 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
-  aiQuery: '', aiResults: [], aiLoading: false, aiError: null,
+  aiQuery: '', aiResults: [], aiLoading: false, aiError: null, aiModeSelected: {},
   modal: null, tab: 'energy', catFilter: 'Tout',
 }
 
@@ -411,13 +411,48 @@ function buildEnergyTab() {
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
 
+function buildAIResultCard(r, i) {
+  const modes = r.modes && r.modes.length > 0 ? r.modes : null
+  const selectedMode = S.aiModeSelected?.[i] ?? 0
+  const displayWatts = modes ? modes[selectedMode]?.watts : r.watts
+  const canAdd = displayWatts != null && displayWatts > 0
+
+  return `
+  <div class="ai-item">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}</div>
+      ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono);white-space:nowrap">${r.efficiency}</span>` : ''}
+    </div>
+    <div class="aimeta">
+      ${r.voltage ? `<span>${r.voltage}V</span>` : ''}
+      ${r.price_eur ? `<span class="aip">~${r.price_eur} €</span>` : ''}
+      ${r.type ? `<span style="color:var(--t3)">${r.type}</span>` : ''}
+    </div>
+    <div class="aid">${r.description}</div>
+    ${modes ? `
+      <div class="ai-modes">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:4px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Modes de fonctionnement 12V :</div>
+        ${modes.map((m, mi) => `
+          <label class="ai-mode-opt${selectedMode === mi ? ' on' : ''}">
+            <input type="radio" name="mode-${i}" data-ai-mode="${i}" data-mode-idx="${mi}" ${selectedMode === mi ? 'checked' : ''} style="display:none">
+            <span class="ai-mode-label">${m.label}</span>
+            <span class="ai-mode-w">${m.watts != null ? m.watts + ' W' : '—'}</span>
+          </label>`).join('')}
+      </div>` : `
+      <div class="aimeta" style="margin-top:4px">
+        ${displayWatts != null ? `<span class="aiw">${displayWatts} W</span><span style="font-size:10px;color:var(--t3)">12V</span>` : '<span style="font-size:10px;color:var(--t3)">Consommation non disponible</span>'}
+      </div>`}
+    ${canAdd ? `<button class="aiadd" data-ai="${i}" data-ai-watts="${displayWatts}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter ${displayWatts} W au calcul</button>` : ''}
+  </div>`
+}
+
 function buildAITab() {
   return `
   <div class="card">
     <div class="ct"><i class="ti ti-sparkles"></i>Recherche d'équipements par IA</div>
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">L'IA recherche sur le web des composants réels avec consommation, prix et modèles exacts.</p>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">L'IA cherche des équipements réels sur le web — consommation 12V, prix, modèles. Supporte les appareils multi-modes (ex: chauffage diesel + ventilateur 12V).</p>
     <div class="ai-row">
-      <input class="ai-in" id="aiq" type="text" placeholder="Ex: réfrigérateur 12V Dometic, chauffage diesel Webasto, panneau solaire 200W…" value="${S.aiQuery}">
+      <input class="ai-in" id="aiq" type="text" placeholder="Ex: chauffage diesel Webasto, réfrigérateur 12V Dometic, pompe eau Shurflo…" value="${S.aiQuery}">
       <button class="aibtn" id="ai-search" ${S.aiLoading ? 'disabled' : ''}>
         ${S.aiLoading ? '<div class="loading"><span></span><span></span><span></span></div>' : '<i class="ti ti-search"></i> Chercher'}
       </button>
@@ -425,32 +460,18 @@ function buildAITab() {
     ${S.aiError ? `
       <div class="api-warn" style="margin-top:8px">
         <strong>⚠️ Erreur</strong> — ${S.aiError}
-        ${S.aiError.includes('API key') || S.aiError.includes('configured') ? `<br><small>Ajoutez <code>ANTHROPIC_KEY</code> dans les variables d'environnement Vercel.</small>` : ''}
+        ${S.aiError.includes('key') || S.aiError.includes('configured') ? `<br><small>Ajoutez <code>ANTHROPIC_KEY</code> dans les variables d'environnement Vercel.</small>` : ''}
       </div>` : ''}
     ${S.aiResults.length
-      ? S.aiResults.map((r, i) => `
-        <div class="ai-item">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-            <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}</div>
-            ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono);white-space:nowrap">${r.efficiency}</span>` : ''}
-          </div>
-          <div class="aimeta">
-            ${r.watts ? `<span class="aiw">${r.watts} W</span>` : ''}
-            ${r.voltage ? `<span>${r.voltage} V</span>` : ''}
-            ${r.price_eur ? `<span class="aip">~${r.price_eur} €</span>` : ''}
-            ${r.type ? `<span style="color:var(--t3)">${r.type}</span>` : ''}
-          </div>
-          <div class="aid">${r.description}</div>
-          ${r.watts ? `<button class="aiadd" data-ai="${i}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter au calcul</button>` : ''}
-        </div>`).join('')
+      ? S.aiResults.map((r, i) => buildAIResultCard(r, i)).join('')
       : S.aiLoading
         ? `<div style="text-align:center;padding:20px;color:var(--t3)">
             <div class="loading" style="justify-content:center"><span></span><span></span><span></span></div>
-            <div style="margin-top:6px;font-size:11px">Recherche en cours, patienter 10-20s…</div>
+            <div style="margin-top:6px;font-size:11px">Recherche web en cours, 10-20 secondes…</div>
            </div>`
         : !S.aiError ? `<div style="text-align:center;padding:28px;color:var(--t3)">
             <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
-            <div style="font-size:11px">Tapez un composant pour lancer la recherche web IA</div>
+            <div style="font-size:11px">Tapez un équipement pour lancer la recherche web IA</div>
            </div>` : ''}
   </div>`
 }
@@ -597,8 +618,13 @@ function bindEvents() {
     const q = document.getElementById('aiq')?.value?.trim()
     if (q) { S.aiQuery = q; searchAI(q) }
   })
+  // AI mode radio selection
+  document.querySelectorAll('[data-ai-mode]').forEach(el => el.addEventListener('change', () => {
+    const i = parseInt(el.dataset.aiMode), mi = parseInt(el.dataset.modeIdx)
+    set({ aiModeSelected: { ...S.aiModeSelected, [i]: mi } })
+  }))
   // Add from AI results
-  document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
+  document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai), parseFloat(el.dataset.aiWatts))))
   // Open modals
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
@@ -627,12 +653,16 @@ function confirmCustom() {
   set({ apps: [...S.apps, { id: Date.now(), n, icon: icons[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
-function addFromAI(i) {
+function addFromAI(i, wattsOverride) {
   const r = S.aiResults[i]
-  const cats = { réfrigérateur: 'Cuisine', chauffage: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine' }
+  const selectedMode = S.aiModeSelected?.[i] ?? 0
+  const modeLabel = r.modes?.[selectedMode]?.label
+  const watts = wattsOverride ?? r.modes?.[selectedMode]?.watts ?? r.watts ?? 0
+  const name = r.name + (r.brand ? ` (${r.brand})` : '') + (modeLabel ? ` — ${modeLabel}` : '')
+  const cats = { réfrigérateur: 'Cuisine', frigo: 'Cuisine', chauffage: 'Confort', clim: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine', convertisseur: 'Système', régulateur: 'Système' }
   const cat = Object.entries(cats).find(([k]) => r.type?.toLowerCase().includes(k))?.[1] || 'Tech'
   const icons = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-  set({ apps: [...S.apps, { id: Date.now(), n: r.name + (r.brand ? ' (' + r.brand + ')' : ''), icon: icons[cat] || 'ti-plug', w: r.watts || 0, h: 4, on: true, cat }], tab: 'energy' })
+  set({ apps: [...S.apps, { id: Date.now(), n: name, icon: icons[cat] || 'ti-plug', w: watts, h: 4, on: true, cat }], tab: 'energy' })
 }
 
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────

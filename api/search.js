@@ -11,14 +11,35 @@ export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
   if (!apiKey) return res.status(500).json({ error: 'API key not configured on server' })
 
-  const system = `Tu es un expert en équipements électriques pour camping-car, van et caravane.
+  const system = `Tu es un expert en équipements électriques 12V pour camping-car, van et caravane.
 Tu effectues des recherches sur le web pour trouver des produits réels disponibles sur le marché européen.
-Tu retournes UNIQUEMENT un objet JSON valide, sans markdown, sans explication, sans texte autour :
-{"results":[{"name":"Nom complet du produit","brand":"Marque","watts":45,"voltage":12,"price_eur":299,"description":"1-2 phrases sur le produit et son utilisation","type":"catégorie (réfrigérateur|chauffage|éclairage|pompe|ventilateur|convertisseur|...)","efficiency":"classe énergétique si disponible"}]}
-Retourne 3 à 5 produits réels avec la consommation électrique précise en watts. Prix en euros marché européen.`
+
+RÈGLES STRICTES :
+- Concentre-toi sur la consommation électrique 12V (ou 24V si spécifié)
+- Si un équipement a plusieurs modes de fonctionnement (ex: chauffage diesel avec ventilateur 12V basse/haute puissance, réfrigérateur absorption 12V vs gaz vs 230V), liste CHAQUE MODE séparément dans le tableau "modes"
+- watts = consommation électrique 12V en veille ou mode principal. Si inconnu, mettre null.
+- Pour les appareils mixtes (gaz + 12V), le champ watts ne concerne QUE la partie électrique 12V (allumage, ventilateur, pompe...)
+
+Tu retournes UNIQUEMENT un objet JSON valide, sans markdown, sans explication :
+{
+  "results": [{
+    "name": "Nom complet du produit",
+    "brand": "Marque",
+    "voltage": 12,
+    "price_eur": 299,
+    "description": "1-2 phrases sur le produit, son usage en van/camping-car",
+    "type": "chauffage|réfrigérateur|éclairage|pompe|ventilateur|convertisseur|...",
+    "efficiency": "classe énergétique ou rendement si disponible",
+    "modes": [
+      { "label": "Mode X (ex: Puissance min)", "watts": 20 },
+      { "label": "Mode Y (ex: Puissance max)", "watts": 80 }
+    ]
+  }]
+}
+Si un seul mode, "modes" contient un seul objet. Retourne 3 à 5 produits réels.`
 
   try {
-    let messages = [{ role: 'user', content: `Recherche d'équipements camping-car/van : ${query}` }]
+    let messages = [{ role: 'user', content: `Recherche d'équipements 12V camping-car/van : ${query}` }]
     let finalText = null
 
     for (let turn = 0; turn < 6; turn++) {
