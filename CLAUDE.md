@@ -259,14 +259,16 @@ npm run preview   # prévisualiser le build
 
 ### Court terme
 - [ ] **Persistance localStorage** — sauvegarder la config `apps` + batteries + solaire entre sessions
-- [ ] **Auth utilisateur** — Supabase Auth pour configs personnelles sauvegardées en base
-- [ ] **Export PDF** — rapport de bilan (print CSS ou jsPDF)
 - [ ] **vtype actif** — ajuster presets et calculs selon camping-car / van / caravane
+- [ ] **Partage de configuration** — URL avec state encodé en base64
+
+### Priorités validées — prochaine session (dans l'ordre)
+- [ ] **🔴 1. Source recharge alternateur** — ajouter heures roulage/jour + ampérage alternateur dans le bilan, déduire les Wh rechargés du déficit batterie
+- [ ] **🔴 2. Export PDF** — rapport de bilan complet (print CSS ou jsPDF) : appareils, batteries, solaire, autonomie
+- [ ] **🔴 3. Auth utilisateur Supabase** — Supabase Auth (Google + email), configs personnelles sauvegardées en base et récupérables sur tout appareil
 
 ### Moyen terme
 - [ ] **Migration React + TypeScript** — composants `ApplianceManager`, `BatteryConfig`, etc.
-- [ ] **Partage de configuration** — URL avec state encodé en base64
-- [ ] **Source recharge alternateur** — Ah rechargés en roulant
 
 ### Long terme
 - [ ] **PWA** — installable mobile (vite-plugin-pwa)
