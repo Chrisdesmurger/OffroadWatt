@@ -125,7 +125,7 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
-  aiQuery: '', aiResults: [], aiLoading: false, aiError: null, aiModeSelected: {},
+  aiQuery: '', aiResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
 }
 
@@ -198,6 +198,28 @@ function buildAppsTab() {
 
 // ── ENERGY TAB ───────────────────────────────────────────────────────────────
 
+function buildAppRow(a) {
+  const hasModes = a.modes && a.modes.length > 1
+  return `
+  <div class="arow${!a.on ? ' off' : ''}${hasModes ? ' has-modes' : ''}">
+    <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
+    <i class="${a.icon} ai"></i>
+    <span class="an" title="${a.n}">${a.n}</span>
+    ${hasModes ? `
+      <div class="mode-btns" style="grid-column:span 2">
+        ${a.modes.map((m, mi) => `
+          <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}" title="${m.label}">
+            ${m.label.length > 14 ? m.label.slice(0, 13) + '…' : m.label}
+            <span class="modew">${m.watts} W</span>
+          </button>`).join('')}
+      </div>` : `
+      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>`}
+    <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
+    <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
+  </div>`
+}
+
 function buildAppsCard() {
   const filtered = S.catFilter === 'Tout' ? S.apps : S.apps.filter(a => a.cat === S.catFilter)
   const total = S.apps.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
@@ -208,20 +230,8 @@ function buildAppsCard() {
     <div class="catf">
       ${CATS.map(c => `<div class="cf${S.catFilter === c ? ' on' : ''}" data-cat="${c}"><i class="ti ${CATICONS[c]}" style="font-size:10px;margin-right:3px"></i>${c}</div>`).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:28px 16px 1fr 70px 90px 52px 24px;gap:7px;padding:0 10px 5px;font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--b1);margin-bottom:4px">
-      <span></span><span></span><span>Appareil</span><span>Watts</span><span>Heures/jour</span><span style="text-align:right">Wh/j</span><span></span>
-    </div>
     <div class="applist">
-      ${filtered.map(a => `
-        <div class="arow${!a.on ? ' off' : ''}">
-          <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
-          <i class="${a.icon} ai"></i>
-          <span class="an" title="${a.n}">${a.n}</span>
-          <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-          <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
-          <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
-          <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
-        </div>`).join('')}
+      ${filtered.map(a => buildAppRow(a)).join('')}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
       <button class="addbtn" style="flex:1;min-width:140px" id="open-catalog"><i class="ti ti-book"></i>Catalogue</button>
@@ -412,10 +422,9 @@ function buildEnergyTab() {
 // ── AI TAB ───────────────────────────────────────────────────────────────────
 
 function buildAIResultCard(r, i) {
-  const modes = r.modes && r.modes.length > 0 ? r.modes : null
-  const selectedMode = S.aiModeSelected?.[i] ?? 0
-  const displayWatts = modes ? modes[selectedMode]?.watts : r.watts
-  const canAdd = displayWatts != null && displayWatts > 0
+  const modes = r.modes && r.modes.length > 1 ? r.modes : null
+  const mainWatts = modes ? modes[0]?.watts : (r.watts ?? null)
+  const canAdd = mainWatts != null || modes
 
   return `
   <div class="ai-item">
@@ -430,19 +439,12 @@ function buildAIResultCard(r, i) {
     </div>
     <div class="aid">${r.description}</div>
     ${modes ? `
-      <div class="ai-modes">
-        <div style="font-size:10px;color:var(--t3);margin-bottom:4px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Modes de fonctionnement 12V :</div>
-        ${modes.map((m, mi) => `
-          <label class="ai-mode-opt${selectedMode === mi ? ' on' : ''}">
-            <input type="radio" name="mode-${i}" data-ai-mode="${i}" data-mode-idx="${mi}" ${selectedMode === mi ? 'checked' : ''} style="display:none">
-            <span class="ai-mode-label">${m.label}</span>
-            <span class="ai-mode-w">${m.watts != null ? m.watts + ' W' : '—'}</span>
-          </label>`).join('')}
-      </div>` : `
-      <div class="aimeta" style="margin-top:4px">
-        ${displayWatts != null ? `<span class="aiw">${displayWatts} W</span><span style="font-size:10px;color:var(--t3)">12V</span>` : '<span style="font-size:10px;color:var(--t3)">Consommation non disponible</span>'}
-      </div>`}
-    ${canAdd ? `<button class="aiadd" data-ai="${i}" data-ai-watts="${displayWatts}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter ${displayWatts} W au calcul</button>` : ''}
+      <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">
+        ${modes.map(m => `<span style="background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:2px 7px;font-size:10px;font-family:var(--mono)"><span style="color:var(--am)">${m.watts} W</span> <span style="color:var(--t3)">${m.label}</span></span>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:3px">← Switchable depuis le dashboard</div>` :
+      mainWatts != null ? `<div class="aimeta" style="margin-top:4px"><span class="aiw">${mainWatts} W</span><span style="font-size:10px;color:var(--t3)">12V</span></div>` : ''}
+    ${canAdd ? `<button class="aiadd" data-ai="${i}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter au dashboard</button>` : ''}
   </div>`
 }
 
@@ -618,13 +620,17 @@ function bindEvents() {
     const q = document.getElementById('aiq')?.value?.trim()
     if (q) { S.aiQuery = q; searchAI(q) }
   })
-  // AI mode radio selection
-  document.querySelectorAll('[data-ai-mode]').forEach(el => el.addEventListener('change', () => {
-    const i = parseInt(el.dataset.aiMode), mi = parseInt(el.dataset.modeIdx)
-    set({ aiModeSelected: { ...S.aiModeSelected, [i]: mi } })
+  // Mode switch on appliance card
+  document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
+    const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)
+    set({ apps: S.apps.map(a => {
+      if (a.id !== id) return a
+      const newW = a.modes[mi]?.watts ?? a.w
+      return { ...a, activeMode: mi, w: newW }
+    })})
   }))
   // Add from AI results
-  document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai), parseFloat(el.dataset.aiWatts))))
+  document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
   // Open modals
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
@@ -653,16 +659,15 @@ function confirmCustom() {
   set({ apps: [...S.apps, { id: Date.now(), n, icon: icons[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
-function addFromAI(i, wattsOverride) {
+function addFromAI(i) {
   const r = S.aiResults[i]
-  const selectedMode = S.aiModeSelected?.[i] ?? 0
-  const modeLabel = r.modes?.[selectedMode]?.label
-  const watts = wattsOverride ?? r.modes?.[selectedMode]?.watts ?? r.watts ?? 0
-  const name = r.name + (r.brand ? ` (${r.brand})` : '') + (modeLabel ? ` — ${modeLabel}` : '')
+  const modes = r.modes && r.modes.length > 1 ? r.modes : null
+  const watts = modes ? (modes[0]?.watts ?? 0) : (r.watts ?? 0)
+  const name = r.name + (r.brand ? ` (${r.brand})` : '')
   const cats = { réfrigérateur: 'Cuisine', frigo: 'Cuisine', chauffage: 'Confort', clim: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine', convertisseur: 'Système', régulateur: 'Système' }
   const cat = Object.entries(cats).find(([k]) => r.type?.toLowerCase().includes(k))?.[1] || 'Tech'
   const icons = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-  set({ apps: [...S.apps, { id: Date.now(), n: name, icon: icons[cat] || 'ti-plug', w: watts, h: 4, on: true, cat }], tab: 'energy' })
+  set({ apps: [...S.apps, { id: Date.now(), n: name, icon: icons[cat] || 'ti-plug', w: watts, h: 4, on: true, cat, modes, activeMode: 0 }], tab: 'energy' })
 }
 
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
@@ -706,7 +711,7 @@ async function searchAI(q) {
       if (!match) throw new Error('Réponse non parsable')
       data = JSON.parse(match[0])
     }
-    set({ aiResults: data.results || [], aiLoading: false, aiError: data.results?.length ? null : 'Aucun résultat trouvé.' })
+    set({ aiResults: data.results || [], aiLoading: false, aiError: (data.results?.length ? null : 'Aucun résultat trouvé.') })
   } catch (e) {
     set({ aiLoading: false, aiResults: [], aiError: e.message || 'Erreur de recherche' })
   }
