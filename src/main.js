@@ -107,41 +107,74 @@ const CATICONS = {
 // ─── API KEY ──────────────────────────────────────────────────────────────────
 const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || ''
 
-// ─── OFFLINE CATALOG (localStorage) ──────────────────────────────────────────
+// ─── SUPABASE CATALOG ────────────────────────────────────────────────────────
 
-const CATALOG_LS_KEY = 'offroadwatt_ai_catalog'
+const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
+const SB_HDR  = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
 
-function loadAICatalog() {
-  try { return JSON.parse(localStorage.getItem(CATALOG_LS_KEY) || '[]') } catch { return [] }
+// Cache mémoire pour éviter des requêtes répétées à Supabase dans la session
+let _catalogCache = null
+let _catalogCacheAt = 0
+
+async function loadCatalogFromDB() {
+  if (_catalogCache && Date.now() - _catalogCacheAt < 60_000) return _catalogCache
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/equipment_catalog?select=*&order=created_at.desc&limit=500`, { headers: SB_HDR })
+    if (!res.ok) return []
+    _catalogCache = await res.json()
+    _catalogCacheAt = Date.now()
+    return _catalogCache
+  } catch { return [] }
 }
 
-function saveAICatalog(catalog) {
-  try { localStorage.setItem(CATALOG_LS_KEY, JSON.stringify(catalog)) } catch {}
-}
-
-function mergeIntoCatalog(newResults) {
-  const catalog = loadAICatalog()
-  let added = 0
-  for (const r of newResults) {
-    const key = (r.name + r.brand).toLowerCase().replace(/\s/g, '')
-    const exists = catalog.some(c => (c.name + c.brand).toLowerCase().replace(/\s/g, '') === key)
-    if (!exists) {
-      catalog.push({ ...r, _addedAt: Date.now() })
-      added++
-    }
-  }
-  if (added > 0) saveAICatalog(catalog)
-  return added
-}
-
-function searchCatalog(q) {
-  const catalog = loadAICatalog()
-  if (!catalog.length || !q.trim()) return []
+async function searchCatalog(q) {
+  if (!q.trim()) return []
   const terms = q.toLowerCase().split(/\s+/).filter(t => t.length > 2)
+  if (!terms.length) return []
+
+  // Recherche via full-text Postgres (rapide)
+  const tsQuery = terms.join(' | ')
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/equipment_catalog?select=*&fts=search_vector.phfts(french).${encodeURIComponent(tsQuery)}&limit=10`,
+      { headers: SB_HDR }
+    )
+    if (res.ok) {
+      const rows = await res.json()
+      if (rows.length) return rows
+    }
+  } catch {}
+
+  // Fallback : filtre client sur le cache
+  const catalog = await loadCatalogFromDB()
   return catalog.filter(r => {
-    const haystack = [r.name, r.brand, r.type, r.description].join(' ').toLowerCase()
-    return terms.some(t => haystack.includes(t))
+    const hay = [r.name, r.brand, r.type, r.description].join(' ').toLowerCase()
+    return terms.some(t => hay.includes(t))
   })
+}
+
+async function mergeIntoCatalog(newResults) {
+  if (!newResults.length) return
+  const rows = newResults.map(r => ({
+    name: r.name,
+    brand: r.brand || null,
+    voltage: r.voltage || 12,
+    price_eur: r.price_eur || null,
+    description: r.description || null,
+    type: r.type || null,
+    efficiency: r.efficiency || null,
+    modes: r.modes || null,
+    search_keywords: [r.name, r.brand, r.type].filter(Boolean).map(s => s.toLowerCase()),
+  }))
+  try {
+    await fetch(`${SB_URL}/rest/v1/equipment_catalog`, {
+      method: 'POST',
+      headers: { ...SB_HDR, 'Prefer': 'resolution=ignore-duplicates' },
+      body: JSON.stringify(rows),
+    })
+    _catalogCache = null // invalider le cache
+  } catch {}
 }
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
@@ -487,7 +520,7 @@ function buildAIResultCard(r, i, source) {
 }
 
 function buildAITab() {
-  const catalogSize = loadAICatalog().length
+  const catalogSize = _catalogCache ? _catalogCache.length : '…'
   const catResults = S.aiCatalogResults
   const onlResults = S.aiOnlineResults
   const allResults = S.aiResults
@@ -498,7 +531,7 @@ function buildAITab() {
       <i class="ti ti-sparkles"></i>Recherche d'équipements par IA
       ${catalogSize > 0 ? `<span class="cat-badge"><i class="ti ti-database" style="font-size:10px"></i> ${catalogSize} en catalogue</span>` : ''}
     </div>
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Recherche instantanée dans votre catalogue, puis en ligne pour les nouveaux modèles. Chaque résultat est sauvegardé localement.</p>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Catalogue partagé Supabase — recherche instantanée, puis en ligne pour les nouveaux modèles. Chaque résultat enrichit la base commune.</p>
     <div class="ai-row">
       <input class="ai-in" id="aiq" type="text" placeholder="Ex: chauffage diesel Webasto, réfrigérateur 12V Dometic, pompe eau Shurflo…" value="${S.aiQuery}">
       <button class="aibtn" id="ai-search" ${S.aiLoading ? 'disabled' : ''}>
@@ -721,14 +754,12 @@ function addFromAI(i) {
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
 
 async function searchAI(q) {
-  // 1. Recherche instantanée dans le catalogue local
-  const catalogHits = searchCatalog(q)
-  set({
-    aiLoading: true, aiError: null,
-    aiCatalogResults: catalogHits,
-    aiOnlineResults: [],
-    aiResults: catalogHits,
-  })
+  // 1. Recherche dans Supabase (rapide, partagé entre tous les utilisateurs)
+  set({ aiLoading: true, aiError: null, aiCatalogResults: [], aiOnlineResults: [], aiResults: [] })
+  const catalogHits = await searchCatalog(q)
+  if (catalogHits.length) {
+    set({ aiCatalogResults: catalogHits, aiResults: catalogHits })
+  }
 
   // 2. Recherche en ligne (API)
   try {
@@ -770,3 +801,5 @@ async function searchAI(q) {
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 render()
+// Précharger le catalogue Supabase en arrière-plan pour afficher le compteur
+loadCatalogFromDB().then(() => render())
