@@ -105,7 +105,7 @@ const CATICONS = {
 }
 
 // ─── API KEY ──────────────────────────────────────────────────────────────────
-// En production, utilisez une API Route Vercel (cf. onglet Déploiement)
+// Utilisé uniquement si pas de proxy serverless disponible (dev local sans api/)
 const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || ''
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
-  aiQuery: '', aiResults: [], aiLoading: false,
+  aiQuery: '', aiResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
 }
 
@@ -412,33 +412,33 @@ function buildEnergyTab() {
 // ── AI TAB ───────────────────────────────────────────────────────────────────
 
 function buildAITab() {
-  const hasKey = API_KEY && API_KEY.length > 10
   return `
   <div class="card">
     <div class="ct"><i class="ti ti-sparkles"></i>Recherche d'équipements par IA</div>
-    ${!hasKey ? `
-      <div class="api-warn">
-        <strong>⚠️ Clé API manquante</strong> — Ajoutez <code>VITE_ANTHROPIC_KEY=sk-ant-…</code>
-        dans les variables d'environnement Vercel (Settings → Environment Variables).
-      </div>` : ''}
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Cherchez un composant réel — l'IA récupère les caractéristiques (consommation, prix, modèle).</p>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">L'IA recherche sur le web des composants réels avec consommation, prix et modèles exacts.</p>
     <div class="ai-row">
-      <input class="ai-in" id="aiq" type="text" placeholder="Ex: réfrigérateur 12V Dometic, chauffage diesel Webasto…" value="${S.aiQuery}">
-      <button class="aibtn" id="ai-search" ${S.aiLoading || !hasKey ? 'disabled' : ''}>
+      <input class="ai-in" id="aiq" type="text" placeholder="Ex: réfrigérateur 12V Dometic, chauffage diesel Webasto, panneau solaire 200W…" value="${S.aiQuery}">
+      <button class="aibtn" id="ai-search" ${S.aiLoading ? 'disabled' : ''}>
         ${S.aiLoading ? '<div class="loading"><span></span><span></span><span></span></div>' : '<i class="ti ti-search"></i> Chercher'}
       </button>
     </div>
+    ${S.aiError ? `
+      <div class="api-warn" style="margin-top:8px">
+        <strong>⚠️ Erreur</strong> — ${S.aiError}
+        ${S.aiError.includes('API key') || S.aiError.includes('configured') ? `<br><small>Ajoutez <code>ANTHROPIC_KEY</code> dans les variables d'environnement Vercel.</small>` : ''}
+      </div>` : ''}
     ${S.aiResults.length
       ? S.aiResults.map((r, i) => `
         <div class="ai-item">
-          <div style="display:flex;justify-content:space-between">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
             <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}</div>
-            ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono)">${r.efficiency}</span>` : ''}
+            ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono);white-space:nowrap">${r.efficiency}</span>` : ''}
           </div>
           <div class="aimeta">
-            ${r.watts ? `<span class="aiw">${r.watts}W</span>` : ''}
-            ${r.voltage ? `<span>${r.voltage}V</span>` : ''}
-            ${r.price_eur ? `<span class="aip">~${r.price_eur}€</span>` : ''}
+            ${r.watts ? `<span class="aiw">${r.watts} W</span>` : ''}
+            ${r.voltage ? `<span>${r.voltage} V</span>` : ''}
+            ${r.price_eur ? `<span class="aip">~${r.price_eur} €</span>` : ''}
+            ${r.type ? `<span style="color:var(--t3)">${r.type}</span>` : ''}
           </div>
           <div class="aid">${r.description}</div>
           ${r.watts ? `<button class="aiadd" data-ai="${i}"><i class="ti ti-plus" style="font-size:10px"></i> Ajouter au calcul</button>` : ''}
@@ -446,12 +446,12 @@ function buildAITab() {
       : S.aiLoading
         ? `<div style="text-align:center;padding:20px;color:var(--t3)">
             <div class="loading" style="justify-content:center"><span></span><span></span><span></span></div>
-            <div style="margin-top:6px;font-size:11px">Recherche…</div>
+            <div style="margin-top:6px;font-size:11px">Recherche en cours, patienter 10-20s…</div>
            </div>`
-        : `<div style="text-align:center;padding:28px;color:var(--t3)">
+        : !S.aiError ? `<div style="text-align:center;padding:28px;color:var(--t3)">
             <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
-            <div style="font-size:11px">${hasKey ? 'Tapez un composant pour lancer la recherche' : 'Configurez la clé API pour activer la recherche'}</div>
-           </div>`}
+            <div style="font-size:11px">Tapez un composant pour lancer la recherche web IA</div>
+           </div>` : ''}
   </div>`
 }
 
@@ -638,34 +638,47 @@ function addFromAI(i) {
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
 
 async function searchAI(q) {
-  if (!API_KEY || API_KEY.length < 10) return
-  set({ aiLoading: true, aiResults: [] })
+  set({ aiLoading: true, aiResults: [], aiError: null })
+
+  // Try serverless proxy first (production), fall back to direct call (dev)
+  const useProxy = !window.location.hostname.includes('localhost') || true
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: `Expert équipements camping-car/van. Recherche: "${q}". Retourne UNIQUEMENT du JSON valide sans markdown:\n{"results":[{"name":"Nom complet","brand":"Marque","watts":45,"voltage":12,"price_eur":299,"description":"1-2 phrases","type":"catégorie","efficiency":"A+++"}]}\n3-4 produits réels marché européen avec consommation précise en watts.` }],
-      }),
-    })
-    const data = await res.json()
-    const textBlock = data.content?.find(b => b.type === 'text')
-    if (textBlock) {
-      const parsed = JSON.parse(textBlock.text.replace(/```json|```/g, '').trim())
-      set({ aiResults: parsed.results || [], aiLoading: false })
+    let data
+    if (useProxy) {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q }),
+      })
+      data = await res.json()
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
     } else {
-      set({ aiLoading: false })
+      if (!API_KEY || API_KEY.length < 10) throw new Error('Clé API manquante')
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-5-20251001',
+          max_tokens: 2048,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          system: 'Retourne UNIQUEMENT un JSON valide: {"results":[{"name":"...","brand":"...","watts":0,"voltage":12,"price_eur":0,"description":"...","type":"...","efficiency":"..."}]}',
+          messages: [{ role: 'user', content: `Recherche équipements camping-car/van: ${q}` }],
+        }),
+      })
+      const raw = await res.json()
+      const text = raw.content?.find(b => b.type === 'text')?.text || ''
+      const match = text.match(/\{[\s\S]*\}/)
+      if (!match) throw new Error('Réponse non parsable')
+      data = JSON.parse(match[0])
     }
+    set({ aiResults: data.results || [], aiLoading: false, aiError: data.results?.length ? null : 'Aucun résultat trouvé.' })
   } catch (e) {
-    set({ aiLoading: false, aiResults: [{ name: 'Erreur', brand: '', watts: 0, description: 'Vérifiez la clé API et la connexion.', type: '', price_eur: 0 }] })
+    set({ aiLoading: false, aiResults: [], aiError: e.message || 'Erreur de recherche' })
   }
 }
 
