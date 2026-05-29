@@ -3,6 +3,9 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
-    "api/search.js": { "maxDuration": 30 }
+    "api/search.js": {
+      "maxDuration": 30,
+      "runtime": "nodejs20.x"
+    }
   }
 }

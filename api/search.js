@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -16,33 +16,18 @@ Tu effectues des recherches sur le web pour trouver des produits réels disponib
 
 RÈGLES STRICTES :
 - Concentre-toi sur la consommation électrique 12V (ou 24V si spécifié)
-- Si un équipement a plusieurs modes de fonctionnement (ex: chauffage diesel avec ventilateur 12V basse/haute puissance, réfrigérateur absorption 12V vs gaz vs 230V), liste CHAQUE MODE séparément dans le tableau "modes"
-- watts = consommation électrique 12V en veille ou mode principal. Si inconnu, mettre null.
-- Pour les appareils mixtes (gaz + 12V), le champ watts ne concerne QUE la partie électrique 12V (allumage, ventilateur, pompe...)
+- Si un équipement a plusieurs modes (ex: chauffage diesel ventilateur min/max, réfrigérateur 12V vs gaz), liste chaque mode dans "modes"
+- Pour les appareils mixtes (gaz + 12V), watts = uniquement la partie électrique 12V
 
-Tu retournes UNIQUEMENT un objet JSON valide, sans markdown, sans explication :
-{
-  "results": [{
-    "name": "Nom complet du produit",
-    "brand": "Marque",
-    "voltage": 12,
-    "price_eur": 299,
-    "description": "1-2 phrases sur le produit, son usage en van/camping-car",
-    "type": "chauffage|réfrigérateur|éclairage|pompe|ventilateur|convertisseur|...",
-    "efficiency": "classe énergétique ou rendement si disponible",
-    "modes": [
-      { "label": "Mode X (ex: Puissance min)", "watts": 20 },
-      { "label": "Mode Y (ex: Puissance max)", "watts": 80 }
-    ]
-  }]
-}
+Retourne UNIQUEMENT ce JSON valide, sans markdown, sans texte autour :
+{"results":[{"name":"Nom complet","brand":"Marque","voltage":12,"price_eur":299,"description":"1-2 phrases","type":"chauffage|réfrigérateur|éclairage|pompe|...","efficiency":"classe si dispo","modes":[{"label":"Mode X","watts":40},{"label":"Mode Y","watts":80}]}]}
 Si un seul mode, "modes" contient un seul objet. Retourne 3 à 5 produits réels.`
 
   try {
     let messages = [{ role: 'user', content: `Recherche d'équipements 12V camping-car/van : ${query}` }]
     let finalText = null
 
-    for (let turn = 0; turn < 6; turn++) {
+    for (let turn = 0; turn < 8; turn++) {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -60,45 +45,67 @@ Si un seul mode, "modes" contient un seul objet. Retourne 3 à 5 produits réels
       })
 
       if (!response.ok) {
-        const err = await response.json().catch(() => ({}))
-        return res.status(response.status).json({ error: err.error?.message || 'Anthropic API error' })
+        const err = await response.json().catch(() => ({ error: { message: `HTTP ${response.status}` } }))
+        return res.status(response.status).json({ error: err.error?.message || `Anthropic API error ${response.status}` })
       }
 
       const data = await response.json()
 
+      // Grab any text block present in this turn
+      const textBlock = data.content?.find(b => b.type === 'text')
+
       if (data.stop_reason === 'end_turn') {
-        const textBlock = data.content?.find(b => b.type === 'text')
         if (textBlock) { finalText = textBlock.text; break }
       }
 
       if (data.stop_reason === 'tool_use') {
+        // Add assistant turn then send tool results so Claude can continue
         messages.push({ role: 'assistant', content: data.content })
         const toolResults = (data.content || [])
           .filter(b => b.type === 'tool_use')
-          .map(b => ({ type: 'tool_result', tool_use_id: b.id, content: b.output || '' }))
+          .map(b => ({
+            type: 'tool_result',
+            tool_use_id: b.id,
+            content: typeof b.output === 'string' ? b.output : (b.output ? JSON.stringify(b.output) : ''),
+          }))
         if (toolResults.length > 0) {
           messages.push({ role: 'user', content: toolResults })
-        } else {
-          break
+          continue
         }
-        continue
+        // No tool results to send — grab whatever text we have
+        if (textBlock) { finalText = textBlock.text; break }
+        break
       }
 
-      // stop_reason: max_tokens or other — grab whatever text we have
-      const textBlock = data.content?.find(b => b.type === 'text')
+      // Any other stop reason — grab text if present
       if (textBlock) { finalText = textBlock.text; break }
       break
     }
 
-    if (!finalText) return res.status(500).json({ error: 'No usable response from AI' })
+    if (!finalText) {
+      return res.status(500).json({ error: 'Aucune réponse textuelle de l\'IA après la recherche web.' })
+    }
 
-    // Extract JSON from response (handle cases where model wraps with prose)
-    const jsonMatch = finalText.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) return res.status(500).json({ error: 'Could not parse AI response as JSON', raw: finalText.slice(0, 500) })
+    // Extract JSON — handle markdown fences and surrounding prose
+    const cleaned = finalText
+      .replace(/```json\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .trim()
 
-    const parsed = JSON.parse(jsonMatch[0])
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      return res.status(500).json({ error: 'Réponse IA non parsable en JSON.', raw: finalText.slice(0, 600) })
+    }
+
+    let parsed
+    try {
+      parsed = JSON.parse(jsonMatch[0])
+    } catch (parseErr) {
+      return res.status(500).json({ error: 'JSON invalide dans la réponse IA.', raw: jsonMatch[0].slice(0, 600) })
+    }
+
     return res.json(parsed)
   } catch (e) {
-    return res.status(500).json({ error: e.message })
+    return res.status(500).json({ error: e.message || 'Erreur interne du serveur' })
   }
 }
