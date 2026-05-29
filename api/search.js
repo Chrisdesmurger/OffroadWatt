@@ -30,7 +30,7 @@ Retourne 3 à 5 produits réels avec la consommation électrique précise en wat
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-opus-4-5-20251001',
+          model: 'claude-sonnet-4-6',
           max_tokens: 2048,
           system,
           tools: [{ type: 'web_search_20250305', name: 'web_search' }],
