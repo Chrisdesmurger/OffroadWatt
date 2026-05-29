@@ -126,7 +126,7 @@ let S = {
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
   aiQuery: '', aiResults: [], aiLoading: false,
-  modal: null, tab: 'apps', catFilter: 'Tout',
+  modal: null, tab: 'energy', catFilter: 'Tout',
 }
 
 // ─── CORE ────────────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ function buildHeader() {
 function buildTabs() {
   return `
   <div class="tabs">
-    ${[['apps','ti-plug','Appareils'],['energy','ti-bolt','Énergie'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
+    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
       <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${lb}</div>`).join('')}
   </div>`
 }
@@ -193,12 +193,18 @@ function buildTabs() {
 // ── APPS TAB ─────────────────────────────────────────────────────────────────
 
 function buildAppsTab() {
+  return buildAppsCard()
+}
+
+// ── ENERGY TAB ───────────────────────────────────────────────────────────────
+
+function buildAppsCard() {
   const filtered = S.catFilter === 'Tout' ? S.apps : S.apps.filter(a => a.cat === S.catFilter)
   const total = S.apps.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
   const active = S.apps.filter(a => a.on)
   return `
   <div class="card">
-    <div class="ct"><i class="ti ti-plug"></i>Gestion des appareils consommateurs</div>
+    <div class="ct"><i class="ti ti-plug"></i>Appareils consommateurs</div>
     <div class="catf">
       ${CATS.map(c => `<div class="cf${S.catFilter === c ? ' on' : ''}" data-cat="${c}"><i class="ti ${CATICONS[c]}" style="font-size:10px;margin-right:3px"></i>${c}</div>`).join('')}
     </div>
@@ -218,13 +224,13 @@ function buildAppsTab() {
         </div>`).join('')}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-      <button class="addbtn" style="flex:1;min-width:180px" id="open-catalog"><i class="ti ti-book"></i>Ajouter depuis le catalogue</button>
-      <button class="addbtn" style="flex:1;min-width:180px" id="open-custom"><i class="ti ti-plus"></i>Appareil personnalisé</button>
+      <button class="addbtn" style="flex:1;min-width:140px" id="open-catalog"><i class="ti ti-book"></i>Catalogue</button>
+      <button class="addbtn" style="flex:1;min-width:140px" id="open-custom"><i class="ti ti-plus"></i>Personnalisé</button>
     </div>
     <div class="cons-footer">
       <div>
-        <div style="font-size:11px;color:var(--t2)">${active.length} appareil(s) actif(s) sur ${S.apps.length}</div>
-        <div style="font-size:10px;color:var(--t3)">Les appareils désactivés sont exclus du calcul</div>
+        <div style="font-size:11px;color:var(--t2)">${active.length} actif(s) sur ${S.apps.length}</div>
+        <div style="font-size:10px;color:var(--t3)">Désactivés exclus du calcul</div>
       </div>
       <div style="text-align:right">
         <div class="cf-num">${Math.round(total)} <span style="font-size:11px;font-weight:400;color:var(--t2)">Wh/jour</span></div>
@@ -233,8 +239,6 @@ function buildAppsTab() {
     </div>
   </div>`
 }
-
-// ── ENERGY TAB ───────────────────────────────────────────────────────────────
 
 function buildEnergyTab() {
   const { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
@@ -251,7 +255,11 @@ function buildEnergyTab() {
   })()
 
   return `
-  <div class="col2">
+  <div class="col3">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${buildAppsCard()}
+    </div>
+
     <div style="display:flex;flex-direction:column;gap:10px">
 
       <div class="card">
@@ -318,7 +326,7 @@ function buildEnergyTab() {
 
     </div>
 
-    <div class="energy-panel">
+    <div style="display:flex;flex-direction:column;gap:10px">
 
       <div class="card">
         <div class="ct te"><i class="ti ti-activity"></i>Bilan énergétique journalier</div>
@@ -603,7 +611,7 @@ function bindEvents() {
   // Add from catalog
   document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
     const item = CATALOG[parseInt(el.dataset.catalog)]
-    set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'apps' })
+    set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
   }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
@@ -624,7 +632,7 @@ function addFromAI(i) {
   const cats = { réfrigérateur: 'Cuisine', chauffage: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine' }
   const cat = Object.entries(cats).find(([k]) => r.type?.toLowerCase().includes(k))?.[1] || 'Tech'
   const icons = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-  set({ apps: [...S.apps, { id: Date.now(), n: r.name + (r.brand ? ' (' + r.brand + ')' : ''), icon: icons[cat] || 'ti-plug', w: r.watts || 0, h: 4, on: true, cat }], tab: 'apps' })
+  set({ apps: [...S.apps, { id: Date.now(), n: r.name + (r.brand ? ' (' + r.brand + ')' : ''), icon: icons[cat] || 'ti-plug', w: r.watts || 0, h: 4, on: true, cat }], tab: 'energy' })
 }
 
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
