@@ -523,8 +523,104 @@ function buildEnergyTab() {
         </div>
       </div>
 
+      <button class="pdf-btn" id="export-pdf" onclick="window.print()">
+        <i class="ti ti-printer"></i> Exporter en PDF
+      </button>
+
     </div>
+  </div>
+
+  <div class="print-report" id="print-report">
+    ${buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr })}
   </div>`
+}
+
+function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr }) {
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+  const vtypeLabel = { campervan: 'Camping-car', caravan: 'Caravane', van: 'Van' }[S.vtype] || 'Véhicule'
+  const zone = SUN_ZONES[S.sunIdx]
+  const sunHours = S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 0) : zone.h
+
+  return `
+  <div class="pr-header">
+    <div class="pr-logo">OffroadWatt</div>
+    <div class="pr-meta">
+      <div class="pr-title">Rapport d'autonomie électrique — ${vtypeLabel}</div>
+      <div class="pr-date">Généré le ${dateStr}</div>
+    </div>
+  </div>
+
+  <div class="pr-section">
+    <div class="pr-sh">Appareils consommateurs</div>
+    <table class="pr-table">
+      <thead><tr><th>Appareil</th><th>Catégorie</th><th>Mode actif</th><th class="num">Watts</th><th class="num">Heures/j</th><th class="num">Wh/jour</th></tr></thead>
+      <tbody>
+        ${S.apps.map(a => {
+          const modeLabel = (a.modes && a.modes.length > 1) ? a.modes[a.activeMode ?? 0]?.label ?? '' : '—'
+          return `<tr class="${!a.on ? 'off' : ''}">
+            <td>${a.n}${!a.on ? ' (désactivé)' : ''}</td>
+            <td>${a.cat}</td>
+            <td>${modeLabel}</td>
+            <td class="num">${a.w} W</td>
+            <td class="num">${a.h} h</td>
+            <td class="num">${a.on ? Math.round(a.w * a.h) : 0} Wh</td>
+          </tr>`
+        }).join('')}
+        <tr class="pr-total"><td colspan="5">Total consommation journalière</td><td class="num">${Math.round(cons)} Wh/j</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pr-grid">
+    <div class="pr-section">
+      <div class="pr-sh">Banc de batteries</div>
+      <table class="pr-kv">
+        <tr><td>Modèle</td><td>${S.bat.ah} Ah ${S.bat.v}V ${S.bat.type}</td></tr>
+        <tr><td>Batteries en parallèle</td><td>${S.batNb}</td></tr>
+        <tr><td>Capacité totale brute</td><td>${batWhTotal.toLocaleString()} Wh</td></tr>
+        <tr><td>Profondeur de décharge</td><td>${Math.round(S.dod * 100)} %</td></tr>
+        <tr class="pr-hi"><td>Énergie utilisable</td><td>${Math.round(usable).toLocaleString()} Wh</td></tr>
+      </table>
+    </div>
+
+    <div class="pr-section">
+      <div class="pr-sh">Panneaux solaires</div>
+      <table class="pr-kv">
+        <tr><td>Puissance unitaire</td><td>${S.solW} Wc</td></tr>
+        <tr><td>Nombre de panneaux</td><td>${S.solNb}</td></tr>
+        <tr><td>Puissance totale</td><td>${S.solW * S.solNb} Wc</td></tr>
+        <tr><td>Rendement MPPT</td><td>${Math.round(S.solEff * 100)} %</td></tr>
+        <tr><td>Zone / Ensoleillement</td><td>${zone.n} — ${sunHours} h/j</td></tr>
+        <tr class="pr-hi"><td>Production journalière</td><td>${Math.round(solar)} Wh/j</td></tr>
+      </table>
+    </div>
+
+    ${S.altOn ? `
+    <div class="pr-section">
+      <div class="pr-sh">Recharge alternateur</div>
+      <table class="pr-kv">
+        <tr><td>Ampérage dédié batteries</td><td>${S.altAmps} A</td></tr>
+        <tr><td>Heures de roulage / jour</td><td>${S.altHours} h</td></tr>
+        <tr><td>Rendement (câbles + régulateur)</td><td>70 %</td></tr>
+        <tr class="pr-hi"><td>Recharge journalière</td><td>${Math.round(alt)} Wh/j</td></tr>
+      </table>
+    </div>` : ''}
+  </div>
+
+  <div class="pr-section">
+    <div class="pr-sh">Bilan énergétique</div>
+    <table class="pr-kv">
+      <tr><td>Consommation totale</td><td>${Math.round(cons)} Wh/j</td></tr>
+      <tr><td>Production solaire</td><td>− ${Math.round(Math.min(solar, cons))} Wh/j</td></tr>
+      ${S.altOn ? `<tr><td>Recharge alternateur</td><td>− ${Math.round(Math.min(alt, Math.max(0, cons - solar)))} Wh/j</td></tr>` : ''}
+      <tr class="${isDanger ? 'pr-danger' : 'pr-hi'}"><td>Déficit batterie résiduel</td><td>${Math.round(net)} Wh/j</td></tr>
+      <tr><td>Couverture solaire${S.altOn ? ' + alternateur' : ''}</td><td>${Math.round(solCovPct)} %</td></tr>
+      <tr class="${isDanger ? 'pr-danger' : 'pr-ok'}"><td>Autonomie estimée (batterie)</td><td>${autStr} ${isFinite(autDays) && autDays >= 1 ? 'jours' : isFinite(autDays) ? 'heures' : ''}</td></tr>
+    </table>
+  </div>
+
+  <div class="pr-footer">Rapport généré par OffroadWatt — Calculateur d'autonomie électrique pour camping-car, van et caravane</div>`
 }
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
