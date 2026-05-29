@@ -105,8 +105,44 @@ const CATICONS = {
 }
 
 // ─── API KEY ──────────────────────────────────────────────────────────────────
-// Utilisé uniquement si pas de proxy serverless disponible (dev local sans api/)
 const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || ''
+
+// ─── OFFLINE CATALOG (localStorage) ──────────────────────────────────────────
+
+const CATALOG_LS_KEY = 'offroadwatt_ai_catalog'
+
+function loadAICatalog() {
+  try { return JSON.parse(localStorage.getItem(CATALOG_LS_KEY) || '[]') } catch { return [] }
+}
+
+function saveAICatalog(catalog) {
+  try { localStorage.setItem(CATALOG_LS_KEY, JSON.stringify(catalog)) } catch {}
+}
+
+function mergeIntoCatalog(newResults) {
+  const catalog = loadAICatalog()
+  let added = 0
+  for (const r of newResults) {
+    const key = (r.name + r.brand).toLowerCase().replace(/\s/g, '')
+    const exists = catalog.some(c => (c.name + c.brand).toLowerCase().replace(/\s/g, '') === key)
+    if (!exists) {
+      catalog.push({ ...r, _addedAt: Date.now() })
+      added++
+    }
+  }
+  if (added > 0) saveAICatalog(catalog)
+  return added
+}
+
+function searchCatalog(q) {
+  const catalog = loadAICatalog()
+  if (!catalog.length || !q.trim()) return []
+  const terms = q.toLowerCase().split(/\s+/).filter(t => t.length > 2)
+  return catalog.filter(r => {
+    const haystack = [r.name, r.brand, r.type, r.description].join(' ').toLowerCase()
+    return terms.some(t => haystack.includes(t))
+  })
+}
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
@@ -125,7 +161,7 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
-  aiQuery: '', aiResults: [], aiLoading: false, aiError: null,
+  aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
 }
 
@@ -421,7 +457,7 @@ function buildEnergyTab() {
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
 
-function buildAIResultCard(r, i) {
+function buildAIResultCard(r, i, source) {
   const modes = r.modes && r.modes.length > 1 ? r.modes : null
   const mainWatts = modes ? modes[0]?.watts : (r.watts ?? null)
   const canAdd = mainWatts != null || modes
@@ -429,7 +465,9 @@ function buildAIResultCard(r, i) {
   return `
   <div class="ai-item">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-      <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}</div>
+      <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}
+        ${source === 'catalog' ? `<span class="src-badge catalog"><i class="ti ti-database"></i></span>` : source === 'online' ? `<span class="src-badge online"><i class="ti ti-world"></i> Nouveau</span>` : ''}
+      </div>
       ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono);white-space:nowrap">${r.efficiency}</span>` : ''}
     </div>
     <div class="aimeta">
@@ -449,32 +487,42 @@ function buildAIResultCard(r, i) {
 }
 
 function buildAITab() {
+  const catalogSize = loadAICatalog().length
+  const catResults = S.aiCatalogResults
+  const onlResults = S.aiOnlineResults
+  const allResults = S.aiResults
+
   return `
   <div class="card">
-    <div class="ct"><i class="ti ti-sparkles"></i>Recherche d'équipements par IA</div>
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">L'IA cherche des équipements réels sur le web — consommation 12V, prix, modèles. Supporte les appareils multi-modes (ex: chauffage diesel + ventilateur 12V).</p>
+    <div class="ct">
+      <i class="ti ti-sparkles"></i>Recherche d'équipements par IA
+      ${catalogSize > 0 ? `<span class="cat-badge"><i class="ti ti-database" style="font-size:10px"></i> ${catalogSize} en catalogue</span>` : ''}
+    </div>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Recherche instantanée dans votre catalogue, puis en ligne pour les nouveaux modèles. Chaque résultat est sauvegardé localement.</p>
     <div class="ai-row">
       <input class="ai-in" id="aiq" type="text" placeholder="Ex: chauffage diesel Webasto, réfrigérateur 12V Dometic, pompe eau Shurflo…" value="${S.aiQuery}">
       <button class="aibtn" id="ai-search" ${S.aiLoading ? 'disabled' : ''}>
         ${S.aiLoading ? '<div class="loading"><span></span><span></span><span></span></div>' : '<i class="ti ti-search"></i> Chercher'}
       </button>
     </div>
-    ${S.aiError ? `
-      <div class="api-warn" style="margin-top:8px">
-        <strong>⚠️ Erreur</strong> — ${S.aiError}
-        ${S.aiError.includes('key') || S.aiError.includes('configured') ? `<br><small>Ajoutez <code>ANTHROPIC_KEY</code> dans les variables d'environnement Vercel.</small>` : ''}
+    ${S.aiError ? `<div class="api-warn" style="margin-top:8px"><strong>⚠️ Erreur</strong> — ${S.aiError}</div>` : ''}
+
+    ${catResults.length ? `
+      <div class="ai-section-hd"><i class="ti ti-database"></i> Catalogue hors ligne — ${catResults.length} résultat(s)</div>
+      ${catResults.map((r, i) => buildAIResultCard(r, i, 'catalog')).join('')}` : ''}
+
+    ${S.aiLoading ? `
+      <div class="ai-section-hd" style="color:var(--so)"><i class="ti ti-world"></i> Recherche en ligne…
+        <div class="loading" style="display:inline-flex;margin-left:6px"><span></span><span></span><span></span></div>
+      </div>` : onlResults.length ? `
+      <div class="ai-section-hd" style="color:var(--te)"><i class="ti ti-world"></i> Résultats en ligne — ${onlResults.length} nouveau(x)</div>
+      ${onlResults.map((r, i) => buildAIResultCard(r, catResults.length + i, 'online')).join('')}` : ''}
+
+    ${!catResults.length && !onlResults.length && !S.aiLoading && !S.aiError ? `
+      <div style="text-align:center;padding:28px;color:var(--t3)">
+        <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
+        <div style="font-size:11px">Tapez un équipement — catalogue local d'abord, puis recherche IA en ligne</div>
       </div>` : ''}
-    ${S.aiResults.length
-      ? S.aiResults.map((r, i) => buildAIResultCard(r, i)).join('')
-      : S.aiLoading
-        ? `<div style="text-align:center;padding:20px;color:var(--t3)">
-            <div class="loading" style="justify-content:center"><span></span><span></span><span></span></div>
-            <div style="margin-top:6px;font-size:11px">Recherche web en cours, 10-20 secondes…</div>
-           </div>`
-        : !S.aiError ? `<div style="text-align:center;padding:28px;color:var(--t3)">
-            <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
-            <div style="font-size:11px">Tapez un équipement pour lancer la recherche web IA</div>
-           </div>` : ''}
   </div>`
 }
 
@@ -673,47 +721,50 @@ function addFromAI(i) {
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
 
 async function searchAI(q) {
-  set({ aiLoading: true, aiResults: [], aiError: null })
+  // 1. Recherche instantanée dans le catalogue local
+  const catalogHits = searchCatalog(q)
+  set({
+    aiLoading: true, aiError: null,
+    aiCatalogResults: catalogHits,
+    aiOnlineResults: [],
+    aiResults: catalogHits,
+  })
 
-  // Try serverless proxy first (production), fall back to direct call (dev)
-  const useProxy = !window.location.hostname.includes('localhost') || true
+  // 2. Recherche en ligne (API)
   try {
-    let data
-    if (useProxy) {
-      const res = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: q }),
-      })
-      data = await res.json()
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
-    } else {
-      if (!API_KEY || API_KEY.length < 10) throw new Error('Clé API manquante')
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 2048,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-          system: 'Retourne UNIQUEMENT un JSON valide: {"results":[{"name":"...","brand":"...","watts":0,"voltage":12,"price_eur":0,"description":"...","type":"...","efficiency":"..."}]}',
-          messages: [{ role: 'user', content: `Recherche équipements camping-car/van: ${q}` }],
-        }),
-      })
-      const raw = await res.json()
-      const text = raw.content?.find(b => b.type === 'text')?.text || ''
-      const match = text.match(/\{[\s\S]*\}/)
-      if (!match) throw new Error('Réponse non parsable')
-      data = JSON.parse(match[0])
-    }
-    set({ aiResults: data.results || [], aiLoading: false, aiError: (data.results?.length ? null : 'Aucun résultat trouvé.') })
+    const res = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+
+    const onlineResults = data.results || []
+
+    // 3. Ne garder que les résultats vraiment nouveaux (pas déjà dans le catalogue local)
+    const catalogKeys = new Set(catalogHits.map(r => (r.name + r.brand).toLowerCase().replace(/\s/g, '')))
+    const newResults = onlineResults.filter(r => {
+      const k = (r.name + r.brand).toLowerCase().replace(/\s/g, '')
+      return !catalogKeys.has(k)
+    })
+
+    // 4. Sauvegarder les nouveaux dans le catalogue
+    const added = mergeIntoCatalog(onlineResults)
+
+    set({
+      aiLoading: false,
+      aiOnlineResults: newResults,
+      aiCatalogResults: catalogHits,
+      aiResults: [...catalogHits, ...newResults],
+      aiError: (!catalogHits.length && !onlineResults.length) ? 'Aucun résultat trouvé.' : null,
+    })
   } catch (e) {
-    set({ aiLoading: false, aiResults: [], aiError: e.message || 'Erreur de recherche' })
+    set({
+      aiLoading: false,
+      aiError: catalogHits.length ? null : (e.message || 'Erreur de recherche en ligne'),
+      aiOnlineResults: [],
+    })
   }
 }
 
