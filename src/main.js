@@ -754,34 +754,53 @@ function addFromAI(i) {
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
 
 async function searchAI(q) {
-  // 1. Recherche dans Supabase (rapide, partagé entre tous les utilisateurs)
+  // 1. Recherche dans Supabase (instantanée)
   set({ aiLoading: true, aiError: null, aiCatalogResults: [], aiOnlineResults: [], aiResults: [] })
   const catalogHits = await searchCatalog(q)
   if (catalogHits.length) {
     set({ aiCatalogResults: catalogHits, aiResults: catalogHits })
   }
 
-  // 2. Recherche en ligne (API)
+  // 2. Appel API en streaming
   try {
     const res = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: q }),
     })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
 
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || `HTTP ${res.status}`)
+    }
+
+    // Lire le flux progressivement
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let accumulated = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      accumulated += decoder.decode(value, { stream: true })
+    }
+
+    // Parser le JSON complet une fois le flux terminé
+    const cleaned = accumulated.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) throw new Error('Réponse IA non parsable.')
+    const data = JSON.parse(jsonMatch[0])
     const onlineResults = data.results || []
 
-    // 3. Ne garder que les résultats vraiment nouveaux (pas déjà dans le catalogue local)
-    const catalogKeys = new Set(catalogHits.map(r => (r.name + r.brand).toLowerCase().replace(/\s/g, '')))
+    // Ne garder que les résultats nouveaux (absents du catalogue)
+    const catalogKeys = new Set(catalogHits.map(r => (r.name + (r.brand || '')).toLowerCase().replace(/\s/g, '')))
     const newResults = onlineResults.filter(r => {
-      const k = (r.name + r.brand).toLowerCase().replace(/\s/g, '')
+      const k = (r.name + (r.brand || '')).toLowerCase().replace(/\s/g, '')
       return !catalogKeys.has(k)
     })
 
-    // 4. Sauvegarder les nouveaux dans le catalogue
-    const added = mergeIntoCatalog(onlineResults)
+    // Sauvegarder en base
+    mergeIntoCatalog(onlineResults)
 
     set({
       aiLoading: false,
