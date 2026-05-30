@@ -1465,9 +1465,14 @@ function bindEvents() {
     const solOn = !S.solOn
     // Ajout/retrait automatique du régulateur MPPT dans les consommateurs
     let apps = S.apps
-    const hasMppt = apps.some(a => /mppt|régulateur/i.test(a.n))
-    if (solOn && !hasMppt) {
-      apps = [...apps, { id: Date.now(), n: 'Régulateur MPPT', icon: 'ti-solar-panel', w: 5, h: 24, on: true, cat: 'Système' }]
+    if (solOn) {
+      const hasMppt = apps.some(a => /mppt|régulateur/i.test(a.n))
+      if (!hasMppt) {
+        apps = [...apps, { id: Date.now(), n: 'Régulateur MPPT', icon: 'ti-solar-panel', w: 5, h: 24, on: true, cat: 'Système' }]
+      }
+    } else {
+      // Décoché : on retire le régulateur MPPT des consommateurs
+      apps = apps.filter(a => !/mppt|régulateur/i.test(a.n))
     }
     set({ solOn, apps })
   })
