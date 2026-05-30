@@ -5,16 +5,20 @@ import { createClient } from '@supabase/supabase-js'
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const BATS = [
-  { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM' },
-  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM' },
-  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM' },
-  { ah: 150, v: 12, label: '150 Ah 12V', type: 'GEL' },
-  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI'  },
-  { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI'  },
-  { ah: 400, v: 12, label: '400 Ah 12V', type: 'LI'  },
-  { ah: 200, v: 24, label: '200 Ah 24V', type: 'LI'  },
-  { ah: 400, v: 24, label: '400 Ah 24V', type: 'LI'  },
+  { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM', eur: 110  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM', eur: 180  },
+  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM', eur: 230  },
+  { ah: 150, v: 12, label: '150 Ah 12V', type: 'GEL', eur: 320  },
+  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI',  eur: 550  },
+  { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI',  eur: 850  },
+  { ah: 400, v: 12, label: '400 Ah 12V', type: 'LI',  eur: 1150 },
+  { ah: 200, v: 24, label: '200 Ah 24V', type: 'LI',  eur: 650  },
+  { ah: 400, v: 24, label: '400 Ah 24V', type: 'LI',  eur: 1300 },
 ]
+
+// Coûts indicatifs marché européen pour le calcul système
+const PANEL_EUR_PER_WC = 1.2  // panneau + fixation
+const ALT_EUR_PER_A    = 8    // chargeur DC-DC (B2B) selon ampérage
 
 const DOD = { AGM: 0.5, GEL: 0.5, LI: 0.8 }
 const PANELS = [80, 100, 150, 200, 250, 300, 400, 500]
@@ -314,29 +318,57 @@ let S = {
   aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false,
+  scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
 const set = (u) => { Object.assign(S, u); render() }
-const sunH = () => S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 4.5) : SUN_ZONES[S.sunIdx].h
+const sunHOf = (st) => st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
+const sunH = () => sunHOf(S)
 
 const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
 
-function calc() {
-  const active = S.apps.filter(a => a.on)
+function calc(st = S) {
+  const active = st.apps.filter(a => a.on)
   const cons = active.reduce((s, a) => s + a.w * a.h, 0)
-  const solar = S.solW * S.solNb * sunH() * S.solEff
-  const alt = S.altOn ? S.altAmps * S.bat.v * S.altHours * ALT_EFF : 0
+  const solar = st.solW * st.solNb * sunHOf(st) * st.solEff
+  const alt = st.altOn ? st.altAmps * st.bat.v * st.altHours * ALT_EFF : 0
   const recharge = solar + alt
   const net = Math.max(0, cons - recharge)
-  const batWhUnit = S.bat.ah * S.bat.v
-  const batWhTotal = batWhUnit * S.batNb
-  const usable = batWhTotal * S.dod
+  const batWhUnit = st.bat.ah * st.bat.v
+  const batWhTotal = batWhUnit * st.batNb
+  const usable = batWhTotal * st.dod
   const autDays = net > 0 ? usable / net : Infinity
   const solCovPct = cons > 0 ? Math.min(100, recharge / cons * 100) : 100
   return { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
 }
+
+// Coût du système énergétique (batteries + solaire + alternateur)
+function systemCost(st = S) {
+  const batCost = (st.bat.eur || 0) * st.batNb
+  const solCost = Math.round(st.solW * st.solNb * PANEL_EUR_PER_WC)
+  const altCost = st.altOn ? Math.round(st.altAmps * ALT_EUR_PER_A) : 0
+  return { batCost, solCost, altCost, total: batCost + solCost + altCost }
+}
+
+// Capture une copie figée de la configuration énergétique courante
+function snapshotState(label) {
+  const snap = JSON.parse(JSON.stringify({
+    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod,
+    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+  }))
+  snap.label = label
+  return snap
+}
+
+function captureScenario(slot) {
+  const snap = snapshotState(slot === 'A' ? 'Setup A' : 'Setup B')
+  set({ scenarios: { ...S.scenarios, [slot]: snap }, tab: 'compare' })
+}
+
+const fmtDays = (d) => isFinite(d) ? (d < 1 ? (d * 24).toFixed(1) + ' h' : d.toFixed(1) + ' j') : '∞'
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
 
@@ -350,10 +382,11 @@ function buildHTML() {
     ${S.modal ? buildModal() : ''}
     ${buildHeader()}
     ${buildTabs()}
-    ${S.tab === 'apps'   ? buildAppsTab()   : ''}
-    ${S.tab === 'energy' ? buildEnergyTab() : ''}
-    ${S.tab === 'ai'     ? buildAITab()     : ''}
-    ${S.tab === 'deploy' ? buildDeployTab() : ''}
+    ${S.tab === 'apps'    ? buildAppsTab()    : ''}
+    ${S.tab === 'energy'  ? buildEnergyTab()  : ''}
+    ${S.tab === 'compare' ? buildCompareTab() : ''}
+    ${S.tab === 'ai'      ? buildAITab()      : ''}
+    ${S.tab === 'deploy'  ? buildDeployTab()  : ''}
   `
 }
 
@@ -388,7 +421,7 @@ function buildHeader() {
 function buildTabs() {
   return `
   <div class="tabs">
-    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
+    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['compare','ti-arrows-diff','Comparer'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
       <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${lb}</div>`).join('')}
   </div>`
 }
@@ -671,6 +704,12 @@ function buildEnergyTab() {
         <i class="ti ti-printer"></i> Exporter en PDF
       </button>
 
+      <div class="capture-row">
+        <span class="capture-lbl"><i class="ti ti-arrows-diff"></i> Comparer cette config :</span>
+        <button class="capture-btn${S.scenarios.A ? ' filled' : ''}" id="capture-a">Capturer en A</button>
+        <button class="capture-btn${S.scenarios.B ? ' filled' : ''}" id="capture-b">Capturer en B</button>
+      </div>
+
     </div>
   </div>
 
@@ -765,6 +804,205 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
   </div>
 
   <div class="pr-footer">Rapport généré par OffroadWatt — Calculateur d'autonomie électrique pour camping-car, van et caravane</div>`
+}
+
+// ── COMPARE TAB ──────────────────────────────────────────────────────────────
+
+// Résumé court d'un scénario (batterie + solaire + alternateur)
+function scenarioSummary(st) {
+  const parts = [
+    `${st.bat.ah}Ah ${st.bat.v}V ${st.bat.type}${st.batNb > 1 ? ` ×${st.batNb}` : ''}`,
+    `${st.solW * st.solNb} Wc solaire`,
+  ]
+  if (st.altOn) parts.push(`Alt ${st.altAmps}A`)
+  return parts.join(' · ')
+}
+
+// Ligne de comparaison avec delta coloré
+function cmpRow(label, vA, vB, fmt, opts = {}) {
+  const { higherBetter = true, delta = true, unit = '' } = opts
+  const dv = vB - vA
+  let deltaHtml = ''
+  if (delta && isFinite(dv) && dv !== 0) {
+    const good = higherBetter ? dv > 0 : dv < 0
+    const sign = dv > 0 ? '+' : ''
+    deltaHtml = `<span class="cmp-delta ${good ? 'up' : 'down'}">${sign}${fmt(dv)}${unit}</span>`
+  } else if (delta && (!isFinite(vA) || !isFinite(vB))) {
+    deltaHtml = `<span class="cmp-delta">—</span>`
+  }
+  return `
+  <tr>
+    <td class="cmp-lbl">${label}</td>
+    <td class="cmp-val">${fmt(vA)}${unit}</td>
+    <td class="cmp-val">${fmt(vB)}${unit}</td>
+    <td class="cmp-d">${deltaHtml}</td>
+  </tr>`
+}
+
+function buildCompareTab() {
+  const A = S.scenarios.A, B = S.scenarios.B
+  let printReport = ''
+
+  const slot = (key, snap) => snap
+    ? `<div class="cmp-slot filled">
+         <div class="cmp-slot-hd"><span class="cmp-tag">${key}</span> ${snap.label}
+           <button class="cmp-clear" data-clear-scenario="${key}" title="Vider"><i class="ti ti-x"></i></button>
+         </div>
+         <div class="cmp-slot-sum">${scenarioSummary(snap)}</div>
+       </div>`
+    : `<div class="cmp-slot empty">
+         <div class="cmp-slot-hd"><span class="cmp-tag empty">${key}</span> Aucun scénario</div>
+         <div class="cmp-slot-sum">Configurez le Dashboard puis cliquez « Capturer en ${key} ».</div>
+       </div>`
+
+  let body
+  if (!A || !B) {
+    body = `
+    <div class="cmp-empty">
+      <i class="ti ti-arrows-diff" style="font-size:30px;opacity:.25;display:block;margin-bottom:8px"></i>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:4px">Capturez deux configurations pour les comparer</div>
+      <div style="font-size:11px;color:var(--t3)">Construisez un setup dans le Dashboard, capturez-le en A,<br>modifiez-le (batterie, solaire…), puis capturez-le en B.</div>
+      <button class="capture-btn" id="goto-dashboard" style="margin-top:12px">→ Aller au Dashboard</button>
+    </div>`
+  } else {
+    const cA = calc(A), cB = calc(B)
+    const kA = systemCost(A), kB = systemCost(B)
+    const r0 = (n) => Math.round(n)
+    const surcout = kB.total - kA.total
+    const gainAut = (isFinite(cB.autDays) && isFinite(cA.autDays)) ? cB.autDays - cA.autDays : null
+    const coutParJour = (gainAut && gainAut > 0 && surcout > 0) ? surcout / gainAut : null
+    const nuitsCamping = (surcout > 0 && S.hookupCost > 0) ? surcout / S.hookupCost : null
+    const winner = isFinite(cB.autDays) && isFinite(cA.autDays) ? (cB.autDays > cA.autDays ? 'B' : cA.autDays > cB.autDays ? 'A' : null) : null
+
+    body = `
+    <table class="cmp-table">
+      <thead><tr><th></th><th><span class="cmp-tag">A</span> ${A.label}</th><th><span class="cmp-tag">B</span> ${B.label}</th><th>Δ</th></tr></thead>
+      <tbody>
+        ${cmpRow('Consommation', cA.cons, cB.cons, r0, { higherBetter: false, unit: ' Wh' })}
+        ${cmpRow('Production solaire', cA.solar, cB.solar, r0, { unit: ' Wh' })}
+        ${(A.altOn || B.altOn) ? cmpRow('Recharge alternateur', cA.alt, cB.alt, r0, { unit: ' Wh' }) : ''}
+        ${cmpRow('Énergie utilisable', cA.usable, cB.usable, r0, { unit: ' Wh' })}
+        ${cmpRow('Déficit / jour', cA.net, cB.net, r0, { higherBetter: false, unit: ' Wh' })}
+        ${cmpRow('Couverture', cA.solCovPct, cB.solCovPct, r0, { unit: ' %' })}
+        ${cmpRow('Autonomie', cA.autDays, cB.autDays, fmtDays, { delta: false })}
+      </tbody>
+      <tbody class="cmp-cost">
+        ${cmpRow('Coût batteries', kA.batCost, kB.batCost, r0, { higherBetter: false, unit: ' €' })}
+        ${cmpRow('Coût solaire', kA.solCost, kB.solCost, r0, { higherBetter: false, unit: ' €' })}
+        ${(A.altOn || B.altOn) ? cmpRow('Coût alternateur', kA.altCost, kB.altCost, r0, { higherBetter: false, unit: ' €' }) : ''}
+        ${cmpRow('Coût système total', kA.total, kB.total, r0, { higherBetter: false, unit: ' €' })}
+      </tbody>
+    </table>
+
+    ${winner ? `<div class="cmp-winner"><i class="ti ti-trophy"></i> Setup <strong>${winner}</strong> offre la meilleure autonomie</div>` : ''}
+
+    <div class="card" style="margin-top:12px">
+      <div class="ct te"><i class="ti ti-calculator"></i>Rentabilité (B vs A)</div>
+      ${surcout === 0 ? `<div style="font-size:12px;color:var(--t3)">Les deux setups ont le même coût système.</div>` : `
+      <div class="roi-grid">
+        <div class="roi-item">
+          <div class="roi-v" style="color:${surcout > 0 ? 'var(--am)' : 'var(--gr)'}">${surcout > 0 ? '+' : ''}${r0(surcout)} €</div>
+          <div class="roi-l">Surcoût de B</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-v" style="color:var(--te)">${gainAut != null ? (gainAut > 0 ? '+' : '') + gainAut.toFixed(1) + ' j' : '∞'}</div>
+          <div class="roi-l">Gain d'autonomie</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-v">${coutParJour != null ? '~' + r0(coutParJour) + ' €' : '—'}</div>
+          <div class="roi-l">Coût / jour gagné</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-v">${nuitsCamping != null ? '~' + r0(nuitsCamping) : '—'}</div>
+          <div class="roi-l">Nuits camping équiv.</div>
+        </div>
+      </div>
+      <div class="roi-param">
+        <label>Prix électricité camping / nuit</label>
+        <input id="hookup-cost" type="number" min="0" max="30" step="0.5" value="${S.hookupCost}"> €
+        <span style="color:var(--t3);font-size:10px;margin-left:auto">Le surcoût équivaut à ${nuitsCamping != null ? r0(nuitsCamping) + ' nuits' : '—'} de borne électrique</span>
+      </div>`}
+    </div>
+
+    <button class="pdf-btn" id="export-compare-pdf" onclick="window.print()" style="margin-top:12px">
+      <i class="ti ti-printer"></i> Exporter le comparatif en PDF
+    </button>`
+
+    printReport = `
+    <div class="print-report" id="print-report-compare">
+      ${buildCompareReport(A, B, cA, cB, kA, kB, { surcout, gainAut, coutParJour, nuitsCamping })}
+    </div>`
+  }
+
+  return `
+  <div class="card">
+    <div class="ct"><i class="ti ti-arrows-diff"></i>Comparateur de setups</div>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:10px">Comparez deux configurations énergétiques côte à côte — autonomie, coût système et rentabilité.</p>
+    <div class="cmp-slots">
+      ${slot('A', A)}
+      ${slot('B', B)}
+    </div>
+    ${body}
+  </div>
+  ${printReport}`
+}
+
+function buildCompareReport(A, B, cA, cB, kA, kB, roi) {
+  const now = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+  const r0 = (n) => Math.round(n)
+  const row = (label, vA, vB, unit = '') => `<tr><td>${label}</td><td class="num">${typeof vA === 'number' ? r0(vA) : vA}${unit}</td><td class="num">${typeof vB === 'number' ? r0(vB) : vB}${unit}</td></tr>`
+  return `
+  <div class="pr-header">
+    <div class="pr-logo">OffroadWatt</div>
+    <div class="pr-meta">
+      <div class="pr-title">Comparatif de configurations énergétiques</div>
+      <div class="pr-date">Généré le ${now}</div>
+    </div>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Setups comparés</div>
+    <table class="pr-kv">
+      <tr><td>Setup A — ${A.label}</td><td>${scenarioSummary(A)}</td></tr>
+      <tr><td>Setup B — ${B.label}</td><td>${scenarioSummary(B)}</td></tr>
+    </table>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Bilan énergétique</div>
+    <table class="pr-table">
+      <thead><tr><th>Critère</th><th class="num">Setup A</th><th class="num">Setup B</th></tr></thead>
+      <tbody>
+        ${row('Consommation', cA.cons, cB.cons, ' Wh/j')}
+        ${row('Production solaire', cA.solar, cB.solar, ' Wh/j')}
+        ${(A.altOn || B.altOn) ? row('Recharge alternateur', cA.alt, cB.alt, ' Wh/j') : ''}
+        ${row('Énergie utilisable', cA.usable, cB.usable, ' Wh')}
+        ${row('Déficit / jour', cA.net, cB.net, ' Wh/j')}
+        ${row('Couverture', cA.solCovPct, cB.solCovPct, ' %')}
+        ${row('Autonomie', fmtDays(cA.autDays), fmtDays(cB.autDays))}
+      </tbody>
+    </table>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Coût du système</div>
+    <table class="pr-table">
+      <thead><tr><th>Poste</th><th class="num">Setup A</th><th class="num">Setup B</th></tr></thead>
+      <tbody>
+        ${row('Batteries', kA.batCost, kB.batCost, ' €')}
+        ${row('Solaire', kA.solCost, kB.solCost, ' €')}
+        ${(A.altOn || B.altOn) ? row('Alternateur', kA.altCost, kB.altCost, ' €') : ''}
+        <tr class="pr-total"><td>Total système</td><td class="num">${kA.total} €</td><td class="num">${kB.total} €</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Rentabilité (B vs A)</div>
+    <table class="pr-kv">
+      <tr class="pr-hi"><td>Surcoût de B</td><td>${roi.surcout > 0 ? '+' : ''}${r0(roi.surcout)} €</td></tr>
+      <tr><td>Gain d'autonomie</td><td>${roi.gainAut != null ? (roi.gainAut > 0 ? '+' : '') + roi.gainAut.toFixed(1) + ' jours' : 'illimité'}</td></tr>
+      <tr><td>Coût par jour d'autonomie gagné</td><td>${roi.coutParJour != null ? '~' + r0(roi.coutParJour) + ' €/jour' : '—'}</td></tr>
+      <tr><td>Équivalent nuits de borne électrique</td><td>${roi.nuitsCamping != null ? '~' + r0(roi.nuitsCamping) + ' nuits (à ' + S.hookupCost + ' €/nuit)' : '—'}</td></tr>
+    </table>
+  </div>
+  <div class="pr-footer">Rapport généré par OffroadWatt — Prix système indicatifs marché européen, hors pose</div>`
 }
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
@@ -1164,6 +1402,15 @@ function bindEvents() {
   }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
+
+  // Comparateur
+  document.getElementById('capture-a')?.addEventListener('click', () => captureScenario('A'))
+  document.getElementById('capture-b')?.addEventListener('click', () => captureScenario('B'))
+  document.getElementById('goto-dashboard')?.addEventListener('click', () => set({ tab: 'energy' }))
+  document.querySelectorAll('[data-clear-scenario]').forEach(el => el.addEventListener('click', () => {
+    set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
+  }))
+  document.getElementById('hookup-cost')?.addEventListener('change', e => set({ hookupCost: Math.max(0, parseFloat(e.target.value) || 0) }))
 
   // Auth
   document.getElementById('open-auth')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
