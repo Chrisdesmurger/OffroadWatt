@@ -280,6 +280,19 @@ async function mergeIntoCatalog(newResults) {
   } catch {}
 }
 
+// Mapping type Supabase → catégorie locale
+function sbTypeToCat(type) {
+  if (!type) return null
+  const t = type.toLowerCase()
+  if (/chauffage|climatiseur|clim|ventilat|confort|couverture/.test(t)) return 'Confort'
+  if (/réfrigér|frigo|congél|micro.onde|café|bouilloire|plaque|cuisine|cuisson/.test(t)) return 'Cuisine'
+  if (/éclairage|lampe|led|lumière|spot|phare/.test(t)) return 'Éclairage'
+  if (/pompe|eau|douche|wc|toilette/.test(t)) return 'Eau'
+  if (/laptop|ordinat|télé|tv|smartphone|téléphone|routeur|drone|appareil.photo|enceinte|tablette/.test(t)) return 'Tech'
+  if (/convertisseur|régulat|bms|alarme|gps|système|onduleur/.test(t)) return 'Système'
+  return null
+}
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
 let S = {
@@ -989,21 +1002,48 @@ function buildModal() {
 
   if (m.type === 'catalog') {
     const cf = m.catFilter || 'Cuisine'
-    const filtered = CATALOG.filter(c => c.cat === cf)
+    const localItems = CATALOG.filter(c => c.cat === cf)
+
+    // Mapper le champ `type` Supabase vers une catégorie locale
+    const sbItems = (_catalogCache || []).filter(item => sbTypeToCat(item.type) === cf)
+
+    const totalCount = localItems.length + sbItems.length
+
     return `
     <div class="ov" id="modal-overlay">
       <div class="mo">
-        <h3><i class="ti ti-book"></i> Catalogue d'appareils</h3>
+        <h3><i class="ti ti-book"></i> Catalogue d'appareils <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${totalCount} appareils</span></h3>
         <div class="catcatalog">
           ${['Cuisine','Confort','Tech','Eau','Éclairage','Système'].map(c => `
             <div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${c}</div>`).join('')}
         </div>
         <div class="catgrid">
-          ${filtered.map(item => `
+          ${localItems.map(item => `
             <div class="catitem" data-catalog="${CATALOG.indexOf(item)}">
-              <div><div class="cin">${item.n}</div><div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span></div></div>
+              <div>
+                <div class="cin">${item.n}</div>
+                <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span></div>
+              </div>
               <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
             </div>`).join('')}
+          ${sbItems.length ? `
+            ${localItems.length ? `<div class="catgrid-sep" style="grid-column:1/-1"><span><i class="ti ti-database" style="font-size:10px"></i> Catalogue IA (${sbItems.length})</span></div>` : ''}
+            ${sbItems.map((item, i) => {
+              const watts = item.modes?.[0]?.watts ?? 0
+              const hasModes = item.modes && item.modes.length > 1
+              return `
+              <div class="catitem catitem-ai" data-sb-catalog="${_catalogCache.indexOf(item)}">
+                <div>
+                  <div class="cin">${item.name}${item.brand ? ` <span style="font-size:10px;color:var(--t3)">${item.brand}</span>` : ''}</div>
+                  <div class="cim">
+                    <span class="ciw">${hasModes ? item.modes.map(m => m.watts + 'W').join(' / ') : watts + 'W'}</span>
+                    ${item.price_eur ? `<span style="color:var(--te)">~${item.price_eur}€</span>` : ''}
+                  </div>
+                </div>
+                <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
+              </div>`
+            }).join('')}` : ''}
+          ${totalCount === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">Aucun appareil dans cette catégorie</div>` : ''}
         </div>
         <div class="mo-btns"><button id="close-modal" class="mo-cancel">Fermer</button></div>
       </div>
@@ -1097,10 +1137,21 @@ function bindEvents() {
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
   // Catalog category filter inside modal
   document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat } })))
-  // Add from catalog
+  // Add from local catalog presets
   document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
     const item = CATALOG[parseInt(el.dataset.catalog)]
     set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
+  }))
+  // Add from Supabase AI catalog
+  document.querySelectorAll('[data-sb-catalog]').forEach(el => el.addEventListener('click', () => {
+    const item = _catalogCache?.[parseInt(el.dataset.sbCatalog)]
+    if (!item) return
+    const modes = item.modes && item.modes.length > 1 ? item.modes : null
+    const watts = modes ? (modes[0]?.watts ?? 0) : (item.modes?.[0]?.watts ?? 0)
+    const cat = sbTypeToCat(item.type) || 'Tech'
+    const iconMap = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
+    const name = item.name + (item.brand ? ` (${item.brand})` : '')
+    set({ apps: [...S.apps, { id: Date.now(), n: name, icon: iconMap[cat] || 'ti-plug', w: watts, h: 4, on: true, cat, modes, activeMode: 0 }], modal: null, tab: 'energy' })
   }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
