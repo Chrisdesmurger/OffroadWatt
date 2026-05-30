@@ -402,6 +402,7 @@ function buildAppRow(a) {
             ${m.label.length > 14 ? m.label.slice(0, 13) + '…' : m.label}
             <span class="modew">${m.watts} W</span>
           </button>`).join('')}
+        <div class="hf" style="margin-left:4px"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
       </div>` : `
       <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>`}
