@@ -7,6 +7,8 @@ import { t, ta, getLang, setLang, initLang, localeCode, LANGS } from './i18n.js'
 const tcat = (c) => t('cat.' + c)
 const tregion = (r) => t('region.' + r)
 const tbattype = (ty) => t('battype.' + ty)
+// Convert Wh → Ah using the current battery voltage
+const toAh = (wh) => { const v = S?.bat?.v || 12; const ah = wh / v; return ah >= 10 ? Math.round(ah) : +ah.toFixed(1) }
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -554,7 +556,7 @@ function buildAppRow(a) {
       <i class="${a.icon} ai"></i>
       <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
-      <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
+      <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
       <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
       <div class="mode-btns">
         ${a.modes.map((m, mi) => `
@@ -570,7 +572,7 @@ function buildAppRow(a) {
     <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
     <i class="${a.icon} ai"></i>
     <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
-    <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
+    <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
     <div class="row-inputs">
       <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
@@ -596,7 +598,7 @@ function buildAppsCard() {
       <div class="appgroup">
         <div class="appgroup-hd">
           <span><i class="ti ${CATICONS[cat] || 'ti-plug'}" style="font-size:10px;margin-right:4px"></i>${tcat(cat)}</span>
-          <span class="appgroup-wh">${Math.round(gWh)} Wh</span>
+          <span class="appgroup-wh">${toAh(gWh)} Ah</span>
         </div>
         ${items.map(a => buildAppRow(a)).join('')}
       </div>`
@@ -617,7 +619,7 @@ function buildAppsCard() {
         <div style="font-size:10px;color:var(--t3)">${t('appliances.disabledExcluded')}</div>
       </div>
       <div style="text-align:right">
-        <div class="cf-num">${Math.round(total)} <span style="font-size:11px;font-weight:400;color:var(--t2)">${t('unit.whday')}</span></div>
+        <div class="cf-num">${toAh(total)} <span style="font-size:11px;font-weight:400;color:var(--t2)">${t('unit.ahday')}</span></div>
         <div style="font-size:10px;color:var(--t3)">${t('appliances.totalConsumption')}</div>
       </div>
     </div>
@@ -671,10 +673,10 @@ function buildEnergyTab() {
         </div>
         <div style="font-size:10px;color:var(--t3);margin-top:3px">${t('battery.dodHint')}</div>
         <div class="bat-summary">
-          <div class="bsrow"><span class="bsn">${t('battery.unit')}</span><span class="bsv">${S.bat.ah} Ah × ${S.bat.v} V = ${S.bat.ah * S.bat.v} Wh</span></div>
+          <div class="bsrow"><span class="bsn">${t('battery.unit')}</span><span class="bsv">${S.bat.ah} Ah × ${S.bat.v} V</span></div>
           <div class="bsrow"><span class="bsn">${t('battery.parallelCount')}</span><span class="bsv am">${t('battery.totalAh', { nb: S.batNb, ah: S.bat.ah * S.batNb })}</span></div>
-          <div class="bsrow"><span class="bsn">${t('battery.totalRaw')}</span><span class="bsv">${batWhTotal.toLocaleString()} Wh</span></div>
-          <div class="bsrow"><span class="bsn">${t('battery.usable', { pct: Math.round(S.dod * 100) })}</span><span class="bsv hi">${Math.round(usable).toLocaleString()} Wh</span></div>
+          <div class="bsrow"><span class="bsn">${t('battery.totalRaw')}</span><span class="bsv">${(S.bat.ah * S.batNb).toLocaleString()} Ah</span></div>
+          <div class="bsrow"><span class="bsn">${t('battery.usable', { pct: Math.round(S.dod * 100) })}</span><span class="bsv hi">${toAh(usable).toLocaleString()} Ah</span></div>
         </div>
       </div>
 
@@ -704,7 +706,7 @@ function buildEnergyTab() {
           <div style="width:1px;background:var(--b1)"></div>
           <div class="ss-item"><div class="ssn" style="color:var(--pu)">${S.altHours} h</div><div class="ssl">${t('alt.driving')}</div></div>
           <div style="width:1px;background:var(--b1)"></div>
-          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${Math.round(S.altAmps * S.bat.v * S.altHours * ALT_EFF)} Wh</div><div class="ssl">${t('alt.charge')}</div></div>
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${toAh(S.altAmps * S.bat.v * S.altHours * ALT_EFF)} Ah</div><div class="ssl">${t('alt.charge')}</div></div>
         </div>
         <div style="font-size:10px;color:var(--t3);margin-top:4px">${t('alt.efficiency')}</div>` :
         `<div style="font-size:12px;color:var(--t3);padding:6px 0">${t('alt.disabled')}</div>`}
@@ -743,7 +745,7 @@ function buildEnergyTab() {
           <div style="width:1px;background:var(--b1)"></div>
           <div class="ss-item"><div class="ssn">${sunH()} h</div><div class="ssl">${t('solar.sunPerDay')}</div></div>
           <div style="width:1px;background:var(--b1)"></div>
-          <div class="ss-item"><div class="ssn">${Math.round(solar)} Wh</div><div class="ssl">${t('solar.production')}</div></div>
+          <div class="ss-item"><div class="ssn">${toAh(solar)} Ah</div><div class="ssl">${t('solar.production')}</div></div>
         </div>`}
       </div>
 
@@ -754,10 +756,10 @@ function buildEnergyTab() {
       <div class="card">
         <div class="ct te"><i class="ti ti-activity"></i>${t('balance.title')}</div>
         <div class="ef-grid${S.altOn ? ' ef-grid-4' : ''}">
-          <div class="ef sol"><div class="en">${Math.round(solar)}</div><div class="el">${t('balance.whSolar')}</div></div>
-          ${S.altOn ? `<div class="ef alt"><div class="en">${Math.round(alt)}</div><div class="el">${t('balance.whAlt')}</div></div>` : ''}
-          <div class="ef bat"><div class="en">${Math.round(usable)}</div><div class="el">${t('balance.whUsable')}</div></div>
-          <div class="ef net ${isDanger ? 'bad' : 'ok'}"><div class="en">${Math.round(net)}</div><div class="el">${t('balance.whDeficit')}</div></div>
+          <div class="ef sol"><div class="en">${toAh(solar)}</div><div class="el">${t('balance.whSolar')}</div></div>
+          ${S.altOn ? `<div class="ef alt"><div class="en">${toAh(alt)}</div><div class="el">${t('balance.whAlt')}</div></div>` : ''}
+          <div class="ef bat"><div class="en">${toAh(usable)}</div><div class="el">${t('balance.whUsable')}</div></div>
+          <div class="ef net ${isDanger ? 'bad' : 'ok'}"><div class="en">${toAh(net)}</div><div class="el">${t('balance.whDeficit')}</div></div>
         </div>
         <div style="font-size:10px;color:var(--t3);display:flex;justify-content:space-between;margin-top:6px;margin-bottom:2px">
           <span>${t('balance.coverageTotal', { alt: S.altOn ? t('balance.coverageAlt') : '' })}</span>
@@ -782,8 +784,8 @@ function buildEnergyTab() {
           </div>
           <div class="ab-item">
             <div class="abn">${t('autonomy.totalConsumption')}</div>
-            <div class="abv">${Math.round(cons)}</div>
-            <div class="abu">${t('unit.whday')}</div>
+            <div class="abv">${toAh(cons)}</div>
+            <div class="abu">${t('unit.ahday')}</div>
             ${solar >= cons
               ? `<div class="tag tinf"><i class="ti ti-solar-panel" style="font-size:10px"></i>${t('autonomy.selfSufficient')}</div>`
               : solar > 0
@@ -796,14 +798,14 @@ function buildEnergyTab() {
       <div class="card">
         <div class="ct"><i class="ti ti-list"></i>${t('detail.title')}</div>
         <div class="bkdown">
-          ${breakdown.slice(0, 6).map(a => `<div class="bkrow"><span class="bkn">${ta(a.n)}</span><span class="bkv">${a.wh} Wh/j</span></div>`).join('')}
-          ${breakdown.length > 6 ? `<div class="bkrow"><span class="bkn">${t('detail.others', { n: breakdown.length - 6 })}</span><span class="bkv">${breakdown.slice(6).reduce((s, a) => s + a.wh, 0)} Wh/j</span></div>` : ''}
-          <div class="bkrow"><span>${t('detail.totalConsumed')}</span><span class="bkv" style="color:var(--am)">${Math.round(cons)} Wh/j</span></div>
-          <div class="bkrow"><span>${t('detail.solarProduction')}</span><span class="bkv" style="color:var(--so)">− ${Math.round(Math.min(solar, cons))} Wh/j</span></div>
-          ${S.altOn ? `<div class="bkrow"><span>${t('detail.altCharge')}</span><span class="bkv" style="color:var(--pu)">− ${Math.round(Math.min(alt, Math.max(0, cons - solar)))} Wh/j</span></div>` : ''}
+          ${breakdown.slice(0, 6).map(a => `<div class="bkrow"><span class="bkn">${ta(a.n)}</span><span class="bkv">${toAh(a.wh)} Ah/j</span></div>`).join('')}
+          ${breakdown.length > 6 ? `<div class="bkrow"><span class="bkn">${t('detail.others', { n: breakdown.length - 6 })}</span><span class="bkv">${toAh(breakdown.slice(6).reduce((s, a) => s + a.wh, 0))} Ah/j</span></div>` : ''}
+          <div class="bkrow"><span>${t('detail.totalConsumed')}</span><span class="bkv" style="color:var(--am)">${toAh(cons)} Ah/j</span></div>
+          <div class="bkrow"><span>${t('detail.solarProduction')}</span><span class="bkv" style="color:var(--so)">− ${toAh(Math.min(solar, cons))} Ah/j</span></div>
+          ${S.altOn ? `<div class="bkrow"><span>${t('detail.altCharge')}</span><span class="bkv" style="color:var(--pu)">− ${toAh(Math.min(alt, Math.max(0, cons - solar)))} Ah/j</span></div>` : ''}
           <div class="bkrow" style="border-top:1px solid var(--b2);margin-top:2px">
             <span style="font-weight:500">${t('detail.batteryDeficit')}</span>
-            <span class="bkv" style="color:${isDanger ? 'var(--rd)' : 'var(--te)'}">${Math.round(net)} Wh/j</span>
+            <span class="bkv" style="color:${isDanger ? 'var(--rd)' : 'var(--te)'}">${toAh(net)} Ah/j</span>
           </div>
         </div>
       </div>
@@ -819,7 +821,7 @@ function buildEnergyTab() {
             <div class="ritem${d >= 1 ? ' best' : ''}">
               <div>
                 <div class="ri-c">${b.ah}Ah ${b.v}V${isCur ? `<span class="btag">${t('market.selected')}</span>` : ''}</div>
-                <div class="ri-s">${tbattype(b.type)} · ${b.ah * b.v} Wh ${t('market.raw')} · ${t('market.usable')} ${Math.round(b.ah * b.v * DOD[b.type])} Wh</div>
+                <div class="ri-s">${tbattype(b.type)} · ${t('market.raw')} ${b.ah} Ah · ${t('market.usable')} ${Math.round(b.ah * DOD[b.type])} Ah</div>
               </div>
               <div>
                 <div class="ri-d">${isFinite(d) && d < 999 ? d.toFixed(1) + ' j' : '∞'}</div>
@@ -882,10 +884,10 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
             <td>${modeLabel ? ta(modeLabel) : '—'}</td>
             <td class="num">${a.w} W</td>
             <td class="num">${a.h} h</td>
-            <td class="num">${a.on ? Math.round(a.w * a.h) : 0} Wh</td>
+            <td class="num">${a.on ? toAh(a.w * a.h) : 0} Ah</td>
           </tr>`
         }).join('')}
-        <tr class="pr-total"><td colspan="5">${t('pr.totalDaily')}</td><td class="num">${Math.round(cons)} Wh/j</td></tr>
+        <tr class="pr-total"><td colspan="5">${t('pr.totalDaily')}</td><td class="num">${toAh(cons)} Ah/j</td></tr>
       </tbody>
     </table>
   </div>
@@ -896,9 +898,9 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
       <table class="pr-kv">
         <tr><td>${t('pr.model')}</td><td>${S.bat.ah} Ah ${S.bat.v}V ${tbattype(S.bat.type)}</td></tr>
         <tr><td>${t('pr.batParallel')}</td><td>${S.batNb}</td></tr>
-        <tr><td>${t('pr.totalRawCap')}</td><td>${batWhTotal.toLocaleString()} Wh</td></tr>
+        <tr><td>${t('pr.totalRawCap')}</td><td>${(S.bat.ah * S.batNb).toLocaleString()} Ah</td></tr>
         <tr><td>${t('pr.dod')}</td><td>${Math.round(S.dod * 100)} %</td></tr>
-        <tr class="pr-hi"><td>${t('pr.usableEnergy')}</td><td>${Math.round(usable).toLocaleString()} Wh</td></tr>
+        <tr class="pr-hi"><td>${t('pr.usableEnergy')}</td><td>${toAh(usable).toLocaleString()} Ah</td></tr>
       </table>
     </div>
 
@@ -911,7 +913,7 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
         <tr><td>${t('pr.totalPower')}</td><td>${S.solW * S.solNb} Wc</td></tr>
         <tr><td>${t('pr.mpptEff')}</td><td>${Math.round(S.solEff * 100)} %</td></tr>
         <tr><td>${t('pr.zoneSun')}</td><td>${zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n} — ${sunHours} h/j</td></tr>
-        <tr class="pr-hi"><td>${t('pr.dailyProduction')}</td><td>${Math.round(solar)} Wh/j</td></tr>
+        <tr class="pr-hi"><td>${t('pr.dailyProduction')}</td><td>${toAh(solar)} Ah/j</td></tr>
       </table>
     </div>` : ''}
 
@@ -922,7 +924,7 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
         <tr><td>${t('pr.altAmps')}</td><td>${S.altAmps} A</td></tr>
         <tr><td>${t('pr.altHours')}</td><td>${S.altHours} h</td></tr>
         <tr><td>${t('pr.altEff')}</td><td>70 %</td></tr>
-        <tr class="pr-hi"><td>${t('pr.dailyCharge')}</td><td>${Math.round(alt)} Wh/j</td></tr>
+        <tr class="pr-hi"><td>${t('pr.dailyCharge')}</td><td>${toAh(alt)} Ah/j</td></tr>
       </table>
     </div>` : ''}
   </div>
@@ -930,10 +932,10 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
   <div class="pr-section">
     <div class="pr-sh">${t('pr.balance')}</div>
     <table class="pr-kv">
-      <tr><td>${t('pr.totalConsumption')}</td><td>${Math.round(cons)} Wh/j</td></tr>
-      <tr><td>${t('pr.solarProduction')}</td><td>− ${Math.round(Math.min(solar, cons))} Wh/j</td></tr>
-      ${S.altOn ? `<tr><td>${t('pr.altCharge')}</td><td>− ${Math.round(Math.min(alt, Math.max(0, cons - solar)))} Wh/j</td></tr>` : ''}
-      <tr class="${isDanger ? 'pr-danger' : 'pr-hi'}"><td>${t('pr.residualDeficit')}</td><td>${Math.round(net)} Wh/j</td></tr>
+      <tr><td>${t('pr.totalConsumption')}</td><td>${toAh(cons)} Ah/j</td></tr>
+      <tr><td>${t('pr.solarProduction')}</td><td>− ${toAh(Math.min(solar, cons))} Ah/j</td></tr>
+      ${S.altOn ? `<tr><td>${t('pr.altCharge')}</td><td>− ${toAh(Math.min(alt, Math.max(0, cons - solar)))} Ah/j</td></tr>` : ''}
+      <tr class="${isDanger ? 'pr-danger' : 'pr-hi'}"><td>${t('pr.residualDeficit')}</td><td>${toAh(net)} Ah/j</td></tr>
       <tr><td>${t('pr.coverage', { alt: S.altOn ? t('balance.coverageAlt') : '' })}</td><td>${Math.round(solCovPct)} %</td></tr>
       <tr class="${isDanger ? 'pr-danger' : 'pr-ok'}"><td>${t('pr.estAutonomy')}</td><td>${autStr} ${isFinite(autDays) && autDays >= 1 ? t('unit.days') : isFinite(autDays) ? t('unit.hours') : ''}</td></tr>
     </table>
@@ -1014,11 +1016,11 @@ function buildCompareTab() {
     <table class="cmp-table">
       <thead><tr><th></th><th><span class="cmp-tag">A</span> ${A.label}</th><th><span class="cmp-tag">B</span> ${B.label}</th><th>Δ</th></tr></thead>
       <tbody>
-        ${cmpRow(t('compare.row.consumption'), cA.cons, cB.cons, r0, { higherBetter: false, unit: ' Wh' })}
-        ${cmpRow(t('compare.row.solarProduction'), cA.solar, cB.solar, r0, { unit: ' Wh' })}
-        ${(A.altOn || B.altOn) ? cmpRow(t('compare.row.altCharge'), cA.alt, cB.alt, r0, { unit: ' Wh' }) : ''}
-        ${cmpRow(t('compare.row.usableEnergy'), cA.usable, cB.usable, r0, { unit: ' Wh' })}
-        ${cmpRow(t('compare.row.deficit'), cA.net, cB.net, r0, { higherBetter: false, unit: ' Wh' })}
+        ${cmpRow(t('compare.row.consumption'), toAh(cA.cons), toAh(cB.cons), r0, { higherBetter: false, unit: ' Ah' })}
+        ${cmpRow(t('compare.row.solarProduction'), toAh(cA.solar), toAh(cB.solar), r0, { unit: ' Ah' })}
+        ${(A.altOn || B.altOn) ? cmpRow(t('compare.row.altCharge'), toAh(cA.alt), toAh(cB.alt), r0, { unit: ' Ah' }) : ''}
+        ${cmpRow(t('compare.row.usableEnergy'), toAh(cA.usable), toAh(cB.usable), r0, { unit: ' Ah' })}
+        ${cmpRow(t('compare.row.deficit'), toAh(cA.net), toAh(cB.net), r0, { higherBetter: false, unit: ' Ah' })}
         ${cmpRow(t('compare.row.coverage'), cA.solCovPct, cB.solCovPct, r0, { unit: ' %' })}
         ${cmpRow(t('compare.row.autonomy'), cA.autDays, cB.autDays, fmtDays, { delta: false })}
       </tbody>
@@ -1107,11 +1109,11 @@ function buildCompareReport(A, B, cA, cB, kA, kB, roi) {
     <table class="pr-table">
       <thead><tr><th>${t('pr.compare.criterion')}</th><th class="num">Setup A</th><th class="num">Setup B</th></tr></thead>
       <tbody>
-        ${row(t('compare.row.consumption'), cA.cons, cB.cons, ' Wh/j')}
-        ${row(t('compare.row.solarProduction'), cA.solar, cB.solar, ' Wh/j')}
-        ${(A.altOn || B.altOn) ? row(t('compare.row.altCharge'), cA.alt, cB.alt, ' Wh/j') : ''}
-        ${row(t('compare.row.usableEnergy'), cA.usable, cB.usable, ' Wh')}
-        ${row(t('compare.row.deficit'), cA.net, cB.net, ' Wh/j')}
+        ${row(t('compare.row.consumption'), toAh(cA.cons), toAh(cB.cons), ' Ah/j')}
+        ${row(t('compare.row.solarProduction'), toAh(cA.solar), toAh(cB.solar), ' Ah/j')}
+        ${(A.altOn || B.altOn) ? row(t('compare.row.altCharge'), toAh(cA.alt), toAh(cB.alt), ' Ah/j') : ''}
+        ${row(t('compare.row.usableEnergy'), toAh(cA.usable), toAh(cB.usable), ' Ah')}
+        ${row(t('compare.row.deficit'), toAh(cA.net), toAh(cB.net), ' Ah/j')}
         ${row(t('compare.row.coverage'), cA.solCovPct, cB.solCovPct, ' %')}
         ${row(t('compare.row.autonomy'), fmtDays(cA.autDays), fmtDays(cB.autDays))}
       </tbody>

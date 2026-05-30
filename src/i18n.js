@@ -45,7 +45,9 @@ const DICT = {
 
     // Units
     'unit.wh': 'Wh',
-    'unit.whday': 'Wh/day',
+    'unit.whday': 'Ah/day',
+    'unit.ah': 'Ah',
+    'unit.ahday': 'Ah/day',
     'unit.w': 'W',
     'unit.hday': 'h/day',
     'unit.days': 'days',
@@ -95,10 +97,10 @@ const DICT = {
 
     // Energy balance
     'balance.title': 'Daily energy balance',
-    'balance.whSolar': 'Wh solar / day',
-    'balance.whAlt': 'Wh alternator / day',
-    'balance.whUsable': 'Wh usable',
-    'balance.whDeficit': 'Wh deficit / day',
+    'balance.whSolar': 'Ah solar / day',
+    'balance.whAlt': 'Ah alternator / day',
+    'balance.whUsable': 'Ah usable',
+    'balance.whDeficit': 'Ah deficit / day',
     'balance.coverageTotal': 'Total coverage (solar{alt})',
     'balance.coverageAlt': ' + alternator',
 
@@ -336,7 +338,9 @@ const DICT = {
     'region.Personnalisé': 'Personalizado',
 
     'unit.wh': 'Wh',
-    'unit.whday': 'Wh/día',
+    'unit.whday': 'Ah/día',
+    'unit.ah': 'Ah',
+    'unit.ahday': 'Ah/día',
     'unit.w': 'W',
     'unit.hday': 'h/día',
     'unit.days': 'días',
@@ -381,10 +385,10 @@ const DICT = {
     'solar.production': 'Producción / día',
 
     'balance.title': 'Balance energético diario',
-    'balance.whSolar': 'Wh solar / día',
-    'balance.whAlt': 'Wh alternador / día',
-    'balance.whUsable': 'Wh utilizables',
-    'balance.whDeficit': 'Wh déficit / día',
+    'balance.whSolar': 'Ah solar / día',
+    'balance.whAlt': 'Ah alternador / día',
+    'balance.whUsable': 'Ah utilizables',
+    'balance.whDeficit': 'Ah déficit / día',
     'balance.coverageTotal': 'Cobertura total (solar{alt})',
     'balance.coverageAlt': ' + alternador',
 
@@ -606,7 +610,9 @@ const DICT = {
     'region.Personnalisé': 'Personnalisé',
 
     'unit.wh': 'Wh',
-    'unit.whday': 'Wh/jour',
+    'unit.whday': 'Ah/j',
+    'unit.ah': 'Ah',
+    'unit.ahday': 'Ah/j',
     'unit.w': 'W',
     'unit.hday': 'h/j',
     'unit.days': 'jours',
@@ -651,10 +657,10 @@ const DICT = {
     'solar.production': 'Production / jour',
 
     'balance.title': 'Bilan énergétique journalier',
-    'balance.whSolar': 'Wh solaire / jour',
-    'balance.whAlt': 'Wh alternateur / jour',
-    'balance.whUsable': 'Wh utilisables',
-    'balance.whDeficit': 'Wh déficit / jour',
+    'balance.whSolar': 'Ah solaire / jour',
+    'balance.whAlt': 'Ah alternateur / jour',
+    'balance.whUsable': 'Ah utilisables',
+    'balance.whDeficit': 'Ah déficit / jour',
     'balance.coverageTotal': 'Couverture totale (solaire{alt})',
     'balance.coverageAlt': ' + alternateur',
 
