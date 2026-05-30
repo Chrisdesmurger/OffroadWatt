@@ -1090,7 +1090,6 @@ function bindEvents() {
   // Add from AI results
   document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
   // Open modals
-  document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
   // Modal overlay close
   document.getElementById('modal-overlay')?.addEventListener('click', e => { if (e.target.id === 'modal-overlay') set({ modal: null }) })
