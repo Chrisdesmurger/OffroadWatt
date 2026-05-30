@@ -193,6 +193,12 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .modebtn:hover{border-color:var(--b2)}.modebtn.on{border-color:var(--am);background:rgba(240,160,48,.08)}
 .modew{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--am)}.modebtn.on .modew{color:var(--am)}
 .model{font-size:10px;color:var(--t3)}.modebtn.on .model{color:var(--t2)}
+/* ── Refine button ── */
+.refinebtn{background:none;border:1px solid var(--b2);border-radius:3px;color:var(--t3);cursor:pointer;font-size:10px;font-family:var(--mono);padding:3px 7px;display:inline-flex;align-items:center;gap:4px;transition:all .1s;white-space:nowrap}
+.refinebtn:hover{border-color:var(--so);color:var(--so)}.refinebtn.loading{opacity:.6;cursor:default}
+.refine-locked{font-size:10px;color:var(--te);background:rgba(45,212,191,.08);border:1px solid var(--te);border-radius:3px;padding:2px 6px;white-space:nowrap}
+.rspin{display:inline-block;width:8px;height:8px;border:1.5px solid var(--b2);border-top-color:var(--so);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Auth button ── */
 .lang-switch{display:inline-flex;gap:2px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:2px}

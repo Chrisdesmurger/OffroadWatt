@@ -188,6 +188,15 @@ const DICT = {
     'ai.addToDashboard': 'Add to dashboard',
     'ai.emptyPrompt': 'Type an appliance — local catalog first, then online AI search',
 
+    // Refine with AI
+    'refine.btn':      'Refine',
+    'refine.loading':  'AI…',
+    'refine.locked':   'Verified ×2',
+    'refine.low':      'Low (winter)',
+    'refine.high':     'High (summer)',
+    'refine.error':    'Could not retrieve consumption data. Try again.',
+    'refine.tooltip':  'Retrieve realistic low/high consumption via AI',
+
     // Deploy tab
     'deploy.title': 'Roadmap — Deployment on Vercel',
     'deploy.subtitle': 'This project is a real Vite project. Here are the steps to run it locally and in production.',
@@ -470,6 +479,15 @@ const DICT = {
     'ai.addToDashboard': 'Añadir al panel',
     'ai.emptyPrompt': 'Escriba un aparato — primero el catálogo local, luego búsqueda IA en línea',
 
+    // Refine with AI
+    'refine.btn':      'Refinar',
+    'refine.loading':  'IA…',
+    'refine.locked':   'Verificado ×2',
+    'refine.low':      'Bajo (invierno)',
+    'refine.high':     'Alto (verano)',
+    'refine.error':    'No se pudieron obtener los datos. Inténtalo de nuevo.',
+    'refine.tooltip':  'Obtener consumo real bajo/alto con IA',
+
     'deploy.title': 'Hoja de ruta — Despliegue en Vercel',
     'deploy.subtitle': 'Este proyecto es un proyecto Vite real. Estos son los pasos para ejecutarlo localmente y en producción.',
     'deploy.phase': 'Fase',
@@ -741,6 +759,15 @@ const DICT = {
     'ai.switchable': '← Switchable depuis le dashboard',
     'ai.addToDashboard': 'Ajouter au dashboard',
     'ai.emptyPrompt': "Tapez un équipement — catalogue local d'abord, puis recherche IA en ligne",
+
+    // Affiner avec l'IA
+    'refine.btn':      'Affiner',
+    'refine.loading':  'IA…',
+    'refine.locked':   'Vérifié ×2',
+    'refine.low':      'Bas (hiver)',
+    'refine.high':     'Haut (été)',
+    'refine.error':    'Impossible de récupérer les données. Réessaie.',
+    'refine.tooltip':  'Obtenir conso réelle basse/haute via IA',
 
     'deploy.title': 'Feuille de route — Déploiement sur Vercel',
     'deploy.subtitle': 'Ce projet est un vrai projet Vite. Voici les étapes pour le faire tourner en local et en production.',

@@ -111,39 +111,46 @@ const SUN_ZONES = [
 ]
 
 const CATALOG = [
-  { n: 'Réfrigérateur compresseur 12V', icon: 'ti-fridge', w: 45, h: 24, cat: 'Cuisine' },
-  { n: 'Réfrigérateur à absorption', icon: 'ti-fridge', w: 180, h: 24, cat: 'Cuisine' },
-  { n: 'Congélateur portable 12V', icon: 'ti-snowflake', w: 55, h: 24, cat: 'Cuisine' },
-  { n: 'Plaque induction 1 feu', icon: 'ti-flame', w: 1500, h: 0.5, cat: 'Cuisine' },
-  { n: 'Micro-ondes', icon: 'ti-microwave', w: 900, h: 0.3, cat: 'Cuisine' },
-  { n: 'Machine à café', icon: 'ti-coffee', w: 800, h: 0.2, cat: 'Cuisine' },
-  { n: 'Cafetière filtre', icon: 'ti-cup', w: 700, h: 0.2, cat: 'Cuisine' },
-  { n: 'Bouilloire électrique', icon: 'ti-droplet', w: 1500, h: 0.1, cat: 'Cuisine' },
-  { n: 'Ventilateur 12V', icon: 'ti-wind', w: 20, h: 8, cat: 'Confort' },
-  { n: 'Climatiseur 12V portatif', icon: 'ti-air-conditioning', w: 400, h: 4, cat: 'Confort' },
-  { n: 'Chauffage diesel (Webasto/Eberspächer)', icon: 'ti-temperature', w: 40, h: 8, cat: 'Confort' },
-  { n: 'Chauffage électrique soufflant', icon: 'ti-temperature', w: 1000, h: 3, cat: 'Confort' },
-  { n: 'Couverture chauffante 12V', icon: 'ti-bed', w: 60, h: 6, cat: 'Confort' },
-  { n: 'Chauffe-eau électrique', icon: 'ti-droplets', w: 1200, h: 0.5, cat: 'Confort' },
-  { n: 'Laptop / MacBook', icon: 'ti-device-laptop', w: 65, h: 4, cat: 'Tech' },
-  { n: 'Smartphone ×2', icon: 'ti-device-mobile', w: 15, h: 3, cat: 'Tech' },
-  { n: 'Tablette', icon: 'ti-device-tablet', w: 20, h: 3, cat: 'Tech' },
-  { n: 'Télévision 24"', icon: 'ti-device-tv', w: 80, h: 3, cat: 'Tech' },
-  { n: 'Drone (chargeur)', icon: 'ti-drone', w: 60, h: 2, cat: 'Tech' },
-  { n: 'Appareil photo', icon: 'ti-camera', w: 10, h: 2, cat: 'Tech' },
-  { n: 'Routeur 4G/WiFi', icon: 'ti-wifi', w: 10, h: 24, cat: 'Tech' },
-  { n: 'Enceinte Bluetooth', icon: 'ti-music', w: 10, h: 4, cat: 'Tech' },
-  { n: 'Pompe à eau 12V', icon: 'ti-droplet', w: 50, h: 0.5, cat: 'Eau' },
-  { n: 'Douche extérieure chauffante', icon: 'ti-droplets', w: 200, h: 0.3, cat: 'Eau' },
-  { n: 'WC électrique (Dometic)', icon: 'ti-toilet-paper', w: 30, h: 0.2, cat: 'Eau' },
-  { n: 'Éclairage LED bande 5m', icon: 'ti-bulb', w: 12, h: 5, cat: 'Éclairage' },
-  { n: 'Spots LED encastrés ×4', icon: 'ti-lamp', w: 20, h: 4, cat: 'Éclairage' },
-  { n: "Lumière d'ambiance 12V", icon: 'ti-lamp-2', w: 8, h: 4, cat: 'Éclairage' },
-  { n: 'Phares de travail ext.', icon: 'ti-focus', w: 50, h: 2, cat: 'Éclairage' },
-  { n: 'Convertisseur 12V→230V', icon: 'ti-plug', w: 30, h: 24, cat: 'Système' },
-  { n: 'Régulateur MPPT', icon: 'ti-solar-panel', w: 5, h: 24, cat: 'Système' },
-  { n: 'BMS batterie Lithium', icon: 'ti-battery-charging', w: 3, h: 24, cat: 'Système' },
-  { n: 'Alarme / GPS tracker', icon: 'ti-map-pin', w: 5, h: 24, cat: 'Système' },
+  // Watts = consommation MOYENNE journalière (duty cycle inclus pour les appareils cycliques)
+  // Cuisine
+  { n: 'Réfrigérateur compresseur 12V', icon: 'ti-fridge',        w: 20,   h: 24,  cat: 'Cuisine'    }, // ~40 Ah/j (cycle ~40% à 20°C ambiant)
+  { n: 'Réfrigérateur à absorption',    icon: 'ti-fridge',        w: 55,   h: 8,   cat: 'Cuisine'    }, // usage 12V ponctuel, reste gaz/230V
+  { n: 'Congélateur portable 12V',      icon: 'ti-snowflake',     w: 22,   h: 24,  cat: 'Cuisine'    }, // ~44 Ah/j
+  { n: 'Plaque induction 1 feu',        icon: 'ti-flame',         w: 1500, h: 0.5, cat: 'Cuisine'    }, // via onduleur 2000W+
+  { n: 'Micro-ondes',                   icon: 'ti-microwave',     w: 900,  h: 0.3, cat: 'Cuisine'    }, // via onduleur
+  { n: 'Machine à café',                icon: 'ti-coffee',        w: 800,  h: 0.2, cat: 'Cuisine'    }, // via onduleur
+  { n: 'Cafetière filtre',              icon: 'ti-cup',           w: 700,  h: 0.2, cat: 'Cuisine'    }, // via onduleur
+  { n: 'Bouilloire électrique',         icon: 'ti-droplet',       w: 1500, h: 0.1, cat: 'Cuisine'    }, // via onduleur
+  // Confort
+  { n: 'Ventilateur 12V',                       icon: 'ti-wind',           w: 20,   h: 8,   cat: 'Confort' },
+  { n: 'Climatiseur 12V portatif',              icon: 'ti-air-conditioning',w: 350, h: 4,   cat: 'Confort' }, // EcoFlow Wave 2 ≈ 330W
+  { n: 'Chauffage diesel (Webasto/Eberspächer)',icon: 'ti-temperature',    w: 40,   h: 8,   cat: 'Confort' }, // ventilateur + électronique uniquement
+  { n: 'Chauffage électrique soufflant',        icon: 'ti-temperature',    w: 1000, h: 2,   cat: 'Confort' }, // via onduleur
+  { n: 'Couverture chauffante 12V',             icon: 'ti-bed',            w: 45,   h: 6,   cat: 'Confort' },
+  { n: 'Chauffe-eau électrique',                icon: 'ti-droplets',       w: 1200, h: 0.5, cat: 'Confort' }, // via onduleur
+  // Tech
+  { n: 'Laptop / MacBook',    icon: 'ti-device-laptop', w: 45,  h: 4,  cat: 'Tech' }, // 45W moyen (écran + charge)
+  { n: 'Smartphone ×2',       icon: 'ti-device-mobile', w: 10,  h: 2,  cat: 'Tech' }, // 5W/téléphone × 2h charge
+  { n: 'Tablette',            icon: 'ti-device-tablet', w: 12,  h: 3,  cat: 'Tech' },
+  { n: 'Télévision 24"',      icon: 'ti-device-tv',     w: 40,  h: 3,  cat: 'Tech' }, // LED 24" ≈ 35-45W
+  { n: 'Drone (chargeur)',    icon: 'ti-drone',         w: 60,  h: 2,  cat: 'Tech' },
+  { n: 'Appareil photo',      icon: 'ti-camera',        w: 10,  h: 2,  cat: 'Tech' },
+  { n: 'Routeur 4G/WiFi',     icon: 'ti-wifi',          w: 8,   h: 24, cat: 'Tech' }, // GL.iNet / Teltonika ~6-10W
+  { n: 'Enceinte Bluetooth',  icon: 'ti-music',         w: 10,  h: 4,  cat: 'Tech' },
+  // Eau
+  { n: 'Pompe à eau 12V',            icon: 'ti-droplet',    w: 50,  h: 0.5, cat: 'Eau' },
+  { n: 'Douche extérieure chauffante',icon: 'ti-droplets',  w: 200, h: 0.3, cat: 'Eau' },
+  { n: 'WC électrique (Dometic)',    icon: 'ti-toilet-paper',w: 30,  h: 0.2, cat: 'Eau' },
+  // Éclairage
+  { n: 'Éclairage LED bande 5m', icon: 'ti-bulb',    w: 12, h: 5, cat: 'Éclairage' },
+  { n: 'Spots LED encastrés ×4', icon: 'ti-lamp',    w: 20, h: 4, cat: 'Éclairage' }, // 5W/spot
+  { n: "Lumière d'ambiance 12V", icon: 'ti-lamp-2',  w: 8,  h: 4, cat: 'Éclairage' },
+  { n: 'Phares de travail ext.', icon: 'ti-focus',   w: 50, h: 2, cat: 'Éclairage' },
+  // Système
+  { n: 'Convertisseur 12V→230V', icon: 'ti-plug',            w: 8,  h: 24, cat: 'Système' }, // veille ~5-10W selon modèle
+  { n: 'Régulateur MPPT',        icon: 'ti-solar-panel',     w: 5,  h: 24, cat: 'Système' },
+  { n: 'BMS batterie Lithium',   icon: 'ti-battery-charging',w: 3,  h: 24, cat: 'Système' },
+  { n: 'Alarme / GPS tracker',   icon: 'ti-map-pin',         w: 5,  h: 24, cat: 'Système' },
 ]
 
 const CATS = ['Tout', 'Cuisine', 'Confort', 'Tech', 'Eau', 'Éclairage', 'Système']
@@ -340,6 +347,101 @@ function sbTypeToCat(type) {
   return null
 }
 
+// ─── REFINE WITH AI ──────────────────────────────────────────────────────────
+
+// Checks Supabase cache first (confirmed_count >= 2 = locked, no API call).
+// Otherwise calls /api/refine, upserts result, increments confirmed_count.
+async function refineWithAI(appId) {
+  const app = S.apps.find(a => a.id === appId)
+  if (!app) return
+  set({ refiningId: appId })
+
+  try {
+    // 1. Check Supabase cache
+    const searchName = encodeURIComponent(app.n)
+    const cacheResp = await fetch(
+      `${SB_URL}/rest/v1/equipment_catalog?select=id,name,confirmed_count,consumption_low_w,consumption_high_w,consumption_hours,modes&name=ilike.*${searchName}*&order=confirmed_count.desc&limit=1`,
+      { headers: SB_HDR }
+    )
+    const cacheRows = cacheResp.ok ? await cacheResp.json() : []
+    const cached = cacheRows[0]
+
+    let lowW, highW, hours, note, rowId
+
+    if (cached && cached.confirmed_count >= 2) {
+      // Locked — use cached data directly
+      lowW  = cached.consumption_low_w
+      highW = cached.consumption_high_w
+      hours = cached.consumption_hours
+      rowId = cached.id
+      note  = 'verified'
+    } else {
+      // Call the AI
+      const resp = await fetch('/api/refine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: app.n }),
+      })
+      if (!resp.ok) throw new Error(await resp.text())
+      const data = await resp.json()
+
+      lowW  = data.low?.watts  ?? null
+      highW = data.high?.watts ?? null
+      hours = data.low?.hours  ?? app.h
+      note  = data.note        ?? ''
+
+      if (!lowW || !highW) throw new Error('Incomplete AI response')
+
+      // Upsert to Supabase & increment confirmed_count
+      const newCount = (cached?.confirmed_count ?? 0) + 1
+      const upsertPayload = {
+        name: data.name || app.n,
+        consumption_low_w:  lowW,
+        consumption_high_w: highW,
+        consumption_hours:  hours,
+        confirmed_count:    newCount,
+        modes: [
+          { label: data.low?.label  || 'Low',  watts: lowW  },
+          { label: data.high?.label || 'High', watts: highW },
+        ],
+        updated_at: new Date().toISOString(),
+      }
+      if (cached?.id) {
+        await fetch(`${SB_URL}/rest/v1/equipment_catalog?id=eq.${cached.id}`, {
+          method: 'PATCH',
+          headers: { ...SB_HDR, Prefer: 'return=minimal' },
+          body: JSON.stringify(upsertPayload),
+        })
+        rowId = cached.id
+      } else {
+        await fetch(`${SB_URL}/rest/v1/equipment_catalog`, {
+          method: 'POST',
+          headers: { ...SB_HDR, Prefer: 'return=minimal' },
+          body: JSON.stringify({ ...upsertPayload, created_at: new Date().toISOString() }),
+        })
+      }
+    }
+
+    // Apply modes to the appliance
+    const confirmed = (cached?.confirmed_count ?? 0) >= 2 || note === 'verified'
+    const newModes = [
+      { label: t('refine.low'),  watts: Math.round(lowW)  },
+      { label: t('refine.high'), watts: Math.round(highW) },
+    ]
+    set({
+      refiningId: null,
+      apps: S.apps.map(a => a.id === appId
+        ? { ...a, modes: newModes, activeMode: 0, w: Math.round(lowW), h: hours, sbConfirmed: confirmed }
+        : a
+      ),
+    })
+  } catch (err) {
+    console.error('refineWithAI error', err)
+    set({ refiningId: null })
+    alert(t('refine.error'))
+  }
+}
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
 let S = {
@@ -374,6 +476,7 @@ let S = {
   aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false,
+  refiningId: null,
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
@@ -548,7 +651,17 @@ function buildAppsTab() {
 // ── ENERGY TAB ───────────────────────────────────────────────────────────────
 
 function buildAppRow(a) {
-  const hasModes = a.modes && a.modes.length > 1
+  const hasModes   = a.modes && a.modes.length > 1
+  const isRefining = S.refiningId === a.id
+  const isLocked   = a.sbConfirmed === true
+  const refineBtnHtml = isLocked
+    ? `<span class="refine-locked" title="${t('refine.locked')}">🔒</span>`
+    : `<button class="refinebtn${isRefining ? ' loading' : ''}" data-refine="${a.id}" title="${t('refine.tooltip')}" ${isRefining ? 'disabled' : ''}>
+        ${isRefining
+          ? '<span class="rspin"></span>'
+          : `<i class="ti ti-sparkles" style="font-size:10px"></i> ${t('refine.btn')}`}
+       </button>`
+
   if (hasModes) {
     return `
     <div class="arow has-modes${!a.on ? ' off' : ''}">
@@ -564,6 +677,7 @@ function buildAppRow(a) {
             <span class="modew">${m.watts}W</span>
             <span class="model">${(l => l.length > 12 ? l.slice(0, 11) + '…' : l)(ta(m.label))}</span>
           </button>`).join('')}
+        ${refineBtnHtml}
       </div>
     </div>`
   }
@@ -577,6 +691,7 @@ function buildAppRow(a) {
     <div class="row-inputs">
       <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
+      ${refineBtnHtml}
     </div>
   </div>`
 }
@@ -1490,6 +1605,8 @@ function bindEvents() {
       return { ...a, activeMode: mi, w: newW }
     })})
   }))
+  // Refine with AI
+  document.querySelectorAll('[data-refine]').forEach(el => el.addEventListener('click', () => refineWithAI(parseInt(el.dataset.refine))))
   // Add from AI results
   document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
   // Open modals
