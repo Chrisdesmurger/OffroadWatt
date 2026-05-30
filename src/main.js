@@ -403,22 +403,31 @@ function buildAppsTab() {
 
 function buildAppRow(a) {
   const hasModes = a.modes && a.modes.length > 1
+  if (hasModes) {
+    return `
+    <div class="arow has-modes${!a.on ? ' off' : ''}">
+      <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
+      <i class="${a.icon} ai"></i>
+      <span class="an" title="${a.n}">${a.n}</span>
+      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
+      <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
+      <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
+      <div class="mode-btns">
+        ${a.modes.map((m, mi) => `
+          <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}">
+            <span class="modew">${m.watts}W</span>
+            <span class="model">${m.label.length > 12 ? m.label.slice(0, 11) + '…' : m.label}</span>
+          </button>`).join('')}
+      </div>
+    </div>`
+  }
   return `
-  <div class="arow${!a.on ? ' off' : ''}${hasModes ? ' has-modes' : ''}">
+  <div class="arow${!a.on ? ' off' : ''}">
     <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
     <i class="${a.icon} ai"></i>
     <span class="an" title="${a.n}">${a.n}</span>
-    ${hasModes ? `
-      <div class="mode-btns" style="grid-column:span 2">
-        ${a.modes.map((m, mi) => `
-          <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}" title="${m.label}">
-            ${m.label.length > 14 ? m.label.slice(0, 13) + '…' : m.label}
-            <span class="modew">${m.watts} W</span>
-          </button>`).join('')}
-        <div class="hf" style="margin-left:4px"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
-      </div>` : `
-      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>`}
+    <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+    <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
     <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
   </div>`
