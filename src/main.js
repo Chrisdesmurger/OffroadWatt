@@ -321,9 +321,58 @@ let S = {
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
+// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+
+const LS_KEY = 'ow_state_v1'
+
+function persistState() {
+  try {
+    const snap = {
+      vtype: S.vtype,
+      apps: S.apps,
+      bat: { ah: S.bat.ah, v: S.bat.v },
+      batNb: S.batNb,
+      dod: S.dod,
+      solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+      altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+      catFilter: S.catFilter,
+      hookupCost: S.hookupCost,
+      scenarios: S.scenarios,
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(snap))
+  } catch (_) {}
+}
+
+function loadPersistedState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    if (!raw) return
+    const p = JSON.parse(raw)
+    const bat = BATS.find(b => b.ah === p.bat?.ah && b.v === p.bat?.v) || S.bat
+    Object.assign(S, {
+      vtype: p.vtype || S.vtype,
+      apps: Array.isArray(p.apps) && p.apps.length ? p.apps : S.apps,
+      bat,
+      batNb: p.batNb ?? S.batNb,
+      dod: p.dod ?? S.dod,
+      solW: p.solW ?? S.solW,
+      solNb: p.solNb ?? S.solNb,
+      solEff: p.solEff ?? S.solEff,
+      sunIdx: p.sunIdx ?? S.sunIdx,
+      customSunH: p.customSunH ?? S.customSunH,
+      altOn: p.altOn ?? S.altOn,
+      altAmps: p.altAmps ?? S.altAmps,
+      altHours: p.altHours ?? S.altHours,
+      catFilter: p.catFilter ?? S.catFilter,
+      hookupCost: p.hookupCost ?? S.hookupCost,
+      scenarios: p.scenarios ?? S.scenarios,
+    })
+  } catch (_) {}
+}
+
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
-const set = (u) => { Object.assign(S, u); render() }
+const set = (u) => { Object.assign(S, u); persistState(); render() }
 const sunHOf = (st) => st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
 const sunH = () => sunHOf(S)
 
@@ -1540,6 +1589,7 @@ async function searchAI(q) {
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
+loadPersistedState()
 render()
 loadCatalogFromDB().then(() => render())
 initAuth()
