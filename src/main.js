@@ -20,6 +20,13 @@ const BATS = [
 const PANEL_EUR_PER_WC = 1.2  // panneau + fixation
 const ALT_EUR_PER_A    = 8    // chargeur DC-DC (B2B) selon ampérage
 
+// Types de batteries pour le filtre (ordre d'affichage)
+const BAT_TYPES = [
+  { id: 'AGM', label: 'AGM' },
+  { id: 'GEL', label: 'Gel' },
+  { id: 'LI',  label: 'Lithium' },
+]
+
 const DOD = { AGM: 0.5, GEL: 0.5, LI: 0.8 }
 const PANELS = [80, 100, 150, 200, 250, 300, 400, 500]
 
@@ -191,8 +198,8 @@ async function saveCurrentConfig(name) {
   set({ saveLoading: true })
 
   const stateToSave = {
-    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod,
-    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }
 
@@ -325,8 +332,8 @@ let S = {
     { id: 1780115201375, n: 'Régulateur MPPT',         icon: 'ti-solar-panel',     w: 5,   h: 24,   on: true, cat: 'Système'   },
     { id: 1780115206090, n: 'BMS batterie Lithium',    icon: 'ti-battery-charging',w: 3,   h: 24,   on: true, cat: 'Système'   },
   ],
-  bat: BATS[1], batNb: 1, dod: 0.8,
-  solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
+  bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
+  solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
   altOn: true, altAmps: 20, altHours: 2,
   aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
@@ -346,6 +353,8 @@ function persistState() {
       bat: { ah: S.bat.ah, v: S.bat.v },
       batNb: S.batNb,
       dod: S.dod,
+      batType: S.batType,
+      solOn: S.solOn,
       solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
@@ -368,6 +377,8 @@ function loadPersistedState() {
       bat,
       batNb: p.batNb ?? S.batNb,
       dod: p.dod ?? S.dod,
+      batType: p.batType ?? (bat ? bat.type : S.batType),
+      solOn: p.solOn ?? S.solOn,
       solW: p.solW ?? S.solW,
       solNb: p.solNb ?? S.solNb,
       solEff: p.solEff ?? S.solEff,
@@ -394,7 +405,7 @@ const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
 function calc(st = S) {
   const active = st.apps.filter(a => a.on)
   const cons = active.reduce((s, a) => s + a.w * a.h, 0)
-  const solar = st.solW * st.solNb * sunHOf(st) * st.solEff
+  const solar = st.solOn === false ? 0 : st.solW * st.solNb * sunHOf(st) * st.solEff
   const alt = st.altOn ? st.altAmps * st.bat.v * st.altHours * ALT_EFF : 0
   const recharge = solar + alt
   const net = Math.max(0, cons - recharge)
@@ -409,7 +420,7 @@ function calc(st = S) {
 // Coût du système énergétique (batteries + solaire + alternateur)
 function systemCost(st = S) {
   const batCost = (st.bat.eur || 0) * st.batNb
-  const solCost = Math.round(st.solW * st.solNb * PANEL_EUR_PER_WC)
+  const solCost = st.solOn === false ? 0 : Math.round(st.solW * st.solNb * PANEL_EUR_PER_WC)
   const altCost = st.altOn ? Math.round(st.altAmps * ALT_EUR_PER_A) : 0
   return { batCost, solCost, altCost, total: batCost + solCost + altCost }
 }
@@ -417,8 +428,8 @@ function systemCost(st = S) {
 // Capture une copie figée de la configuration énergétique courante
 function snapshotState(label) {
   const snap = JSON.parse(JSON.stringify({
-    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod,
-    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }))
   snap.label = label
@@ -599,8 +610,11 @@ function buildEnergyTab() {
 
       <div class="card">
         <div class="ct"><i class="ti ti-battery-charging"></i>Banc de batteries</div>
+        <div class="bat-types">
+          ${BAT_TYPES.map(t => `<div class="btf${S.batType === t.id ? ' on' : ''}" data-btype="${t.id}">${t.label}</div>`).join('')}
+        </div>
         <div class="batgrid">
-          ${BATS.map((b, i) => `
+          ${BATS.map((b, i) => ({ b, i })).filter(({ b }) => b.type === S.batType).map(({ b, i }) => `
             <div class="bopt${S.bat.ah === b.ah && S.bat.v === b.v ? ' on' : ''}" data-bat="${i}">
               <div class="bah">${b.ah}Ah</div><div class="btype">${b.type} ${b.v}V</div>
             </div>`).join('')}
@@ -658,7 +672,10 @@ function buildEnergyTab() {
       </div>
 
       <div class="card">
-        <div class="ct sol"><i class="ti ti-sun"></i>Panneaux solaires</div>
+        <div class="ct sol"><i class="ti ti-sun"></i>Panneaux solaires
+          <button class="tog${S.solOn ? ' on' : ''}" id="sol-toggle" style="margin-left:auto"></button>
+        </div>
+        ${!S.solOn ? `<div style="font-size:12px;color:var(--t3);padding:6px 0">Activez si votre installation comporte des panneaux solaires.</div>` : `
         <div class="spgrid">
           ${PANELS.map(w => `<div class="spo${S.solW === w ? ' on' : ''}" data-panel="${w}"><div class="spw">${w}</div><div class="spl">Wc</div></div>`).join('')}
         </div>
@@ -688,7 +705,7 @@ function buildEnergyTab() {
           <div class="ss-item"><div class="ssn">${sunH()} h</div><div class="ssl">Soleil / jour</div></div>
           <div style="width:1px;background:var(--b1)"></div>
           <div class="ss-item"><div class="ssn">${Math.round(solar)} Wh</div><div class="ssl">Production / jour</div></div>
-        </div>
+        </div>`}
       </div>
 
     </div>
@@ -1423,16 +1440,37 @@ function bindEvents() {
   document.getElementById('alt-toggle')?.addEventListener('click', () => set({ altOn: !S.altOn }))
   document.getElementById('alt-amps')?.addEventListener('change', e => set({ altAmps: Math.max(5, parseFloat(e.target.value) || 20) }))
   document.getElementById('alt-hours')?.addEventListener('change', e => set({ altHours: Math.max(0.5, parseFloat(e.target.value) || 2) }))
+  // Battery type filter
+  document.querySelectorAll('[data-btype]').forEach(el => el.addEventListener('click', () => {
+    const t = el.dataset.btype
+    const u = { batType: t }
+    // Si la batterie sélectionnée n'est pas du type choisi, basculer sur la première de ce type
+    if (S.bat.type !== t) {
+      const first = BATS.find(b => b.type === t)
+      if (first) { u.bat = first; u.dod = DOD[first.type] }
+    }
+    set(u)
+  }))
   // Battery options
   document.querySelectorAll('[data-bat]').forEach(el => el.addEventListener('click', () => {
     const b = BATS[parseInt(el.dataset.bat)]
-    set({ bat: b, dod: DOD[b.type] })
+    set({ bat: b, dod: DOD[b.type], batType: b.type })
   }))
   // Parallel count
   document.querySelectorAll('[data-nb]').forEach(el => el.addEventListener('click', () => set({ batNb: parseInt(el.dataset.nb) })))
   // DoD slider
   document.getElementById('dod-range')?.addEventListener('input', e => set({ dod: parseFloat(e.target.value) }))
   // Solar panels
+  document.getElementById('sol-toggle')?.addEventListener('click', () => {
+    const solOn = !S.solOn
+    // Ajout/retrait automatique du régulateur MPPT dans les consommateurs
+    let apps = S.apps
+    const hasMppt = apps.some(a => /mppt|régulateur/i.test(a.n))
+    if (solOn && !hasMppt) {
+      apps = [...apps, { id: Date.now(), n: 'Régulateur MPPT', icon: 'ti-solar-panel', w: 5, h: 24, on: true, cat: 'Système' }]
+    }
+    set({ solOn, apps })
+  })
   document.querySelectorAll('[data-panel]').forEach(el => el.addEventListener('click', () => set({ solW: parseInt(el.dataset.panel) })))
   document.getElementById('sol-nb')?.addEventListener('change', e => set({ solNb: Math.max(1, parseInt(e.target.value) || 1) }))
   document.getElementById('sol-eff')?.addEventListener('change', e => set({ solEff: Math.min(0.98, Math.max(0.6, (parseInt(e.target.value) || 85) / 100)) }))
