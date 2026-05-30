@@ -1,47 +1,54 @@
 export const config = { runtime: 'edge' }
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
 const SYSTEM_PROMPT = `You are an expert in 12V electrical systems for campervans, caravans and vans (vanlife/overlanding).
 Your task: given an appliance name, return its REALISTIC daily energy consumption for mobile use.
 
 CRITICAL RULES:
-- "watts" = AVERAGE watts over 24h INCLUDING duty cycles (e.g. a fridge compressor runs ~40% of the time, so a 45W compressor = 18W average)
-- For appliances used intermittently, "hours" = typical daily usage hours
-- Return ONLY valid JSON, no markdown, no explanation
-- Provide LOW (winter/minimal use) and HIGH (summer/intensive use) consumption scenarios
+- "watts" = AVERAGE watts including duty cycles (e.g. a 45W compressor fridge running 40% of the time = 18W average)
+- For combustion heaters (diesel/gas): watts = electrical draw of fan/pump/electronics ONLY, not thermal power
+- For intermittent appliances: "hours" = typical daily usage hours
+- Return ONLY valid JSON, no markdown, no explanation outside the JSON
 
 JSON FORMAT:
 {
   "name": "canonical appliance name",
-  "low": { "watts": X, "hours": H, "label": "short label (winter / minimal)" },
-  "high": { "watts": X, "hours": H, "label": "short label (summer / intensive)" },
-  "note": "1-line explanation of the difference"
+  "low": { "watts": X, "hours": H, "label": "short label (e.g. Winter / Minimal)" },
+  "high": { "watts": X, "hours": H, "label": "short label (e.g. Summer / Intensive)" },
+  "note": "1-line explanation of the difference between low and high"
 }
 
 Examples:
-- 12V compressor fridge: low={watts:15,hours:24,label:"Hiver (15°C)"}, high={watts:28,hours:24,label:"Été (30°C)"}
-- Diesel heater: low={watts:35,hours:4,label:"Nuit fraîche"}, high={watts:40,hours:10,label:"Grand froid"}
-- Laptop: low={watts:35,hours:3,label:"Usage léger"}, high={watts:55,hours:6,label:"Usage intensif"}`
+- 12V compressor fridge 45W peak: low={watts:15,hours:24,label:"Winter (15°C)"}, high={watts:28,hours:24,label:"Summer (30°C)"}
+- Diesel heater Webasto: low={watts:30,hours:5,label:"Mild night"}, high={watts:40,hours:10,label:"Deep cold"}
+- Laptop MacBook: low={watts:35,hours:3,label:"Light use"}, high={watts:55,hours:6,label:"Intensive use"}`
 
 export default async function handler(req) {
-  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 })
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS })
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: CORS })
 
   let name
   try {
     const body = await req.json()
     name = (body.name || '').trim()
   } catch {
-    return new Response('Bad request', { status: 400 })
+    return new Response('Bad request', { status: 400, headers: CORS })
   }
 
-  if (!name) return new Response('Missing name', { status: 400 })
+  if (!name) return new Response('Missing name', { status: 400, headers: CORS })
 
-  const key = process.env.ANTHROPIC_KEY
-  if (!key) return new Response('Missing ANTHROPIC_KEY', { status: 500 })
+  const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
+  if (!apiKey) return new Response('Missing API key', { status: 500, headers: CORS })
 
   const anthropicResp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'x-api-key': key,
+      'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       'content-type': 'application/json',
     },
@@ -55,17 +62,16 @@ export default async function handler(req) {
 
   if (!anthropicResp.ok) {
     const err = await anthropicResp.text()
-    return new Response(`Anthropic error: ${err}`, { status: 502 })
+    return new Response(`Anthropic error: ${err}`, { status: 502, headers: CORS })
   }
 
   const data = await anthropicResp.json()
   const text = data?.content?.[0]?.text || ''
 
-  // Extract JSON from response
   const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) return new Response('No JSON in response', { status: 502 })
+  if (!jsonMatch) return new Response('No JSON in response', { status: 502, headers: CORS })
 
   return new Response(jsonMatch[0], {
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: { ...CORS, 'Content-Type': 'application/json' },
   })
 }
