@@ -1,5 +1,6 @@
 // OffroadWatt — Calculateur d'autonomie électrique
 // Vanilla JS / Vite
+import { createClient } from '@supabase/supabase-js'
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -107,11 +108,113 @@ const CATICONS = {
 // ─── API KEY ──────────────────────────────────────────────────────────────────
 const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || ''
 
-// ─── SUPABASE CATALOG ────────────────────────────────────────────────────────
+// ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
 const SB_HDR  = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+
+// Client Supabase (auth + requêtes authentifiées)
+const supabase = createClient(SB_URL, SB_KEY)
+
+// ─── AI RATE LIMIT ────────────────────────────────────────────────────────────
+
+const AI_LIMIT_FREE = 5
+
+function getAiSearchesLeft() {
+  if (S.user?.plan === 'pro') return Infinity
+  const today = new Date().toDateString()
+  const stored = JSON.parse(localStorage.getItem('ow_ai_searches') || '{}')
+  if (stored.date !== today) return AI_LIMIT_FREE
+  return Math.max(0, AI_LIMIT_FREE - (stored.count || 0))
+}
+
+function consumeAiSearch() {
+  const today = new Date().toDateString()
+  const stored = JSON.parse(localStorage.getItem('ow_ai_searches') || '{}')
+  const count = stored.date === today ? (stored.count || 0) + 1 : 1
+  localStorage.setItem('ow_ai_searches', JSON.stringify({ date: today, count }))
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+
+async function initAuth() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session?.user) await onSignIn(session.user)
+
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) await onSignIn(session.user)
+    if (event === 'SIGNED_OUT') set({ user: null, userConfigs: [] })
+  })
+}
+
+async function onSignIn(user) {
+  const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single()
+  const plan = profile?.plan || 'free'
+  set({ user: { id: user.id, email: user.email, plan }, modal: null, authLoading: false })
+  loadUserConfigs()
+}
+
+async function loadUserConfigs() {
+  const { data } = await supabase.from('user_configs').select('id, name, created_at, updated_at').order('updated_at', { ascending: false })
+  if (data) set({ userConfigs: data })
+}
+
+async function signInWithGoogle() {
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  })
+}
+
+async function signInWithEmail(email) {
+  set({ authLoading: true })
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin },
+  })
+  if (error) { set({ authLoading: false }); alert('Erreur : ' + error.message); return }
+  set({ authLoading: false, modal: { type: 'auth-sent', email } })
+}
+
+async function signOut() {
+  await supabase.auth.signOut()
+  set({ user: null, userConfigs: [] })
+}
+
+async function saveCurrentConfig(name) {
+  if (!S.user) { set({ modal: { type: 'auth' } }); return }
+  set({ saveLoading: true })
+
+  const stateToSave = {
+    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod,
+    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+  }
+
+  const isFree = S.user.plan === 'free'
+  if (isFree && S.userConfigs.length >= 1) {
+    await supabase.from('user_configs').update({ name, state: stateToSave, updated_at: new Date().toISOString() }).eq('id', S.userConfigs[0].id)
+  } else {
+    await supabase.from('user_configs').insert({ user_id: S.user.id, name, state: stateToSave })
+  }
+
+  await loadUserConfigs()
+  set({ saveLoading: false, modal: null })
+}
+
+async function loadConfig(configId) {
+  const { data } = await supabase.from('user_configs').select('state').eq('id', configId).single()
+  if (!data?.state) return
+  const st = data.state
+  const bat = BATS.find(b => b.ah === st.bat?.ah && b.v === st.bat?.v) || BATS[4]
+  set({ ...st, bat, modal: null, tab: 'energy' })
+}
+
+async function deleteConfig(configId) {
+  await supabase.from('user_configs').delete().eq('id', configId)
+  await loadUserConfigs()
+}
 
 // Cache mémoire pour éviter des requêtes répétées à Supabase dans la session
 let _catalogCache = null
@@ -177,6 +280,19 @@ async function mergeIntoCatalog(newResults) {
   } catch {}
 }
 
+// Mapping type Supabase → catégorie locale
+function sbTypeToCat(type) {
+  if (!type) return null
+  const t = type.toLowerCase()
+  if (/chauffage|climatiseur|clim|ventilat|confort|couverture/.test(t)) return 'Confort'
+  if (/réfrigér|frigo|congél|micro.onde|café|bouilloire|plaque|cuisine|cuisson/.test(t)) return 'Cuisine'
+  if (/éclairage|lampe|led|lumière|spot|phare/.test(t)) return 'Éclairage'
+  if (/pompe|eau|douche|wc|toilette/.test(t)) return 'Eau'
+  if (/laptop|ordinat|télé|tv|smartphone|téléphone|routeur|drone|appareil.photo|enceinte|tablette/.test(t)) return 'Tech'
+  if (/convertisseur|régulat|bms|alarme|gps|système|onduleur/.test(t)) return 'Système'
+  return null
+}
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
 let S = {
@@ -194,8 +310,10 @@ let S = {
   ],
   bat: BATS[4], batNb: 1, dod: 0.8,
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
+  altOn: false, altAmps: 20, altHours: 2,
   aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
+  user: null, userConfigs: [], authLoading: false, saveLoading: false,
 }
 
 // ─── CORE ────────────────────────────────────────────────────────────────────
@@ -203,17 +321,21 @@ let S = {
 const set = (u) => { Object.assign(S, u); render() }
 const sunH = () => S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 4.5) : SUN_ZONES[S.sunIdx].h
 
+const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
+
 function calc() {
   const active = S.apps.filter(a => a.on)
   const cons = active.reduce((s, a) => s + a.w * a.h, 0)
   const solar = S.solW * S.solNb * sunH() * S.solEff
-  const net = Math.max(0, cons - solar)
+  const alt = S.altOn ? S.altAmps * S.bat.v * S.altHours * ALT_EFF : 0
+  const recharge = solar + alt
+  const net = Math.max(0, cons - recharge)
   const batWhUnit = S.bat.ah * S.bat.v
   const batWhTotal = batWhUnit * S.batNb
   const usable = batWhTotal * S.dod
   const autDays = net > 0 ? usable / net : Infinity
-  const solCovPct = cons > 0 ? Math.min(100, solar / cons * 100) : 100
-  return { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
+  const solCovPct = cons > 0 ? Math.min(100, recharge / cons * 100) : 100
+  return { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
 }
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
@@ -236,6 +358,17 @@ function buildHTML() {
 }
 
 function buildHeader() {
+  const authEl = S.user
+    ? `<div class="auth-btn on" id="open-configs" title="Mes configurations">
+        <i class="ti ti-user-circle" style="font-size:15px"></i>
+        <span>${S.user.email.split('@')[0]}</span>
+        ${S.user.plan === 'pro' ? '<span class="pro-badge">PRO</span>' : ''}
+        <i class="ti ti-chevron-down" style="font-size:10px;color:var(--t3)"></i>
+      </div>`
+    : `<button class="auth-btn" id="open-auth">
+        <i class="ti ti-user" style="font-size:14px"></i> Se connecter
+      </button>`
+
   return `
   <div class="hdr">
     <div>
@@ -247,6 +380,7 @@ function buildHeader() {
         <div class="vt${S.vtype === v ? ' on' : ''}" data-vtype="${v}">
           <i class="${ic}"></i><span>${lb}</span>
         </div>`).join('')}
+      ${authEl}
     </div>
   </div>`
 }
@@ -269,21 +403,31 @@ function buildAppsTab() {
 
 function buildAppRow(a) {
   const hasModes = a.modes && a.modes.length > 1
+  if (hasModes) {
+    return `
+    <div class="arow has-modes${!a.on ? ' off' : ''}">
+      <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
+      <i class="${a.icon} ai"></i>
+      <span class="an" title="${a.n}">${a.n}</span>
+      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
+      <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
+      <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
+      <div class="mode-btns">
+        ${a.modes.map((m, mi) => `
+          <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}">
+            <span class="modew">${m.watts}W</span>
+            <span class="model">${m.label.length > 12 ? m.label.slice(0, 11) + '…' : m.label}</span>
+          </button>`).join('')}
+      </div>
+    </div>`
+  }
   return `
-  <div class="arow${!a.on ? ' off' : ''}${hasModes ? ' has-modes' : ''}">
+  <div class="arow${!a.on ? ' off' : ''}">
     <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
     <i class="${a.icon} ai"></i>
     <span class="an" title="${a.n}">${a.n}</span>
-    ${hasModes ? `
-      <div class="mode-btns" style="grid-column:span 2">
-        ${a.modes.map((m, mi) => `
-          <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}" title="${m.label}">
-            ${m.label.length > 14 ? m.label.slice(0, 13) + '…' : m.label}
-            <span class="modew">${m.watts} W</span>
-          </button>`).join('')}
-      </div>` : `
-      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>`}
+    <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+    <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
     <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
   </div>`
@@ -320,7 +464,7 @@ function buildAppsCard() {
 }
 
 function buildEnergyTab() {
-  const { cons, solar, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
+  const { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
   const isDanger = net > usable
   const autStr = isFinite(autDays) ? (autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ' j') : '∞'
 
@@ -370,6 +514,38 @@ function buildEnergyTab() {
       </div>
 
       <div class="card">
+        <div class="ct alt"><i class="ti ti-engine"></i>Recharge alternateur
+          <button class="tog${S.altOn ? ' on' : ''}" id="alt-toggle" style="margin-left:auto"></button>
+        </div>
+        ${S.altOn ? `
+        <div class="sol-config">
+          <div class="scf">
+            <label>Ampérage dédié batteries</label>
+            <div style="display:flex;align-items:center;gap:5px">
+              <input id="alt-amps" type="number" min="5" max="200" value="${S.altAmps}" style="width:70px">
+              <span style="font-size:11px;color:var(--t3)">A</span>
+            </div>
+          </div>
+          <div class="scf">
+            <label>Heures de roulage / jour</label>
+            <div style="display:flex;align-items:center;gap:5px">
+              <input id="alt-hours" type="number" min="0.5" max="12" step="0.5" value="${S.altHours}" style="width:70px">
+              <span style="font-size:11px;color:var(--t3)">h/j</span>
+            </div>
+          </div>
+        </div>
+        <div class="sol-summary" style="background:rgba(167,139,250,.06);border-color:#4c3680">
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${S.altAmps} A</div><div class="ssl">Ampérage</div></div>
+          <div style="width:1px;background:var(--b1)"></div>
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${S.altHours} h</div><div class="ssl">Roulage / jour</div></div>
+          <div style="width:1px;background:var(--b1)"></div>
+          <div class="ss-item"><div class="ssn" style="color:var(--pu)">${Math.round(S.altAmps * S.bat.v * S.altHours * ALT_EFF)} Wh</div><div class="ssl">Recharge / jour</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);margin-top:4px">Rendement câbles + régulateur : 70%</div>` :
+        `<div style="font-size:12px;color:var(--t3);padding:6px 0">Activez pour comptabiliser la recharge en roulant.</div>`}
+      </div>
+
+      <div class="card">
         <div class="ct sol"><i class="ti ti-sun"></i>Panneaux solaires</div>
         <div class="spgrid">
           ${PANELS.map(w => `<div class="spo${S.solW === w ? ' on' : ''}" data-panel="${w}"><div class="spw">${w}</div><div class="spl">Wc</div></div>`).join('')}
@@ -409,13 +585,14 @@ function buildEnergyTab() {
 
       <div class="card">
         <div class="ct te"><i class="ti ti-activity"></i>Bilan énergétique journalier</div>
-        <div class="ef-grid">
-          <div class="ef sol"><div class="en">${Math.round(solar)}</div><div class="el">Wh produits / jour</div></div>
+        <div class="ef-grid${S.altOn ? ' ef-grid-4' : ''}">
+          <div class="ef sol"><div class="en">${Math.round(solar)}</div><div class="el">Wh solaire / jour</div></div>
+          ${S.altOn ? `<div class="ef alt"><div class="en">${Math.round(alt)}</div><div class="el">Wh alternateur / jour</div></div>` : ''}
           <div class="ef bat"><div class="en">${Math.round(usable)}</div><div class="el">Wh utilisables</div></div>
           <div class="ef net ${isDanger ? 'bad' : 'ok'}"><div class="en">${Math.round(net)}</div><div class="el">Wh déficit / jour</div></div>
         </div>
         <div style="font-size:10px;color:var(--t3);display:flex;justify-content:space-between;margin-top:6px;margin-bottom:2px">
-          <span>Couverture solaire</span>
+          <span>Couverture totale (solaire${S.altOn ? ' + alternateur' : ''})</span>
           <span style="font-family:var(--mono);color:var(--so)">${Math.round(solCovPct)}%</span>
         </div>
         <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden">
@@ -427,7 +604,7 @@ function buildEnergyTab() {
         <div class="ct te"><i class="ti ti-clock"></i>Autonomie</div>
         <div class="ab-grid">
           <div class="ab-item">
-            <div class="abn">Sans soleil (batterie seule)</div>
+            <div class="abn">${S.altOn ? 'Avec alternateur + batterie' : 'Sans soleil (batterie seule)'}</div>
             <div class="abv" style="color:${isDanger ? 'var(--rd)' : 'var(--te)'}">${autStr}</div>
             <div class="abu">${isFinite(autDays) && autDays >= 1 ? 'jours' : isFinite(autDays) ? 'heures' : 'illimité'}</div>
             <div class="tag ${isDanger ? 'twarn' : 'tok'}">
@@ -455,6 +632,7 @@ function buildEnergyTab() {
           ${breakdown.length > 6 ? `<div class="bkrow"><span class="bkn">+${breakdown.length - 6} autres</span><span class="bkv">${breakdown.slice(6).reduce((s, a) => s + a.wh, 0)} Wh/j</span></div>` : ''}
           <div class="bkrow"><span>Total consommé</span><span class="bkv" style="color:var(--am)">${Math.round(cons)} Wh/j</span></div>
           <div class="bkrow"><span>Production solaire</span><span class="bkv" style="color:var(--so)">− ${Math.round(Math.min(solar, cons))} Wh/j</span></div>
+          ${S.altOn ? `<div class="bkrow"><span>Recharge alternateur</span><span class="bkv" style="color:var(--pu)">− ${Math.round(Math.min(alt, Math.max(0, cons - solar)))} Wh/j</span></div>` : ''}
           <div class="bkrow" style="border-top:1px solid var(--b2);margin-top:2px">
             <span style="font-weight:500">Déficit batterie</span>
             <span class="bkv" style="color:${isDanger ? 'var(--rd)' : 'var(--te)'}">${Math.round(net)} Wh/j</span>
@@ -484,8 +662,109 @@ function buildEnergyTab() {
         </div>
       </div>
 
+      <button class="save-cfg-btn" id="save-config-btn">
+        <i class="ti ti-device-floppy"></i>
+        ${S.user ? `Sauvegarder ma config${S.userConfigs.length ? ` <span class="save-count">${S.userConfigs.length}</span>` : ''}` : 'Sauvegarder (compte requis)'}
+      </button>
+
+      <button class="pdf-btn" id="export-pdf" onclick="window.print()">
+        <i class="ti ti-printer"></i> Exporter en PDF
+      </button>
+
     </div>
+  </div>
+
+  <div class="print-report" id="print-report">
+    ${buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr })}
   </div>`
+}
+
+function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr }) {
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+  const vtypeLabel = { campervan: 'Camping-car', caravan: 'Caravane', van: 'Van' }[S.vtype] || 'Véhicule'
+  const zone = SUN_ZONES[S.sunIdx]
+  const sunHours = S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 0) : zone.h
+
+  return `
+  <div class="pr-header">
+    <div class="pr-logo">OffroadWatt</div>
+    <div class="pr-meta">
+      <div class="pr-title">Rapport d'autonomie électrique — ${vtypeLabel}</div>
+      <div class="pr-date">Généré le ${dateStr}</div>
+    </div>
+  </div>
+
+  <div class="pr-section">
+    <div class="pr-sh">Appareils consommateurs</div>
+    <table class="pr-table">
+      <thead><tr><th>Appareil</th><th>Catégorie</th><th>Mode actif</th><th class="num">Watts</th><th class="num">Heures/j</th><th class="num">Wh/jour</th></tr></thead>
+      <tbody>
+        ${S.apps.map(a => {
+          const modeLabel = (a.modes && a.modes.length > 1) ? a.modes[a.activeMode ?? 0]?.label ?? '' : '—'
+          return `<tr class="${!a.on ? 'off' : ''}">
+            <td>${a.n}${!a.on ? ' (désactivé)' : ''}</td>
+            <td>${a.cat}</td>
+            <td>${modeLabel}</td>
+            <td class="num">${a.w} W</td>
+            <td class="num">${a.h} h</td>
+            <td class="num">${a.on ? Math.round(a.w * a.h) : 0} Wh</td>
+          </tr>`
+        }).join('')}
+        <tr class="pr-total"><td colspan="5">Total consommation journalière</td><td class="num">${Math.round(cons)} Wh/j</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pr-grid">
+    <div class="pr-section">
+      <div class="pr-sh">Banc de batteries</div>
+      <table class="pr-kv">
+        <tr><td>Modèle</td><td>${S.bat.ah} Ah ${S.bat.v}V ${S.bat.type}</td></tr>
+        <tr><td>Batteries en parallèle</td><td>${S.batNb}</td></tr>
+        <tr><td>Capacité totale brute</td><td>${batWhTotal.toLocaleString()} Wh</td></tr>
+        <tr><td>Profondeur de décharge</td><td>${Math.round(S.dod * 100)} %</td></tr>
+        <tr class="pr-hi"><td>Énergie utilisable</td><td>${Math.round(usable).toLocaleString()} Wh</td></tr>
+      </table>
+    </div>
+
+    <div class="pr-section">
+      <div class="pr-sh">Panneaux solaires</div>
+      <table class="pr-kv">
+        <tr><td>Puissance unitaire</td><td>${S.solW} Wc</td></tr>
+        <tr><td>Nombre de panneaux</td><td>${S.solNb}</td></tr>
+        <tr><td>Puissance totale</td><td>${S.solW * S.solNb} Wc</td></tr>
+        <tr><td>Rendement MPPT</td><td>${Math.round(S.solEff * 100)} %</td></tr>
+        <tr><td>Zone / Ensoleillement</td><td>${zone.n} — ${sunHours} h/j</td></tr>
+        <tr class="pr-hi"><td>Production journalière</td><td>${Math.round(solar)} Wh/j</td></tr>
+      </table>
+    </div>
+
+    ${S.altOn ? `
+    <div class="pr-section">
+      <div class="pr-sh">Recharge alternateur</div>
+      <table class="pr-kv">
+        <tr><td>Ampérage dédié batteries</td><td>${S.altAmps} A</td></tr>
+        <tr><td>Heures de roulage / jour</td><td>${S.altHours} h</td></tr>
+        <tr><td>Rendement (câbles + régulateur)</td><td>70 %</td></tr>
+        <tr class="pr-hi"><td>Recharge journalière</td><td>${Math.round(alt)} Wh/j</td></tr>
+      </table>
+    </div>` : ''}
+  </div>
+
+  <div class="pr-section">
+    <div class="pr-sh">Bilan énergétique</div>
+    <table class="pr-kv">
+      <tr><td>Consommation totale</td><td>${Math.round(cons)} Wh/j</td></tr>
+      <tr><td>Production solaire</td><td>− ${Math.round(Math.min(solar, cons))} Wh/j</td></tr>
+      ${S.altOn ? `<tr><td>Recharge alternateur</td><td>− ${Math.round(Math.min(alt, Math.max(0, cons - solar)))} Wh/j</td></tr>` : ''}
+      <tr class="${isDanger ? 'pr-danger' : 'pr-hi'}"><td>Déficit batterie résiduel</td><td>${Math.round(net)} Wh/j</td></tr>
+      <tr><td>Couverture solaire${S.altOn ? ' + alternateur' : ''}</td><td>${Math.round(solCovPct)} %</td></tr>
+      <tr class="${isDanger ? 'pr-danger' : 'pr-ok'}"><td>Autonomie estimée (batterie)</td><td>${autStr} ${isFinite(autDays) && autDays >= 1 ? 'jours' : isFinite(autDays) ? 'heures' : ''}</td></tr>
+    </table>
+  </div>
+
+  <div class="pr-footer">Rapport généré par OffroadWatt — Calculateur d'autonomie électrique pour camping-car, van et caravane</div>`
 }
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
@@ -523,7 +802,8 @@ function buildAITab() {
   const catalogSize = _catalogCache ? _catalogCache.length : '…'
   const catResults = S.aiCatalogResults
   const onlResults = S.aiOnlineResults
-  const allResults = S.aiResults
+  const searchesLeft = getAiSearchesLeft()
+  const isPro = S.user?.plan === 'pro'
 
   return `
   <div class="card">
@@ -532,9 +812,16 @@ function buildAITab() {
       ${catalogSize > 0 ? `<span class="cat-badge"><i class="ti ti-database" style="font-size:10px"></i> ${catalogSize} en catalogue</span>` : ''}
     </div>
     <p style="font-size:12px;color:var(--t2);margin-bottom:8px">Catalogue partagé Supabase — recherche instantanée, puis en ligne pour les nouveaux modèles. Chaque résultat enrichit la base commune.</p>
+    ${!isPro ? `
+    <div class="ai-quota${searchesLeft === 0 ? ' depleted' : ''}">
+      <i class="ti ti-${searchesLeft > 0 ? 'bolt' : 'lock'}" style="font-size:11px"></i>
+      ${searchesLeft > 0
+        ? `<span>${searchesLeft}/${AI_LIMIT_FREE} recherche${searchesLeft > 1 ? 's' : ''} restante${searchesLeft > 1 ? 's' : ''} aujourd'hui</span>`
+        : `<span>Quota journalier atteint — <button class="quota-cta" id="open-auth-quota">Passer en Pro</button> pour des recherches illimitées</span>`}
+    </div>` : ''}
     <div class="ai-row">
       <input class="ai-in" id="aiq" type="text" placeholder="Ex: chauffage diesel Webasto, réfrigérateur 12V Dometic, pompe eau Shurflo…" value="${S.aiQuery}">
-      <button class="aibtn" id="ai-search" ${S.aiLoading ? 'disabled' : ''}>
+      <button class="aibtn" id="ai-search" ${S.aiLoading || searchesLeft === 0 ? 'disabled' : ''}>
         ${S.aiLoading ? '<div class="loading"><span></span><span></span><span></span></div>' : '<i class="ti ti-search"></i> Chercher'}
       </button>
     </div>
@@ -614,23 +901,158 @@ function buildDeployTab() {
 
 function buildModal() {
   const m = S.modal
-  if (m.type === 'catalog') {
-    const cf = m.catFilter || 'Cuisine'
-    const filtered = CATALOG.filter(c => c.cat === cf)
+
+  if (m.type === 'auth' || m.type === 'auth-save') {
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:400px">
+        <h3><i class="ti ti-user-circle"></i> Créer un compte / Se connecter</h3>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:14px">
+          Sauvegardez votre configuration et accédez-y depuis n'importe quel appareil.
+          Plan gratuit inclus — 1 config sauvegardée.
+        </p>
+        <button class="google-btn" id="auth-google">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continuer avec Google
+        </button>
+        <div class="auth-divider"><span>ou par email (lien magique)</span></div>
+        <input id="auth-email" type="email" placeholder="votre@email.com"
+          style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
+        <button id="auth-email-send" class="mo-ok" style="width:100%" ${S.authLoading ? 'disabled' : ''}>
+          ${S.authLoading ? 'Envoi en cours…' : '<i class="ti ti-send" style="font-size:11px"></i> Recevoir le lien de connexion'}
+        </button>
+        <div class="mo-btns" style="margin-top:10px"><button id="close-modal" class="mo-cancel">Annuler</button></div>
+      </div>
+    </div>`
+  }
+
+  if (m.type === 'auth-sent') {
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:380px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">📬</div>
+        <h3>Lien envoyé !</h3>
+        <p style="font-size:12px;color:var(--t2);margin-top:8px">
+          Vérifiez votre boîte mail <strong style="color:var(--t1)">${m.email}</strong><br>
+          et cliquez sur le lien pour vous connecter.<br>
+          <span style="color:var(--t3);font-size:11px">Le lien est valable 1 heure.</span>
+        </p>
+        <div class="mo-btns" style="margin-top:14px"><button id="close-modal" class="mo-cancel" style="flex:1">Fermer</button></div>
+      </div>
+    </div>`
+  }
+
+  if (m.type === 'save') {
+    const isFree = S.user?.plan === 'free'
+    const defaultName = S.userConfigs.length > 0 ? S.userConfigs[0].name : 'Ma configuration'
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:380px">
+        <h3><i class="ti ti-device-floppy"></i> Sauvegarder la configuration</h3>
+        ${isFree && S.userConfigs.length >= 1
+          ? `<div style="font-size:11px;color:var(--am);background:rgba(240,160,48,.07);border:1px solid var(--am3);border-radius:var(--r);padding:7px 10px;margin-bottom:10px">
+              <i class="ti ti-info-circle"></i> Plan gratuit : la configuration existante sera remplacée.
+             </div>`
+          : ''}
+        <input id="save-name" type="text" placeholder="Nom de la configuration" value="${defaultName}"
+          style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
+        <div class="mo-btns">
+          <button id="close-modal" class="mo-cancel">Annuler</button>
+          <button id="confirm-save" class="mo-ok" ${S.saveLoading ? 'disabled' : ''}>
+            ${S.saveLoading ? 'Sauvegarde…' : '<i class="ti ti-check" style="font-size:11px"></i> Sauvegarder'}
+          </button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  if (m.type === 'configs') {
+    const isFree = S.user?.plan === 'free'
     return `
     <div class="ov" id="modal-overlay">
       <div class="mo">
-        <h3><i class="ti ti-book"></i> Catalogue d'appareils</h3>
+        <h3><i class="ti ti-bookmark"></i> Mes configurations</h3>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:11px;color:var(--t3)">${S.user?.email}</span>
+          <span class="plan-pill ${isFree ? 'free' : 'pro'}">${isFree ? 'Plan Gratuit' : 'Pro'}</span>
+          <button id="auth-signout" style="margin-left:auto;font-size:10px;background:none;border:1px solid var(--b1);color:var(--t3);border-radius:var(--r);padding:3px 8px;cursor:pointer">
+            <i class="ti ti-logout"></i> Déconnexion
+          </button>
+        </div>
+        ${isFree ? `<div style="font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">
+          Plan gratuit — 1 config sauvegardée · Recherches IA : ${AI_LIMIT_FREE}/jour
+        </div>` : ''}
+        ${S.userConfigs.length === 0
+          ? `<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">
+              Aucune configuration sauvegardée.<br>Retournez au Dashboard et cliquez "Sauvegarder ma config".
+             </div>`
+          : S.userConfigs.map(c => `
+            <div class="config-item">
+              <div>
+                <div class="ci-name">${c.name}</div>
+                <div class="ci-date">Modifié le ${new Date(c.updated_at).toLocaleDateString('fr-FR')}</div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <button class="mo-ok" style="padding:4px 10px;font-size:10px" data-load-config="${c.id}">
+                  <i class="ti ti-upload" style="font-size:10px"></i> Charger
+                </button>
+                <button class="mo-cancel" style="padding:4px 8px;font-size:10px" data-del-config="${c.id}">
+                  <i class="ti ti-trash" style="font-size:10px"></i>
+                </button>
+              </div>
+            </div>`).join('')}
+        <div class="mo-btns" style="margin-top:12px">
+          <button id="close-modal" class="mo-cancel">Fermer</button>
+          <button class="mo-ok" id="open-save-from-configs"><i class="ti ti-plus" style="font-size:10px"></i> Nouvelle sauvegarde</button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  if (m.type === 'catalog') {
+    const cf = m.catFilter || 'Cuisine'
+    const localItems = CATALOG.filter(c => c.cat === cf)
+
+    // Mapper le champ `type` Supabase vers une catégorie locale
+    const sbItems = (_catalogCache || []).filter(item => sbTypeToCat(item.type) === cf)
+
+    const totalCount = localItems.length + sbItems.length
+
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo">
+        <h3><i class="ti ti-book"></i> Catalogue d'appareils <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${totalCount} appareils</span></h3>
         <div class="catcatalog">
           ${['Cuisine','Confort','Tech','Eau','Éclairage','Système'].map(c => `
             <div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${c}</div>`).join('')}
         </div>
         <div class="catgrid">
-          ${filtered.map(item => `
+          ${localItems.map(item => `
             <div class="catitem" data-catalog="${CATALOG.indexOf(item)}">
-              <div><div class="cin">${item.n}</div><div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span></div></div>
+              <div>
+                <div class="cin">${item.n}</div>
+                <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span></div>
+              </div>
               <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
             </div>`).join('')}
+          ${sbItems.length ? `
+            ${localItems.length ? `<div class="catgrid-sep" style="grid-column:1/-1"><span><i class="ti ti-database" style="font-size:10px"></i> Catalogue IA (${sbItems.length})</span></div>` : ''}
+            ${sbItems.map((item, i) => {
+              const watts = item.modes?.[0]?.watts ?? 0
+              const hasModes = item.modes && item.modes.length > 1
+              return `
+              <div class="catitem catitem-ai" data-sb-catalog="${_catalogCache.indexOf(item)}">
+                <div>
+                  <div class="cin">${item.name}${item.brand ? ` <span style="font-size:10px;color:var(--t3)">${item.brand}</span>` : ''}</div>
+                  <div class="cim">
+                    <span class="ciw">${hasModes ? item.modes.map(m => m.watts + 'W').join(' / ') : watts + 'W'}</span>
+                    ${item.price_eur ? `<span style="color:var(--te)">~${item.price_eur}€</span>` : ''}
+                  </div>
+                </div>
+                <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
+              </div>`
+            }).join('')}` : ''}
+          ${totalCount === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">Aucun appareil dans cette catégorie</div>` : ''}
         </div>
         <div class="mo-btns"><button id="close-modal" class="mo-cancel">Fermer</button></div>
       </div>
@@ -680,6 +1102,10 @@ function bindEvents() {
     const id = parseInt(el.dataset.del)
     set({ apps: S.apps.filter(a => a.id !== id) })
   }))
+  // Alternateur
+  document.getElementById('alt-toggle')?.addEventListener('click', () => set({ altOn: !S.altOn }))
+  document.getElementById('alt-amps')?.addEventListener('change', e => set({ altAmps: Math.max(5, parseFloat(e.target.value) || 20) }))
+  document.getElementById('alt-hours')?.addEventListener('change', e => set({ altHours: Math.max(0.5, parseFloat(e.target.value) || 2) }))
   // Battery options
   document.querySelectorAll('[data-bat]').forEach(el => el.addEventListener('click', () => {
     const b = BATS[parseInt(el.dataset.bat)]
@@ -713,7 +1139,6 @@ function bindEvents() {
   // Add from AI results
   document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
   // Open modals
-  document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
   // Modal overlay close
   document.getElementById('modal-overlay')?.addEventListener('click', e => { if (e.target.id === 'modal-overlay') set({ modal: null }) })
@@ -721,13 +1146,52 @@ function bindEvents() {
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
   // Catalog category filter inside modal
   document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat } })))
-  // Add from catalog
+  // Add from local catalog presets
   document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
     const item = CATALOG[parseInt(el.dataset.catalog)]
     set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
   }))
+  // Add from Supabase AI catalog
+  document.querySelectorAll('[data-sb-catalog]').forEach(el => el.addEventListener('click', () => {
+    const item = _catalogCache?.[parseInt(el.dataset.sbCatalog)]
+    if (!item) return
+    const modes = item.modes && item.modes.length > 1 ? item.modes : null
+    const watts = modes ? (modes[0]?.watts ?? 0) : (item.modes?.[0]?.watts ?? 0)
+    const cat = sbTypeToCat(item.type) || 'Tech'
+    const iconMap = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
+    const name = item.name + (item.brand ? ` (${item.brand})` : '')
+    set({ apps: [...S.apps, { id: Date.now(), n: name, icon: iconMap[cat] || 'ti-plug', w: watts, h: 4, on: true, cat, modes, activeMode: 0 }], modal: null, tab: 'energy' })
+  }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
+
+  // Auth
+  document.getElementById('open-auth')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
+  document.getElementById('open-auth-quota')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
+  document.getElementById('open-configs')?.addEventListener('click', () => set({ modal: { type: 'configs' } }))
+  document.getElementById('auth-google')?.addEventListener('click', () => signInWithGoogle())
+  document.getElementById('auth-email-send')?.addEventListener('click', () => {
+    const email = document.getElementById('auth-email')?.value?.trim()
+    if (email) signInWithEmail(email)
+  })
+  document.getElementById('auth-signout')?.addEventListener('click', () => signOut())
+
+  // Save config
+  document.getElementById('save-config-btn')?.addEventListener('click', () => {
+    if (!S.user) { set({ modal: { type: 'auth' } }); return }
+    set({ modal: { type: 'save' } })
+  })
+  document.getElementById('confirm-save')?.addEventListener('click', () => {
+    const name = document.getElementById('save-name')?.value?.trim() || 'Ma configuration'
+    saveCurrentConfig(name)
+  })
+  document.getElementById('open-save-from-configs')?.addEventListener('click', () => set({ modal: { type: 'save' } }))
+
+  // Load / delete configs
+  document.querySelectorAll('[data-load-config]').forEach(el => el.addEventListener('click', () => loadConfig(el.dataset.loadConfig)))
+  document.querySelectorAll('[data-del-config]').forEach(el => el.addEventListener('click', () => {
+    if (confirm('Supprimer cette configuration ?')) deleteConfig(el.dataset.delConfig)
+  }))
 }
 
 function confirmCustom() {
@@ -754,6 +1218,13 @@ function addFromAI(i) {
 // ─── AI SEARCH ───────────────────────────────────────────────────────────────
 
 async function searchAI(q) {
+  // Vérification rate limit (free: 5/jour)
+  const left = getAiSearchesLeft()
+  if (left <= 0) {
+    set({ aiError: 'Limite de 5 recherches IA par jour atteinte. Créez un compte Pro pour des recherches illimitées.' })
+    return
+  }
+
   // 1. Recherche dans Supabase (instantanée)
   set({ aiLoading: true, aiError: null, aiCatalogResults: [], aiOnlineResults: [], aiResults: [] })
   const catalogHits = await searchCatalog(q)
@@ -784,6 +1255,9 @@ async function searchAI(q) {
       if (done) break
       accumulated += decoder.decode(value, { stream: true })
     }
+
+    // Consommer une recherche du quota
+    consumeAiSearch()
 
     // Parser le JSON complet une fois le flux terminé
     const cleaned = accumulated.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
@@ -820,5 +1294,5 @@ async function searchAI(q) {
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 render()
-// Précharger le catalogue Supabase en arrière-plan pour afficher le compteur
 loadCatalogFromDB().then(() => render())
+initAuth()
