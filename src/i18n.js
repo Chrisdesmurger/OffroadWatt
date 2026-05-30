@@ -845,6 +845,63 @@ const DICT = {
   },
 }
 
+// Dictionnaire des noms d'appareils + libellés de modes.
+// Clé = libellé français canonique (tel que stocké dans CATALOG / state).
+// Les appareils ajoutés par l'utilisateur ou l'IA gardent leur nom littéral.
+const APPL = {
+  // ── Catalogue & appareils par défaut ──
+  'Réfrigérateur compresseur 12V':        { en: '12V compressor fridge',        es: 'Nevera de compresor 12V' },
+  'Réfrigérateur à absorption':           { en: 'Absorption fridge',            es: 'Nevera de absorción' },
+  'Congélateur portable 12V':             { en: 'Portable 12V freezer',         es: 'Congelador portátil 12V' },
+  'Plaque induction 1 feu':               { en: 'Single induction hob',         es: 'Placa de inducción 1 fuego' },
+  'Micro-ondes':                          { en: 'Microwave',                    es: 'Microondas' },
+  'Machine à café':                       { en: 'Coffee machine',               es: 'Cafetera' },
+  'Cafetière filtre':                     { en: 'Filter coffee maker',          es: 'Cafetera de filtro' },
+  'Bouilloire électrique':                { en: 'Electric kettle',              es: 'Hervidor eléctrico' },
+  'Ventilateur 12V':                      { en: '12V fan',                      es: 'Ventilador 12V' },
+  'Climatiseur 12V portatif':             { en: 'Portable 12V air conditioner', es: 'Aire acondicionado portátil 12V' },
+  'Chauffage diesel (Webasto/Eberspächer)': { en: 'Diesel heater (Webasto/Eberspächer)', es: 'Calefacción diésel (Webasto/Eberspächer)' },
+  'Chauffage électrique soufflant':       { en: 'Electric fan heater',          es: 'Calefactor eléctrico' },
+  'Couverture chauffante 12V':            { en: '12V heated blanket',           es: 'Manta eléctrica 12V' },
+  'Chauffe-eau électrique':               { en: 'Electric water heater',        es: 'Calentador de agua eléctrico' },
+  'Laptop / MacBook':                     { en: 'Laptop / MacBook',             es: 'Portátil / MacBook' },
+  'Smartphone ×2':                        { en: 'Smartphone ×2',                es: 'Smartphone ×2' },
+  'Tablette':                             { en: 'Tablet',                       es: 'Tableta' },
+  'Télévision 24"':                       { en: '24" TV',                       es: 'Televisor 24"' },
+  'Drone (chargeur)':                     { en: 'Drone (charger)',              es: 'Dron (cargador)' },
+  'Appareil photo':                       { en: 'Camera',                       es: 'Cámara' },
+  'Routeur 4G/WiFi':                      { en: '4G/WiFi router',               es: 'Router 4G/WiFi' },
+  'Enceinte Bluetooth':                   { en: 'Bluetooth speaker',            es: 'Altavoz Bluetooth' },
+  'Pompe à eau 12V':                      { en: '12V water pump',               es: 'Bomba de agua 12V' },
+  'Douche extérieure chauffante':         { en: 'Heated outdoor shower',        es: 'Ducha exterior con calentador' },
+  'WC électrique (Dometic)':              { en: 'Electric toilet (Dometic)',    es: 'WC eléctrico (Dometic)' },
+  'Éclairage LED bande 5m':               { en: '5m LED strip lighting',        es: 'Tira LED 5m' },
+  'Spots LED encastrés ×4':               { en: 'Recessed LED spots ×4',        es: 'Focos LED empotrados ×4' },
+  "Lumière d'ambiance 12V":               { en: '12V ambient light',            es: 'Luz ambiental 12V' },
+  'Phares de travail ext.':               { en: 'Exterior work lights',         es: 'Faros de trabajo ext.' },
+  'Convertisseur 12V→230V':               { en: '12V→230V inverter',            es: 'Convertidor 12V→230V' },
+  'Régulateur MPPT':                      { en: 'MPPT regulator',               es: 'Regulador MPPT' },
+  'BMS batterie Lithium':                 { en: 'Lithium battery BMS',          es: 'BMS batería de litio' },
+  'Alarme / GPS tracker':                 { en: 'Alarm / GPS tracker',          es: 'Alarma / rastreador GPS' },
+  // Appareils par défaut supplémentaires
+  'Laptop':                               { en: 'Laptop',                       es: 'Portátil' },
+  'Pompe à eau':                          { en: 'Water pump',                   es: 'Bomba de agua' },
+  'Routeur 4G':                           { en: '4G router',                    es: 'Router 4G' },
+  'Ventilateur 12V portatif':             { en: 'Portable 12V fan',             es: 'Ventilador portátil 12V' },
+  'Éclairage LED':                        { en: 'LED lighting',                 es: 'Iluminación LED' },
+  'Convertisseur':                        { en: 'Inverter',                     es: 'Convertidor' },
+  'Réfrigérateur 12V':                    { en: '12V fridge',                   es: 'Nevera 12V' },
+
+  // ── Libellés de modes ──
+  '12V veille/non-refroidissement':       { en: '12V standby/no cooling',       es: '12V reposo/sin refrigeración' },
+  'Compresseur 12V refroidissement':      { en: '12V compressor cooling',       es: 'Compresor 12V refrigeración' },
+  'Chauffage anti-condensation':          { en: 'Anti-condensation heating',    es: 'Calefacción anticondensación' },
+  'Veille électronique':                  { en: 'Electronic standby',           es: 'Reposo electrónico' },
+  'Ventilateur min':                      { en: 'Fan min',                      es: 'Ventilador mín' },
+  'Ventilateur max':                      { en: 'Fan max',                      es: 'Ventilador máx' },
+  'Pompe circulation eau chaude':         { en: 'Hot water circulation pump',   es: 'Bomba circulación agua caliente' },
+}
+
 const LS_LANG = 'ow_lang'
 let _lang = 'en'
 
@@ -884,3 +941,10 @@ export function t(key, vars) {
 export function localeCode() {
   return { en: 'en-US', es: 'es-ES', fr: 'fr-FR' }[_lang] || 'en-US'
 }
+
+// Translate appliance name — canonical key is French
+export function ta(frName) {
+  if (_lang === 'fr') return frName
+  return (APPL[frName] && APPL[frName][_lang]) || frName
+}
+

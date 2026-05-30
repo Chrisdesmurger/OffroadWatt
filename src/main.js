@@ -1,7 +1,7 @@
 // OffroadWatt — Calculateur d'autonomie électrique
 // Vanilla JS / Vite
 import { createClient } from '@supabase/supabase-js'
-import { t, getLang, setLang, initLang, localeCode, LANGS } from './i18n.js'
+import { t, ta, getLang, setLang, initLang, localeCode, LANGS } from './i18n.js'
 
 // Traduction des catégories et régions (les clés internes restent en français)
 const tcat = (c) => t('cat.' + c)
@@ -11,15 +11,43 @@ const tbattype = (ty) => t('battype.' + ty)
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const BATS = [
-  { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM', eur: 110  },
-  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM', eur: 180  },
-  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM', eur: 230  },
-  { ah: 150, v: 12, label: '150 Ah 12V', type: 'GEL', eur: 320  },
-  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI',  eur: 550  },
-  { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI',  eur: 850  },
+  // AGM 12V — batteries plomb AGM du marché
+  { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM', eur: 90   },
+  { ah: 70,  v: 12, label: '70 Ah 12V',  type: 'AGM', eur: 110  },
+  { ah: 80,  v: 12, label: '80 Ah 12V',  type: 'AGM', eur: 130  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM', eur: 160  },
+  { ah: 105, v: 12, label: '105 Ah 12V', type: 'AGM', eur: 175  },
+  { ah: 110, v: 12, label: '110 Ah 12V', type: 'AGM', eur: 185  },
+  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM', eur: 210  },
+  { ah: 130, v: 12, label: '130 Ah 12V', type: 'AGM', eur: 240  },
+  { ah: 140, v: 12, label: '140 Ah 12V', type: 'AGM', eur: 260  },
+  { ah: 180, v: 12, label: '180 Ah 12V', type: 'AGM', eur: 340  },
+  { ah: 200, v: 12, label: '200 Ah 12V', type: 'AGM', eur: 390  },
+  // GEL 12V — batteries plomb gel du marché
+  { ah: 75,  v: 12, label: '75 Ah 12V',  type: 'GEL', eur: 160  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'GEL', eur: 200  },
+  { ah: 120, v: 12, label: '120 Ah 12V', type: 'GEL', eur: 240  },
+  { ah: 150, v: 12, label: '150 Ah 12V', type: 'GEL', eur: 290  },
+  { ah: 200, v: 12, label: '200 Ah 12V', type: 'GEL', eur: 380  },
+  { ah: 250, v: 12, label: '250 Ah 12V', type: 'GEL', eur: 480  },
+  // Lithium 12V — batteries LiFePO4 du marché
+  { ah: 50,  v: 12, label: '50 Ah 12V',  type: 'LI',  eur: 250  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'LI',  eur: 380  },
+  { ah: 120, v: 12, label: '120 Ah 12V', type: 'LI',  eur: 450  },
+  { ah: 150, v: 12, label: '150 Ah 12V', type: 'LI',  eur: 520  },
+  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI',  eur: 650  },
+  { ah: 280, v: 12, label: '280 Ah 12V', type: 'LI',  eur: 850  },
+  { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI',  eur: 900  },
   { ah: 400, v: 12, label: '400 Ah 12V', type: 'LI',  eur: 1150 },
-  { ah: 200, v: 24, label: '200 Ah 24V', type: 'LI',  eur: 650  },
-  { ah: 400, v: 24, label: '400 Ah 24V', type: 'LI',  eur: 1300 },
+  { ah: 600, v: 12, label: '600 Ah 12V', type: 'LI',  eur: 1650 },
+  // Lithium 24V — batteries LiFePO4 24V
+  { ah: 50,  v: 24, label: '50 Ah 24V',  type: 'LI',  eur: 350  },
+  { ah: 100, v: 24, label: '100 Ah 24V', type: 'LI',  eur: 550  },
+  { ah: 150, v: 24, label: '150 Ah 24V', type: 'LI',  eur: 750  },
+  { ah: 200, v: 24, label: '200 Ah 24V', type: 'LI',  eur: 950  },
+  { ah: 280, v: 24, label: '280 Ah 24V', type: 'LI',  eur: 1250 },
+  { ah: 300, v: 24, label: '300 Ah 24V', type: 'LI',  eur: 1350 },
+  { ah: 400, v: 24, label: '400 Ah 24V', type: 'LI',  eur: 1700 },
 ]
 
 // Coûts indicatifs marché européen pour le calcul système
@@ -524,7 +552,7 @@ function buildAppRow(a) {
     <div class="arow has-modes${!a.on ? ' off' : ''}">
       <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
       <i class="${a.icon} ai"></i>
-      <span class="an" title="${a.n}">${a.n}</span>
+      <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
       <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
       <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
@@ -532,7 +560,7 @@ function buildAppRow(a) {
         ${a.modes.map((m, mi) => `
           <button class="modebtn${a.activeMode === mi ? ' on' : ''}" data-mode-id="${a.id}" data-mode-idx="${mi}">
             <span class="modew">${m.watts}W</span>
-            <span class="model">${m.label.length > 12 ? m.label.slice(0, 11) + '…' : m.label}</span>
+            <span class="model">${(l => l.length > 12 ? l.slice(0, 11) + '…' : l)(ta(m.label))}</span>
           </button>`).join('')}
       </div>
     </div>`
@@ -541,7 +569,7 @@ function buildAppRow(a) {
   <div class="arow two-row${!a.on ? ' off' : ''}">
     <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
     <i class="${a.icon} ai"></i>
-    <span class="an" title="${a.n}">${a.n}</span>
+    <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
     <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
     <div class="row-inputs">
@@ -768,7 +796,7 @@ function buildEnergyTab() {
       <div class="card">
         <div class="ct"><i class="ti ti-list"></i>${t('detail.title')}</div>
         <div class="bkdown">
-          ${breakdown.slice(0, 6).map(a => `<div class="bkrow"><span class="bkn">${a.n}</span><span class="bkv">${a.wh} Wh/j</span></div>`).join('')}
+          ${breakdown.slice(0, 6).map(a => `<div class="bkrow"><span class="bkn">${ta(a.n)}</span><span class="bkv">${a.wh} Wh/j</span></div>`).join('')}
           ${breakdown.length > 6 ? `<div class="bkrow"><span class="bkn">${t('detail.others', { n: breakdown.length - 6 })}</span><span class="bkv">${breakdown.slice(6).reduce((s, a) => s + a.wh, 0)} Wh/j</span></div>` : ''}
           <div class="bkrow"><span>${t('detail.totalConsumed')}</span><span class="bkv" style="color:var(--am)">${Math.round(cons)} Wh/j</span></div>
           <div class="bkrow"><span>${t('detail.solarProduction')}</span><span class="bkv" style="color:var(--so)">− ${Math.round(Math.min(solar, cons))} Wh/j</span></div>
@@ -849,9 +877,9 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
         ${S.apps.map(a => {
           const modeLabel = (a.modes && a.modes.length > 1) ? a.modes[a.activeMode ?? 0]?.label ?? '' : '—'
           return `<tr class="${!a.on ? 'off' : ''}">
-            <td>${a.n}${!a.on ? t('pr.disabled') : ''}</td>
+            <td>${ta(a.n)}${!a.on ? t('pr.disabled') : ''}</td>
             <td>${tcat(a.cat)}</td>
-            <td>${modeLabel}</td>
+            <td>${modeLabel ? ta(modeLabel) : '—'}</td>
             <td class="num">${a.w} W</td>
             <td class="num">${a.h} h</td>
             <td class="num">${a.on ? Math.round(a.w * a.h) : 0} Wh</td>
@@ -1323,7 +1351,7 @@ function buildModal() {
           ${localItems.map(item => `
             <div class="catitem" data-catalog="${CATALOG.indexOf(item)}">
               <div>
-                <div class="cin">${item.n}</div>
+                <div class="cin">${ta(item.n)}</div>
                 <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span></div>
               </div>
               <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
