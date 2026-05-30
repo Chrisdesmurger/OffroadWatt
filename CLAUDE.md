@@ -12,15 +12,20 @@ L'utilisateur configure :
 - ses **appareils consommateurs** (watts, heures/jour, multi-modes 12V/Gaz)
 - sa **banque de batteries** (Ah, voltage, nombre en parallèle, profondeur de décharge)
 - ses **panneaux solaires** (Wc, nombre, rendement MPPT, zone géographique)
+- sa **recharge alternateur** (ampérage dédié, heures de roulage/jour)
 
 L'application calcule en temps réel :
 - la consommation totale en **Wh/jour**
-- la production solaire en **Wh/jour**
+- la production solaire + alternateur en **Wh/jour**
 - le déficit journalier résiduel
-- l'**autonomie en jours** (sans soleil)
+- l'**autonomie en jours** (batterie seule ou avec recharge)
 - des recommandations de batterie du marché
 
-Une fonctionnalité **Recherche IA** (Anthropic Claude API via Edge Function Vercel) permet de trouver des composants réels avec leur consommation exacte. Les résultats sont sauvegardés dans un **catalogue partagé Supabase**.
+Fonctionnalités complémentaires :
+- **Recherche IA** (Anthropic Claude API via Edge Function Vercel) — trouve des composants réels avec consommation exacte, enrichit le catalogue Supabase
+- **Catalogue fusionné** — le modal Catalogue du dashboard affiche les presets locaux ET les items du catalogue Supabase IA
+- **Export PDF** — rapport A4 imprimable via `window.print()`
+- **Auth Supabase** — Magic Link email + Google OAuth, configurations sauvegardées en base par utilisateur
 
 ---
 
@@ -36,9 +41,9 @@ Une fonctionnalité **Recherche IA** (Anthropic Claude API via Edge Function Ver
 | Déploiement | **Vercel** (buildCommand: `npm run build`, output: `dist/`) |
 | API IA | **Anthropic Claude API** (`claude-haiku-4-5-20251001`) via Edge Function |
 | Base de données | **Supabase** `ofjpskrjlwfebaqomijm` (eu-west-3 / Paris) |
+| Auth | **Supabase Auth** — Magic Link + Google OAuth |
+| SDK Supabase | `@supabase/supabase-js` ^2.49.0 (runtime dependency) |
 | Node.js | `20.x` (fixé dans `package.json` engines) |
-
-**Aucune dépendance runtime** — uniquement `vite` en devDependency.
 
 ---
 
@@ -46,12 +51,12 @@ Une fonctionnalité **Recherche IA** (Anthropic Claude API via Edge Function Ver
 
 ```
 OffroadWatt/
-├── index.html          ← HTML shell + tout le CSS (~200 lignes)
+├── index.html          ← HTML shell + tout le CSS (~280 lignes)
 ├── src/
-│   └── main.js         ← Toute la logique applicative (~750 lignes)
+│   └── main.js         ← Toute la logique applicative (~1150 lignes)
 ├── api/
 │   └── search.js       ← Vercel Edge Function — proxy Anthropic + streaming SSE
-├── package.json        ← { "vite": "^5.4.0" }, engines: node 20.x
+├── package.json        ← vite + @supabase/supabase-js, engines: node 20.x
 ├── vite.config.js      ← Config minimale (root: '.', outDir: 'dist')
 ├── vercel.json         ← buildCommand + outputDirectory + Edge Function config
 ├── .gitignore          ← node_modules/, dist/, .env.local
@@ -84,19 +89,31 @@ let S = {
   batNb: 1,                 // batteries en parallèle
   dod: 0.8,                 // profondeur de décharge
   solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
+  altOn: false, altAmps: 20, altHours: 2,   // recharge alternateur
   aiQuery: '',
   aiResults: [],            // merge catalogue + online
   aiCatalogResults: [],     // résultats depuis Supabase
   aiOnlineResults: [],      // résultats nouveaux depuis l'API
   aiLoading: false,
   aiError: null,
-  modal: null,
+  modal: null,              // { type: 'auth'|'auth-sent'|'save'|'configs'|'catalog'|'custom', ...data }
   tab: 'energy',            // onglet par défaut
   catFilter: 'Tout',
+  user: null,               // { id, email, plan: 'free'|'pro' }
+  userConfigs: [],          // [{id, name, created_at, updated_at}]
+  authLoading: false,
+  saveLoading: false,
 }
 ```
 
-### 4.3 Multi-modes appareils
+### 4.3 Constante alternateur
+
+```js
+const ALT_EFF = 0.7  // rendement câbles + régulateur
+// Wh alternateur/jour = altAmps × bat.v × altHours × ALT_EFF
+```
+
+### 4.4 Multi-modes appareils
 
 Les appareils issus de la recherche IA peuvent avoir plusieurs modes de consommation :
 
@@ -113,19 +130,25 @@ Les appareils issus de la recherche IA peuvent avoir plusieurs modes de consomma
 }
 ```
 
-Le switch de mode se fait **directement dans la carte du dashboard** via des boutons inline. Changer de mode met à jour `w` et recalcule l'autonomie en temps réel.
+Layout dans le dashboard — **2 lignes** :
+- Ligne 1 : toggle · icône · nom · `h/j` input · Wh · supprimer
+- Ligne 2 : boutons de mode compacts (`watts en gras` + label court)
 
-### 4.4 Fonctions de rendu principales
+Changer de mode met à jour `w` et recalcule l'autonomie en temps réel.
+
+### 4.5 Fonctions de rendu principales
 
 | Fonction | Rôle |
 |---|---|
 | `buildEnergyTab()` | Dashboard principal — layout 3 colonnes |
-| `buildAppsCard()` | Carte appareils avec `buildAppRow()` pour le multi-modes |
-| `buildAITab()` | Recherche IA — sections catalogue Supabase + résultats en ligne |
+| `buildAppRow(a)` | Ligne appareil — gère regular et multi-modes (2 layouts) |
+| `buildAppsCard()` | Carte appareils avec filtres catégorie |
+| `buildPrintReport(...)` | Rapport PDF caché, visible uniquement à l'impression |
+| `buildAITab()` | Recherche IA — quota, sections catalogue + résultats en ligne |
 | `buildAIResultCard(r, i, source)` | Card résultat avec badge 'catalog' ou 'online' |
-| `buildAppsTab()` | Onglet secondaire — délègue à `buildAppsCard()` |
+| `buildModal()` | Dispatch vers auth / auth-sent / save / configs / catalog / custom |
 
-### 4.5 Navigation
+### 4.6 Navigation
 
 ```
 Onglet 1 : Dashboard (energy) ← onglet par défaut
@@ -158,14 +181,15 @@ export const config = { runtime: 'edge' }  // Vercel Edge Runtime
 
 ---
 
-## 6. Catalogue Supabase
+## 6. Supabase
 
 **Projet :** `ofjpskrjlwfebaqomijm` — OffroadWatt — eu-west-3 (Paris)
 **URL :** `https://ofjpskrjlwfebaqomijm.supabase.co`
-**Clé anon publique :** dans `src/main.js` constants `SB_URL` / `SB_KEY`
+**Clé anon publique :** `SB_KEY` dans `src/main.js`
 
-### Table `equipment_catalog`
+### Tables
 
+#### `equipment_catalog` (catalogue communautaire)
 ```sql
 id uuid primary key default gen_random_uuid()
 name text not null
@@ -181,20 +205,84 @@ created_at timestamptz
 updated_at timestamptz
 unique (name, brand)
 ```
-
+RLS : lecture + insertion publiques anonymes.
 Index full-text PostgreSQL `tsvector` français sur name+brand+type+description.
-RLS : lecture + insertion publiques anonymes (catalogue communautaire).
 
-### Flux de recherche
+#### `profiles` (utilisateurs)
+```sql
+id uuid primary key references auth.users(id)
+email text
+plan text default 'free'   -- 'free' | 'pro'
+created_at timestamptz
+```
+RLS : chaque user voit/modifie uniquement son profil.
+Trigger `on_auth_user_created` → insère automatiquement à l'inscription.
 
-1. `searchCatalog(q)` → full-text Supabase, résultats instantanés (badge vert "Catalogue")
+#### `user_configs` (configurations sauvegardées)
+```sql
+id uuid primary key default gen_random_uuid()
+user_id uuid references profiles(id)
+name text not null
+state jsonb not null       -- sérialisation complète de S (apps, bat, sol, alt...)
+created_at timestamptz
+updated_at timestamptz
+```
+RLS : chaque user voit/modifie uniquement ses configs.
+
+### Flux catalogue IA
+
+1. `searchCatalog(q)` → full-text Supabase, résultats instantanés (badge vert)
 2. Appel `api/search` en streaming → Anthropic haiku
-3. Nouveaux résultats upsertés dans Supabase automatiquement (badge jaune "Nouveau")
-4. Cache mémoire 60s pour éviter les requêtes répétées dans la session
+3. Nouveaux résultats upsertés dans Supabase automatiquement (badge jaune)
+4. Cache mémoire `_catalogCache` 60s pour éviter les requêtes répétées
+5. `sbTypeToCat(type)` → mappe le champ `type` Supabase vers une catégorie locale
+
+### Catalogue dans le modal Dashboard
+
+Le modal "Catalogue d'appareils" (bouton dans la carte Appareils) affiche **deux sources** :
+- Section 1 : presets locaux (33 items hardcodés dans `CATALOG`)
+- Section 2 : items Supabase filtrés via `sbTypeToCat()` avec badge teal "Catalogue IA"
+
+### Auth Supabase
+
+```js
+const supabase = createClient(SB_URL, SB_KEY)  // @supabase/supabase-js v2
+```
+
+- **Magic Link** : `supabase.auth.signInWithOtp({ email })`
+- **Google OAuth** : `supabase.auth.signInWithOAuth({ provider: 'google' })`
+  - Nécessite configuration manuelle dans Supabase Dashboard → Auth → Providers → Google
+  - Callback URL : `https://ofjpskrjlwfebaqomijm.supabase.co/auth/v1/callback`
+- **Session** : gérée automatiquement par le SDK (localStorage)
+- `initAuth()` appelé au boot → vérifie la session existante
+
+### Freemium
+
+| Feature | Free | Pro |
+|---|---|---|
+| Configs sauvegardées | 1 (écrasement) | Illimitées |
+| Recherches IA / jour | 5 (localStorage) | Illimitées |
+| Export PDF | ✓ | ✓ |
+
+Le plan est stocké dans `profiles.plan`. La mise à jour vers Pro (via Stripe, à implémenter) modifie ce champ.
 
 ---
 
-## 7. Configuration Vercel
+## 7. Export PDF
+
+Bouton "Exporter en PDF" en bas de la colonne bilan → `window.print()`.
+
+Un `<div class="print-report">` caché contient le rapport complet :
+- En-tête avec logo + type de véhicule + date
+- Tableau des appareils (nom, catégorie, mode actif, W, h/j, Wh)
+- Cards batteries / solaire / alternateur côte à côte
+- Tableau bilan (consommation, production, déficit, autonomie)
+
+`@media print` dans `index.html` : masque toute l'UI, affiche uniquement `.print-report`.
+
+---
+
+## 8. Configuration Vercel
 
 ```json
 {
@@ -212,10 +300,10 @@ RLS : lecture + insertion publiques anonymes (catalogue communautaire).
 
 ---
 
-## 8. Commandes
+## 9. Commandes
 
 ```bash
-npm install       # installer les dépendances (vite)
+npm install       # installer les dépendances (vite + @supabase/supabase-js)
 npm run dev       # serveur dev → http://localhost:5173
 npm run build     # build production → dist/
 npm run preview   # prévisualiser le build
@@ -223,51 +311,54 @@ npm run preview   # prévisualiser le build
 
 ---
 
-## 9. Ce qui fonctionne
+## 10. Ce qui fonctionne
 
 - [x] **Dashboard** — onglet principal, layout 3 colonnes (appareils | batteries+solaire | bilan)
 - [x] **Appareils** — toggle, édition watts/heures, filtre catégorie, catalogue 33 items, custom
-- [x] **Multi-modes** — appareils avec modes 12V/Gaz switchables inline dans le dashboard
+- [x] **Multi-modes** — layout 2 lignes propre, switch inline, h/j toujours éditable
 - [x] **Batteries** — 9 modèles, parallèle 1-10, DoD slider, résumé Wh exact
 - [x] **Solaire** — 8 puissances, rendement MPPT, 41 zones géographiques mondiales
-- [x] **Bilan** — autonomie jours/heures, couverture solaire %, comparatif batteries marché
+- [x] **Recharge alternateur** — ampérage + heures roulage, rendement 70%, intégré au bilan
+- [x] **Bilan** — autonomie jours/heures, couverture %, comparatif batteries marché
+- [x] **Export PDF** — rapport A4 complet via print CSS, bouton dans la colonne bilan
 - [x] **Recherche IA** — Edge Function streaming, haiku model, résultats en ~3-5s
-- [x] **Catalogue Supabase** — partagé communautaire, enrichissement automatique par les recherches
+- [x] **Catalogue Supabase** — communautaire, enrichissement automatique par les recherches
+- [x] **Catalogue fusionné** — modal Dashboard affiche presets locaux + items IA Supabase
+- [x] **Auth Supabase** — Magic Link + Google OAuth, bouton dans le header
+- [x] **Sauvegarde configs** — par utilisateur en base, chargement multi-appareils
+- [x] **Rate limit IA** — 5 recherches/jour pour free (localStorage), illimité pour Pro
 - [x] **Build Vite** — déployable sur Vercel
 
 ---
 
-## 10. Repo GitHub
+## 11. Repo GitHub
 
 - **URL** : https://github.com/Chrisdesmurger/OffroadWatt
 - **Branche principale** : `main`
 
 ---
 
-## 11. Points d'attention
+## 12. Points d'attention
 
 1. **Pas de framework** — `render()` réécrit l'innerHTML à chaque `set()`. Pour scaler, migrer vers React.
-2. **État non persistant** — rafraîchir remet à zéro. Implémenter `localStorage` pour la config utilisateur.
-3. **Catalogue communautaire** — pas d'auth. Si besoin de contrôle, ajouter auth Supabase + RLS par user.
-4. **Edge Function** — Web APIs uniquement (pas de `require`, pas de `https` Node.js). `fetch` natif.
+2. **`_catalogCache`** — variable module-level, perdu au refresh. Rechargé au boot via `loadCatalogFromDB()`.
+3. **Rate limit IA** — implémenté en localStorage (client-side). Facile à contourner. Passer server-side avec Supabase Edge Function si nécessaire.
+4. **Google OAuth** — nécessite configuration manuelle dans Supabase Dashboard + Google Cloud Console.
 5. **`vtype`** — stocké en state mais pas encore utilisé dans les calculs ni les presets d'appareils.
-6. **Streaming timeout** — Edge Function avec streaming contourne la limite 10s Vercel plan gratuit.
+6. **Edge Function** — Web APIs uniquement (pas de `require`, pas de `https` Node.js). `fetch` natif.
+7. **`sbTypeToCat()`** — mapping regex `type Supabase → catégorie locale`. Si un type ne matche pas, l'item n'apparaît dans aucun filtre. À enrichir si besoin.
 
 ---
 
-## 12. Pistes d'amélioration
+## 13. Pistes d'amélioration
 
 ### Court terme
-- [ ] **Persistance localStorage** — sauvegarder la config `apps` + batteries + solaire entre sessions
-- [ ] **vtype actif** — ajuster presets et calculs selon camping-car / van / caravane
 - [ ] **Partage de configuration** — URL avec state encodé en base64
-
-### Priorités validées — prochaine session (dans l'ordre)
-- [ ] **🔴 1. Source recharge alternateur** — ajouter heures roulage/jour + ampérage alternateur dans le bilan, déduire les Wh rechargés du déficit batterie
-- [ ] **🔴 2. Export PDF** — rapport de bilan complet (print CSS ou jsPDF) : appareils, batteries, solaire, autonomie
-- [ ] **🔴 3. Auth utilisateur Supabase** — Supabase Auth (Google + email), configs personnelles sauvegardées en base et récupérables sur tout appareil
+- [ ] **`vtype` actif** — ajuster presets et calculs selon camping-car / van / caravane
+- [ ] **Rate limit IA server-side** — Supabase Edge Function pour enforcement côté serveur
 
 ### Moyen terme
+- [ ] **Stripe** — paiement Pro (~4,99€/mois), webhook → update `profiles.plan`
 - [ ] **Migration React + TypeScript** — composants `ApplianceManager`, `BatteryConfig`, etc.
 
 ### Long terme
