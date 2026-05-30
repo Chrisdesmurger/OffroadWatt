@@ -197,6 +197,13 @@ const DICT = {
     'refine.error':    'Could not retrieve consumption data. Try again.',
     'refine.tooltip':  'Retrieve realistic low/high consumption via AI',
 
+    // Season profile
+    'season.label':   'Season',
+    'season.summer':  '☀️ Summer',
+    'season.winter':  '❄️ Winter',
+    'season.hint':    'Auto-switches AI-refined appliances',
+    'season.noApp':   'Use Refine on an appliance to enable seasonal switching',
+
     // Deploy tab
     'deploy.title': 'Roadmap — Deployment on Vercel',
     'deploy.subtitle': 'This project is a real Vite project. Here are the steps to run it locally and in production.',
@@ -488,6 +495,12 @@ const DICT = {
     'refine.error':    'No se pudieron obtener los datos. Inténtalo de nuevo.',
     'refine.tooltip':  'Obtener consumo real bajo/alto con IA',
 
+    'season.label':   'Temporada',
+    'season.summer':  '☀️ Verano',
+    'season.winter':  '❄️ Invierno',
+    'season.hint':    'Cambia automáticamente los aparatos refinados por IA',
+    'season.noApp':   'Usa Refinar en un aparato para activar el cambio estacional',
+
     'deploy.title': 'Hoja de ruta — Despliegue en Vercel',
     'deploy.subtitle': 'Este proyecto es un proyecto Vite real. Estos son los pasos para ejecutarlo localmente y en producción.',
     'deploy.phase': 'Fase',
@@ -768,6 +781,12 @@ const DICT = {
     'refine.high':     'Haut (été)',
     'refine.error':    'Impossible de récupérer les données. Réessaie.',
     'refine.tooltip':  'Obtenir conso réelle basse/haute via IA',
+
+    'season.label':   'Saison',
+    'season.summer':  '☀️ Été',
+    'season.winter':  '❄️ Hiver',
+    'season.hint':    'Bascule automatiquement les appareils raffinés par IA',
+    'season.noApp':   'Utilise Affiner sur un appareil pour activer le basculement saisonnier',
 
     'deploy.title': 'Feuille de route — Déploiement sur Vercel',
     'deploy.subtitle': 'Ce projet est un vrai projet Vite. Voici les étapes pour le faire tourner en local et en production.',

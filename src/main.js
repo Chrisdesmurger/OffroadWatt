@@ -422,16 +422,17 @@ async function refineWithAI(appId) {
       }
     }
 
-    // Apply modes to the appliance
+    // Apply modes to the appliance (tag with season for global toggle)
     const confirmed = (cached?.confirmed_count ?? 0) >= 2 || note === 'verified'
     const newModes = [
-      { label: t('refine.low'),  watts: Math.round(lowW)  },
-      { label: t('refine.high'), watts: Math.round(highW) },
+      { label: t('refine.low'),  watts: Math.round(lowW),  season: 'winter' },
+      { label: t('refine.high'), watts: Math.round(highW), season: 'summer' },
     ]
+    const seasonIdx = S.season === 'summer' ? 1 : 0
     set({
       refiningId: null,
       apps: S.apps.map(a => a.id === appId
-        ? { ...a, modes: newModes, activeMode: 0, w: Math.round(lowW), h: hours, sbConfirmed: confirmed }
+        ? { ...a, modes: newModes, activeMode: seasonIdx, w: newModes[seasonIdx].watts, h: hours, sbConfirmed: confirmed }
         : a
       ),
     })
@@ -477,6 +478,7 @@ let S = {
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false,
   refiningId: null,
+  season: 'summer',
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
@@ -498,6 +500,7 @@ function persistState() {
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
       hookupCost: S.hookupCost,
+      season: S.season,
       scenarios: S.scenarios,
     }
     localStorage.setItem(LS_KEY, JSON.stringify(snap))
@@ -528,6 +531,7 @@ function loadPersistedState() {
       altHours: p.altHours ?? S.altHours,
       catFilter: p.catFilter ?? S.catFilter,
       hookupCost: p.hookupCost ?? S.hookupCost,
+      season: p.season ?? S.season,
       scenarios: p.scenarios ?? S.scenarios,
     })
   } catch (_) {}
@@ -650,6 +654,29 @@ function buildAppsTab() {
 
 // ── ENERGY TAB ───────────────────────────────────────────────────────────────
 
+// Auto-switch appliances that have season-tagged modes to the given season
+function applySeasonToApps(season, apps) {
+  return apps.map(a => {
+    if (!a.modes) return a
+    const idx = a.modes.findIndex(m => m.season === season)
+    if (idx === -1) return a
+    return { ...a, activeMode: idx, w: a.modes[idx].watts }
+  })
+}
+
+function buildSeasonBar() {
+  const hasRefined = S.apps.some(a => a.modes && a.modes.some(m => m.season))
+  return `
+  <div class="season-bar">
+    <span class="season-lbl"><i class="ti ti-sun-moon" style="font-size:12px"></i>${t('season.label')}</span>
+    <div class="season-btns">
+      <button class="season-btn summer${S.season === 'summer' ? ' on' : ''}" data-season="summer">${t('season.summer')}</button>
+      <button class="season-btn winter${S.season === 'winter' ? ' on' : ''}" data-season="winter">${t('season.winter')}</button>
+    </div>
+    <span class="season-hint">${hasRefined ? t('season.hint') : t('season.noApp')}</span>
+  </div>`
+}
+
 function buildAppRow(a) {
   const hasModes   = a.modes && a.modes.length > 1
   const isRefining = S.refiningId === a.id
@@ -757,6 +784,7 @@ function buildEnergyTab() {
   })()
 
   return `
+  ${buildSeasonBar()}
   <div class="col3">
     <div style="display:flex;flex-direction:column;gap:10px">
       ${buildAppsCard()}
@@ -1604,6 +1632,11 @@ function bindEvents() {
       const newW = a.modes[mi]?.watts ?? a.w
       return { ...a, activeMode: mi, w: newW }
     })})
+  }))
+  // Season profile toggle
+  document.querySelectorAll('[data-season]').forEach(el => el.addEventListener('click', () => {
+    const season = el.dataset.season
+    set({ season, apps: applySeasonToApps(season, S.apps) })
   }))
   // Refine with AI
   document.querySelectorAll('[data-refine]').forEach(el => el.addEventListener('click', () => refineWithAI(parseInt(el.dataset.refine))))
