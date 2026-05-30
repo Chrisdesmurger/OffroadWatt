@@ -504,29 +504,46 @@ function buildAppRow(a) {
     </div>`
   }
   return `
-  <div class="arow${!a.on ? ' off' : ''}">
+  <div class="arow two-row${!a.on ? ' off' : ''}">
     <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
     <i class="${a.icon} ai"></i>
     <span class="an" title="${a.n}">${a.n}</span>
-    <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-    <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
     <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
+    <div class="row-inputs">
+      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
+    </div>
   </div>`
 }
 
 function buildAppsCard() {
-  const filtered = S.catFilter === 'Tout' ? S.apps : S.apps.filter(a => a.cat === S.catFilter)
   const total = S.apps.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
   const active = S.apps.filter(a => a.on)
+  // Liste unique triée automatiquement par sous-catégorie (ordre = CATS hors 'Tout')
+  const order = CATS.filter(c => c !== 'Tout')
+  const cats = [...new Set(S.apps.map(a => a.cat))]
+    .sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b)
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
+    })
+  const groups = cats.map(cat => {
+    const items = S.apps.filter(a => a.cat === cat)
+    const gWh = items.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
+    return `
+      <div class="appgroup">
+        <div class="appgroup-hd">
+          <span><i class="ti ${CATICONS[cat] || 'ti-plug'}" style="font-size:10px;margin-right:4px"></i>${cat}</span>
+          <span class="appgroup-wh">${Math.round(gWh)} Wh</span>
+        </div>
+        ${items.map(a => buildAppRow(a)).join('')}
+      </div>`
+  }).join('')
   return `
   <div class="card">
     <div class="ct"><i class="ti ti-plug"></i>Appareils consommateurs</div>
-    <div class="catf">
-      ${CATS.map(c => `<div class="cf${S.catFilter === c ? ' on' : ''}" data-cat="${c}"><i class="ti ${CATICONS[c]}" style="font-size:10px;margin-right:3px"></i>${c}</div>`).join('')}
-    </div>
     <div class="applist">
-      ${filtered.map(a => buildAppRow(a)).join('')}
+      ${groups}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
       <button class="addbtn" style="flex:1;min-width:140px" id="open-catalog"><i class="ti ti-book"></i>Catalogue</button>
