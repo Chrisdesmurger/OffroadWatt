@@ -177,7 +177,35 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .modebtn{background:var(--s3);border:1px solid var(--b1);border-radius:3px;color:var(--t2);font-size:10px;cursor:pointer;padding:3px 7px;display:flex;align-items:center;gap:4px;transition:all .1s;font-family:var(--sans)}
 .modebtn:hover{border-color:var(--b2);color:var(--t1)}.modebtn.on{border-color:var(--am);background:rgba(240,160,48,.08);color:var(--am)}
 .modew{font-family:var(--mono);font-size:11px;font-weight:700}
-.pdf-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;background:transparent;border:1px solid var(--b2);border-radius:var(--r);color:var(--t2);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;transition:all .15s;margin-top:2px}
+
+/* ── Auth button ── */
+.auth-btn{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:6px 10px;color:var(--t2);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.auth-btn:hover{border-color:var(--am2);color:var(--am)}.auth-btn.on{border-color:var(--te2);color:var(--te);background:rgba(45,212,191,.06)}
+.pro-badge{background:rgba(167,139,250,.15);border:1px solid #4c3680;color:var(--pu);font-size:8px;padding:1px 5px;border-radius:2px;font-family:var(--mono)}
+.plan-pill{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px}.plan-pill.free{background:var(--s3);color:var(--t3);border:1px solid var(--b1)}.plan-pill.pro{background:rgba(167,139,250,.12);color:var(--pu);border:1px solid #4c3680}
+
+/* ── Auth modal ── */
+.google-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:9px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;cursor:pointer;transition:all .15s;margin-bottom:10px}
+.google-btn:hover{border-color:var(--b2);background:var(--s3)}
+.auth-divider{text-align:center;position:relative;margin:10px 0;color:var(--t3);font-size:10px}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--b1)}
+.auth-divider span{position:relative;background:var(--s1);padding:0 8px}
+
+/* ── Configs modal ── */
+.config-item{display:flex;justify-content:space-between;align-items:center;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-bottom:5px;gap:8px}
+.ci-name{font-size:12px;font-weight:500;color:var(--t1)}.ci-date{font-size:10px;color:var(--t3);margin-top:1px}
+
+/* ── Save config button ── */
+.save-cfg-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;background:rgba(45,212,191,.05);border:1px solid var(--te3);border-radius:var(--r);color:var(--te);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;transition:all .15s;margin-top:2px}
+.save-cfg-btn:hover{background:rgba(45,212,191,.1);border-color:var(--te2)}.save-count{background:var(--te3);color:var(--te);font-size:9px;padding:1px 5px;border-radius:2px;margin-left:2px}
+
+/* ── AI quota ── */
+.ai-quota{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:6px 10px;margin-bottom:8px}
+.ai-quota.depleted{color:var(--am);border-color:var(--am3);background:rgba(240,160,48,.05)}
+.quota-cta{background:none;border:none;color:var(--am);text-decoration:underline;cursor:pointer;font-size:11px;padding:0}
+
+/* ── Save / PDF buttons ── */
+.pdf-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;background:transparent;border:1px solid var(--b2);border-radius:var(--r);color:var(--t2);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;transition:all .15s;margin-top:4px}
 .pdf-btn:hover{border-color:var(--am2);color:var(--am);background:rgba(240,160,48,.05)}
 .pdf-btn i{font-size:14px}
 .print-report{display:none}
