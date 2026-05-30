@@ -5,15 +5,26 @@ import { createClient } from '@supabase/supabase-js'
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const BATS = [
-  { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM' },
-  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM' },
-  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM' },
-  { ah: 150, v: 12, label: '150 Ah 12V', type: 'GEL' },
-  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI'  },
-  { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI'  },
-  { ah: 400, v: 12, label: '400 Ah 12V', type: 'LI'  },
-  { ah: 200, v: 24, label: '200 Ah 24V', type: 'LI'  },
-  { ah: 400, v: 24, label: '400 Ah 24V', type: 'LI'  },
+  { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM', eur: 110  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM', eur: 180  },
+  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM', eur: 230  },
+  { ah: 150, v: 12, label: '150 Ah 12V', type: 'GEL', eur: 320  },
+  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI',  eur: 550  },
+  { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI',  eur: 850  },
+  { ah: 400, v: 12, label: '400 Ah 12V', type: 'LI',  eur: 1150 },
+  { ah: 200, v: 24, label: '200 Ah 24V', type: 'LI',  eur: 650  },
+  { ah: 400, v: 24, label: '400 Ah 24V', type: 'LI',  eur: 1300 },
+]
+
+// Coûts indicatifs marché européen pour le calcul système
+const PANEL_EUR_PER_WC = 1.2  // panneau + fixation
+const ALT_EUR_PER_A    = 8    // chargeur DC-DC (B2B) selon ampérage
+
+// Types de batteries pour le filtre (ordre d'affichage)
+const BAT_TYPES = [
+  { id: 'AGM', label: 'AGM' },
+  { id: 'GEL', label: 'Gel' },
+  { id: 'LI',  label: 'Lithium' },
 ]
 
 const DOD = { AGM: 0.5, GEL: 0.5, LI: 0.8 }
@@ -187,8 +198,8 @@ async function saveCurrentConfig(name) {
   set({ saveLoading: true })
 
   const stateToSave = {
-    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod,
-    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }
 
@@ -298,45 +309,139 @@ function sbTypeToCat(type) {
 let S = {
   vtype: 'campervan',
   apps: [
-    { id: 1, n: 'Réfrigérateur 12V',  icon: 'ti-fridge',         w: 45,  h: 24,   on: true,  cat: 'Cuisine'   },
-    { id: 2, n: 'Éclairage LED',       icon: 'ti-bulb',           w: 15,  h: 5,    on: true,  cat: 'Éclairage' },
-    { id: 3, n: 'Ventilateur 12V',     icon: 'ti-wind',           w: 20,  h: 8,    on: true,  cat: 'Confort'   },
-    { id: 4, n: 'Laptop',              icon: 'ti-device-laptop',  w: 65,  h: 4,    on: true,  cat: 'Tech'      },
-    { id: 5, n: 'Smartphone ×2',       icon: 'ti-device-mobile',  w: 15,  h: 3,    on: true,  cat: 'Tech'      },
-    { id: 6, n: 'Pompe à eau',         icon: 'ti-droplet',        w: 50,  h: 0.5,  on: false, cat: 'Eau'       },
-    { id: 7, n: 'Micro-ondes',         icon: 'ti-microwave',      w: 900, h: 0.25, on: false, cat: 'Cuisine'   },
-    { id: 8, n: 'Routeur 4G',          icon: 'ti-wifi',           w: 10,  h: 24,   on: false, cat: 'Tech'      },
-    { id: 9, n: 'Convertisseur',       icon: 'ti-plug',           w: 30,  h: 24,   on: false, cat: 'Système'   },
+    { id: 4,             n: 'Laptop',                   icon: 'ti-device-laptop',  w: 65,  h: 4,    on: true, cat: 'Tech'      },
+    { id: 5,             n: 'Smartphone ×2',            icon: 'ti-device-mobile',  w: 15,  h: 3,    on: true, cat: 'Tech'      },
+    { id: 6,             n: 'Pompe à eau',              icon: 'ti-droplet',        w: 50,  h: 0.5,  on: true, cat: 'Eau'       },
+    { id: 7,             n: 'Micro-ondes',              icon: 'ti-microwave',      w: 900, h: 0.25, on: true, cat: 'Cuisine'   },
+    { id: 8,             n: 'Routeur 4G',               icon: 'ti-wifi',           w: 10,  h: 24,   on: true, cat: 'Tech'      },
+    { id: 1780115079731, n: 'Dometic RDC 70 (Dometic)', icon: 'ti-bowl-spoon',     w: 45,  h: 24,   on: true, cat: 'Cuisine',
+      modes: [
+        { label: '12V veille/non-refroidissement',    watts: 5  },
+        { label: 'Compresseur 12V refroidissement',   watts: 45 },
+        { label: 'Chauffage anti-condensation',       watts: 15 },
+      ], activeMode: 1 },
+    { id: 1780115116303, n: 'Spots LED encastrés ×4',  icon: 'ti-lamp',            w: 20,  h: 4,    on: true, cat: 'Éclairage' },
+    { id: 1780115130898, n: 'Éclairage LED bande 5m',  icon: 'ti-bulb',            w: 12,  h: 5,    on: true, cat: 'Éclairage' },
+    { id: 1780115154949, n: 'Truma Combi 4 (Truma)',   icon: 'ti-temperature',     w: 15,  h: 24,   on: true, cat: 'Confort',
+      modes: [
+        { label: 'Veille électronique',              watts: 3  },
+        { label: 'Ventilateur min',                  watts: 8  },
+        { label: 'Ventilateur max',                  watts: 25 },
+        { label: 'Pompe circulation eau chaude',     watts: 15 },
+      ], activeMode: 3 },
+    { id: 1780115201375, n: 'Régulateur MPPT',         icon: 'ti-solar-panel',     w: 5,   h: 24,   on: true, cat: 'Système'   },
+    { id: 1780115206090, n: 'BMS batterie Lithium',    icon: 'ti-battery-charging',w: 3,   h: 24,   on: true, cat: 'Système'   },
   ],
-  bat: BATS[4], batNb: 1, dod: 0.8,
-  solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3, customSunH: '',
-  altOn: false, altAmps: 20, altHours: 2,
+  bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
+  solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
+  altOn: true, altAmps: 20, altHours: 2,
   aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false,
+  scenarios: { A: null, B: null }, hookupCost: 4,
+}
+
+// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+
+const LS_KEY = 'ow_state_v1'
+
+function persistState() {
+  try {
+    const snap = {
+      vtype: S.vtype,
+      apps: S.apps,
+      bat: { ah: S.bat.ah, v: S.bat.v },
+      batNb: S.batNb,
+      dod: S.dod,
+      batType: S.batType,
+      solOn: S.solOn,
+      solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+      altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+      catFilter: S.catFilter,
+      hookupCost: S.hookupCost,
+      scenarios: S.scenarios,
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(snap))
+  } catch (_) {}
+}
+
+function loadPersistedState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    if (!raw) return
+    const p = JSON.parse(raw)
+    const bat = BATS.find(b => b.ah === p.bat?.ah && b.v === p.bat?.v) || S.bat
+    Object.assign(S, {
+      vtype: p.vtype || S.vtype,
+      apps: Array.isArray(p.apps) && p.apps.length ? p.apps : S.apps,
+      bat,
+      batNb: p.batNb ?? S.batNb,
+      dod: p.dod ?? S.dod,
+      batType: p.batType ?? (bat ? bat.type : S.batType),
+      solOn: p.solOn ?? S.solOn,
+      solW: p.solW ?? S.solW,
+      solNb: p.solNb ?? S.solNb,
+      solEff: p.solEff ?? S.solEff,
+      sunIdx: p.sunIdx ?? S.sunIdx,
+      customSunH: p.customSunH ?? S.customSunH,
+      altOn: p.altOn ?? S.altOn,
+      altAmps: p.altAmps ?? S.altAmps,
+      altHours: p.altHours ?? S.altHours,
+      catFilter: p.catFilter ?? S.catFilter,
+      hookupCost: p.hookupCost ?? S.hookupCost,
+      scenarios: p.scenarios ?? S.scenarios,
+    })
+  } catch (_) {}
 }
 
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
-const set = (u) => { Object.assign(S, u); render() }
-const sunH = () => S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 4.5) : SUN_ZONES[S.sunIdx].h
+const set = (u) => { Object.assign(S, u); persistState(); render() }
+const sunHOf = (st) => st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
+const sunH = () => sunHOf(S)
 
 const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
 
-function calc() {
-  const active = S.apps.filter(a => a.on)
+function calc(st = S) {
+  const active = st.apps.filter(a => a.on)
   const cons = active.reduce((s, a) => s + a.w * a.h, 0)
-  const solar = S.solW * S.solNb * sunH() * S.solEff
-  const alt = S.altOn ? S.altAmps * S.bat.v * S.altHours * ALT_EFF : 0
+  const solar = st.solOn === false ? 0 : st.solW * st.solNb * sunHOf(st) * st.solEff
+  const alt = st.altOn ? st.altAmps * st.bat.v * st.altHours * ALT_EFF : 0
   const recharge = solar + alt
   const net = Math.max(0, cons - recharge)
-  const batWhUnit = S.bat.ah * S.bat.v
-  const batWhTotal = batWhUnit * S.batNb
-  const usable = batWhTotal * S.dod
+  const batWhUnit = st.bat.ah * st.bat.v
+  const batWhTotal = batWhUnit * st.batNb
+  const usable = batWhTotal * st.dod
   const autDays = net > 0 ? usable / net : Infinity
   const solCovPct = cons > 0 ? Math.min(100, recharge / cons * 100) : 100
   return { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
 }
+
+// Coût du système énergétique (batteries + solaire + alternateur)
+function systemCost(st = S) {
+  const batCost = (st.bat.eur || 0) * st.batNb
+  const solCost = st.solOn === false ? 0 : Math.round(st.solW * st.solNb * PANEL_EUR_PER_WC)
+  const altCost = st.altOn ? Math.round(st.altAmps * ALT_EUR_PER_A) : 0
+  return { batCost, solCost, altCost, total: batCost + solCost + altCost }
+}
+
+// Capture une copie figée de la configuration énergétique courante
+function snapshotState(label) {
+  const snap = JSON.parse(JSON.stringify({
+    vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+  }))
+  snap.label = label
+  return snap
+}
+
+function captureScenario(slot) {
+  const snap = snapshotState(slot === 'A' ? 'Setup A' : 'Setup B')
+  set({ scenarios: { ...S.scenarios, [slot]: snap }, tab: 'compare' })
+}
+
+const fmtDays = (d) => isFinite(d) ? (d < 1 ? (d * 24).toFixed(1) + ' h' : d.toFixed(1) + ' j') : '∞'
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
 
@@ -350,10 +455,11 @@ function buildHTML() {
     ${S.modal ? buildModal() : ''}
     ${buildHeader()}
     ${buildTabs()}
-    ${S.tab === 'apps'   ? buildAppsTab()   : ''}
-    ${S.tab === 'energy' ? buildEnergyTab() : ''}
-    ${S.tab === 'ai'     ? buildAITab()     : ''}
-    ${S.tab === 'deploy' ? buildDeployTab() : ''}
+    ${S.tab === 'apps'    ? buildAppsTab()    : ''}
+    ${S.tab === 'energy'  ? buildEnergyTab()  : ''}
+    ${S.tab === 'compare' ? buildCompareTab() : ''}
+    ${S.tab === 'ai'      ? buildAITab()      : ''}
+    ${S.tab === 'deploy'  ? buildDeployTab()  : ''}
   `
 }
 
@@ -388,7 +494,7 @@ function buildHeader() {
 function buildTabs() {
   return `
   <div class="tabs">
-    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
+    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['compare','ti-arrows-diff','Comparer'],['ai','ti-sparkles','Recherche IA'],['deploy','ti-rocket','Déploiement']].map(([k,ic,lb]) => `
       <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${lb}</div>`).join('')}
   </div>`
 }
@@ -422,29 +528,46 @@ function buildAppRow(a) {
     </div>`
   }
   return `
-  <div class="arow${!a.on ? ' off' : ''}">
+  <div class="arow two-row${!a.on ? ' off' : ''}">
     <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
     <i class="${a.icon} ai"></i>
     <span class="an" title="${a.n}">${a.n}</span>
-    <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-    <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
     <span class="wh">${a.on ? Math.round(a.w * a.h) : 0} Wh</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
+    <div class="row-inputs">
+      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>h/j</span></div>
+    </div>
   </div>`
 }
 
 function buildAppsCard() {
-  const filtered = S.catFilter === 'Tout' ? S.apps : S.apps.filter(a => a.cat === S.catFilter)
   const total = S.apps.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
   const active = S.apps.filter(a => a.on)
+  // Liste unique triée automatiquement par sous-catégorie (ordre = CATS hors 'Tout')
+  const order = CATS.filter(c => c !== 'Tout')
+  const cats = [...new Set(S.apps.map(a => a.cat))]
+    .sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b)
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
+    })
+  const groups = cats.map(cat => {
+    const items = S.apps.filter(a => a.cat === cat)
+    const gWh = items.filter(a => a.on).reduce((s, a) => s + a.w * a.h, 0)
+    return `
+      <div class="appgroup">
+        <div class="appgroup-hd">
+          <span><i class="ti ${CATICONS[cat] || 'ti-plug'}" style="font-size:10px;margin-right:4px"></i>${cat}</span>
+          <span class="appgroup-wh">${Math.round(gWh)} Wh</span>
+        </div>
+        ${items.map(a => buildAppRow(a)).join('')}
+      </div>`
+  }).join('')
   return `
   <div class="card">
     <div class="ct"><i class="ti ti-plug"></i>Appareils consommateurs</div>
-    <div class="catf">
-      ${CATS.map(c => `<div class="cf${S.catFilter === c ? ' on' : ''}" data-cat="${c}"><i class="ti ${CATICONS[c]}" style="font-size:10px;margin-right:3px"></i>${c}</div>`).join('')}
-    </div>
     <div class="applist">
-      ${filtered.map(a => buildAppRow(a)).join('')}
+      ${groups}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
       <button class="addbtn" style="flex:1;min-width:140px" id="open-catalog"><i class="ti ti-book"></i>Catalogue</button>
@@ -487,8 +610,11 @@ function buildEnergyTab() {
 
       <div class="card">
         <div class="ct"><i class="ti ti-battery-charging"></i>Banc de batteries</div>
+        <div class="bat-types">
+          ${BAT_TYPES.map(t => `<div class="btf${S.batType === t.id ? ' on' : ''}" data-btype="${t.id}">${t.label}</div>`).join('')}
+        </div>
         <div class="batgrid">
-          ${BATS.map((b, i) => `
+          ${BATS.map((b, i) => ({ b, i })).filter(({ b }) => b.type === S.batType).map(({ b, i }) => `
             <div class="bopt${S.bat.ah === b.ah && S.bat.v === b.v ? ' on' : ''}" data-bat="${i}">
               <div class="bah">${b.ah}Ah</div><div class="btype">${b.type} ${b.v}V</div>
             </div>`).join('')}
@@ -546,7 +672,10 @@ function buildEnergyTab() {
       </div>
 
       <div class="card">
-        <div class="ct sol"><i class="ti ti-sun"></i>Panneaux solaires</div>
+        <div class="ct sol"><i class="ti ti-sun"></i>Panneaux solaires
+          <button class="tog${S.solOn ? ' on' : ''}" id="sol-toggle" style="margin-left:auto"></button>
+        </div>
+        ${!S.solOn ? `<div style="font-size:12px;color:var(--t3);padding:6px 0">Activez si votre installation comporte des panneaux solaires.</div>` : `
         <div class="spgrid">
           ${PANELS.map(w => `<div class="spo${S.solW === w ? ' on' : ''}" data-panel="${w}"><div class="spw">${w}</div><div class="spl">Wc</div></div>`).join('')}
         </div>
@@ -576,7 +705,7 @@ function buildEnergyTab() {
           <div class="ss-item"><div class="ssn">${sunH()} h</div><div class="ssl">Soleil / jour</div></div>
           <div style="width:1px;background:var(--b1)"></div>
           <div class="ss-item"><div class="ssn">${Math.round(solar)} Wh</div><div class="ssl">Production / jour</div></div>
-        </div>
+        </div>`}
       </div>
 
     </div>
@@ -670,6 +799,12 @@ function buildEnergyTab() {
       <button class="pdf-btn" id="export-pdf" onclick="window.print()">
         <i class="ti ti-printer"></i> Exporter en PDF
       </button>
+
+      <div class="capture-row">
+        <span class="capture-lbl"><i class="ti ti-arrows-diff"></i> Comparer cette config :</span>
+        <button class="capture-btn${S.scenarios.A ? ' filled' : ''}" id="capture-a">Capturer en A</button>
+        <button class="capture-btn${S.scenarios.B ? ' filled' : ''}" id="capture-b">Capturer en B</button>
+      </div>
 
     </div>
   </div>
@@ -765,6 +900,205 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
   </div>
 
   <div class="pr-footer">Rapport généré par OffroadWatt — Calculateur d'autonomie électrique pour camping-car, van et caravane</div>`
+}
+
+// ── COMPARE TAB ──────────────────────────────────────────────────────────────
+
+// Résumé court d'un scénario (batterie + solaire + alternateur)
+function scenarioSummary(st) {
+  const parts = [
+    `${st.bat.ah}Ah ${st.bat.v}V ${st.bat.type}${st.batNb > 1 ? ` ×${st.batNb}` : ''}`,
+    `${st.solW * st.solNb} Wc solaire`,
+  ]
+  if (st.altOn) parts.push(`Alt ${st.altAmps}A`)
+  return parts.join(' · ')
+}
+
+// Ligne de comparaison avec delta coloré
+function cmpRow(label, vA, vB, fmt, opts = {}) {
+  const { higherBetter = true, delta = true, unit = '' } = opts
+  const dv = vB - vA
+  let deltaHtml = ''
+  if (delta && isFinite(dv) && dv !== 0) {
+    const good = higherBetter ? dv > 0 : dv < 0
+    const sign = dv > 0 ? '+' : ''
+    deltaHtml = `<span class="cmp-delta ${good ? 'up' : 'down'}">${sign}${fmt(dv)}${unit}</span>`
+  } else if (delta && (!isFinite(vA) || !isFinite(vB))) {
+    deltaHtml = `<span class="cmp-delta">—</span>`
+  }
+  return `
+  <tr>
+    <td class="cmp-lbl">${label}</td>
+    <td class="cmp-val">${fmt(vA)}${unit}</td>
+    <td class="cmp-val">${fmt(vB)}${unit}</td>
+    <td class="cmp-d">${deltaHtml}</td>
+  </tr>`
+}
+
+function buildCompareTab() {
+  const A = S.scenarios.A, B = S.scenarios.B
+  let printReport = ''
+
+  const slot = (key, snap) => snap
+    ? `<div class="cmp-slot filled">
+         <div class="cmp-slot-hd"><span class="cmp-tag">${key}</span> ${snap.label}
+           <button class="cmp-clear" data-clear-scenario="${key}" title="Vider"><i class="ti ti-x"></i></button>
+         </div>
+         <div class="cmp-slot-sum">${scenarioSummary(snap)}</div>
+       </div>`
+    : `<div class="cmp-slot empty">
+         <div class="cmp-slot-hd"><span class="cmp-tag empty">${key}</span> Aucun scénario</div>
+         <div class="cmp-slot-sum">Configurez le Dashboard puis cliquez « Capturer en ${key} ».</div>
+       </div>`
+
+  let body
+  if (!A || !B) {
+    body = `
+    <div class="cmp-empty">
+      <i class="ti ti-arrows-diff" style="font-size:30px;opacity:.25;display:block;margin-bottom:8px"></i>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:4px">Capturez deux configurations pour les comparer</div>
+      <div style="font-size:11px;color:var(--t3)">Construisez un setup dans le Dashboard, capturez-le en A,<br>modifiez-le (batterie, solaire…), puis capturez-le en B.</div>
+      <button class="capture-btn" id="goto-dashboard" style="margin-top:12px">→ Aller au Dashboard</button>
+    </div>`
+  } else {
+    const cA = calc(A), cB = calc(B)
+    const kA = systemCost(A), kB = systemCost(B)
+    const r0 = (n) => Math.round(n)
+    const surcout = kB.total - kA.total
+    const gainAut = (isFinite(cB.autDays) && isFinite(cA.autDays)) ? cB.autDays - cA.autDays : null
+    const coutParJour = (gainAut && gainAut > 0 && surcout > 0) ? surcout / gainAut : null
+    const nuitsCamping = (surcout > 0 && S.hookupCost > 0) ? surcout / S.hookupCost : null
+    const winner = isFinite(cB.autDays) && isFinite(cA.autDays) ? (cB.autDays > cA.autDays ? 'B' : cA.autDays > cB.autDays ? 'A' : null) : null
+
+    body = `
+    <table class="cmp-table">
+      <thead><tr><th></th><th><span class="cmp-tag">A</span> ${A.label}</th><th><span class="cmp-tag">B</span> ${B.label}</th><th>Δ</th></tr></thead>
+      <tbody>
+        ${cmpRow('Consommation', cA.cons, cB.cons, r0, { higherBetter: false, unit: ' Wh' })}
+        ${cmpRow('Production solaire', cA.solar, cB.solar, r0, { unit: ' Wh' })}
+        ${(A.altOn || B.altOn) ? cmpRow('Recharge alternateur', cA.alt, cB.alt, r0, { unit: ' Wh' }) : ''}
+        ${cmpRow('Énergie utilisable', cA.usable, cB.usable, r0, { unit: ' Wh' })}
+        ${cmpRow('Déficit / jour', cA.net, cB.net, r0, { higherBetter: false, unit: ' Wh' })}
+        ${cmpRow('Couverture', cA.solCovPct, cB.solCovPct, r0, { unit: ' %' })}
+        ${cmpRow('Autonomie', cA.autDays, cB.autDays, fmtDays, { delta: false })}
+      </tbody>
+      <tbody class="cmp-cost">
+        ${cmpRow('Coût batteries', kA.batCost, kB.batCost, r0, { higherBetter: false, unit: ' €' })}
+        ${cmpRow('Coût solaire', kA.solCost, kB.solCost, r0, { higherBetter: false, unit: ' €' })}
+        ${(A.altOn || B.altOn) ? cmpRow('Coût alternateur', kA.altCost, kB.altCost, r0, { higherBetter: false, unit: ' €' }) : ''}
+        ${cmpRow('Coût système total', kA.total, kB.total, r0, { higherBetter: false, unit: ' €' })}
+      </tbody>
+    </table>
+
+    ${winner ? `<div class="cmp-winner"><i class="ti ti-trophy"></i> Setup <strong>${winner}</strong> offre la meilleure autonomie</div>` : ''}
+
+    <div class="card" style="margin-top:12px">
+      <div class="ct te"><i class="ti ti-calculator"></i>Rentabilité (B vs A)</div>
+      ${surcout === 0 ? `<div style="font-size:12px;color:var(--t3)">Les deux setups ont le même coût système.</div>` : `
+      <div class="roi-grid">
+        <div class="roi-item">
+          <div class="roi-v" style="color:${surcout > 0 ? 'var(--am)' : 'var(--gr)'}">${surcout > 0 ? '+' : ''}${r0(surcout)} €</div>
+          <div class="roi-l">Surcoût de B</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-v" style="color:var(--te)">${gainAut != null ? (gainAut > 0 ? '+' : '') + gainAut.toFixed(1) + ' j' : '∞'}</div>
+          <div class="roi-l">Gain d'autonomie</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-v">${coutParJour != null ? '~' + r0(coutParJour) + ' €' : '—'}</div>
+          <div class="roi-l">Coût / jour gagné</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-v">${nuitsCamping != null ? '~' + r0(nuitsCamping) : '—'}</div>
+          <div class="roi-l">Nuits camping équiv.</div>
+        </div>
+      </div>
+      <div class="roi-param">
+        <label>Prix électricité camping / nuit</label>
+        <input id="hookup-cost" type="number" min="0" max="30" step="0.5" value="${S.hookupCost}"> €
+        <span style="color:var(--t3);font-size:10px;margin-left:auto">Le surcoût équivaut à ${nuitsCamping != null ? r0(nuitsCamping) + ' nuits' : '—'} de borne électrique</span>
+      </div>`}
+    </div>
+
+    <button class="pdf-btn" id="export-compare-pdf" onclick="window.print()" style="margin-top:12px">
+      <i class="ti ti-printer"></i> Exporter le comparatif en PDF
+    </button>`
+
+    printReport = `
+    <div class="print-report" id="print-report-compare">
+      ${buildCompareReport(A, B, cA, cB, kA, kB, { surcout, gainAut, coutParJour, nuitsCamping })}
+    </div>`
+  }
+
+  return `
+  <div class="card">
+    <div class="ct"><i class="ti ti-arrows-diff"></i>Comparateur de setups</div>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:10px">Comparez deux configurations énergétiques côte à côte — autonomie, coût système et rentabilité.</p>
+    <div class="cmp-slots">
+      ${slot('A', A)}
+      ${slot('B', B)}
+    </div>
+    ${body}
+  </div>
+  ${printReport}`
+}
+
+function buildCompareReport(A, B, cA, cB, kA, kB, roi) {
+  const now = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+  const r0 = (n) => Math.round(n)
+  const row = (label, vA, vB, unit = '') => `<tr><td>${label}</td><td class="num">${typeof vA === 'number' ? r0(vA) : vA}${unit}</td><td class="num">${typeof vB === 'number' ? r0(vB) : vB}${unit}</td></tr>`
+  return `
+  <div class="pr-header">
+    <div class="pr-logo">OffroadWatt</div>
+    <div class="pr-meta">
+      <div class="pr-title">Comparatif de configurations énergétiques</div>
+      <div class="pr-date">Généré le ${now}</div>
+    </div>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Setups comparés</div>
+    <table class="pr-kv">
+      <tr><td>Setup A — ${A.label}</td><td>${scenarioSummary(A)}</td></tr>
+      <tr><td>Setup B — ${B.label}</td><td>${scenarioSummary(B)}</td></tr>
+    </table>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Bilan énergétique</div>
+    <table class="pr-table">
+      <thead><tr><th>Critère</th><th class="num">Setup A</th><th class="num">Setup B</th></tr></thead>
+      <tbody>
+        ${row('Consommation', cA.cons, cB.cons, ' Wh/j')}
+        ${row('Production solaire', cA.solar, cB.solar, ' Wh/j')}
+        ${(A.altOn || B.altOn) ? row('Recharge alternateur', cA.alt, cB.alt, ' Wh/j') : ''}
+        ${row('Énergie utilisable', cA.usable, cB.usable, ' Wh')}
+        ${row('Déficit / jour', cA.net, cB.net, ' Wh/j')}
+        ${row('Couverture', cA.solCovPct, cB.solCovPct, ' %')}
+        ${row('Autonomie', fmtDays(cA.autDays), fmtDays(cB.autDays))}
+      </tbody>
+    </table>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Coût du système</div>
+    <table class="pr-table">
+      <thead><tr><th>Poste</th><th class="num">Setup A</th><th class="num">Setup B</th></tr></thead>
+      <tbody>
+        ${row('Batteries', kA.batCost, kB.batCost, ' €')}
+        ${row('Solaire', kA.solCost, kB.solCost, ' €')}
+        ${(A.altOn || B.altOn) ? row('Alternateur', kA.altCost, kB.altCost, ' €') : ''}
+        <tr class="pr-total"><td>Total système</td><td class="num">${kA.total} €</td><td class="num">${kB.total} €</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pr-section">
+    <div class="pr-sh">Rentabilité (B vs A)</div>
+    <table class="pr-kv">
+      <tr class="pr-hi"><td>Surcoût de B</td><td>${roi.surcout > 0 ? '+' : ''}${r0(roi.surcout)} €</td></tr>
+      <tr><td>Gain d'autonomie</td><td>${roi.gainAut != null ? (roi.gainAut > 0 ? '+' : '') + roi.gainAut.toFixed(1) + ' jours' : 'illimité'}</td></tr>
+      <tr><td>Coût par jour d'autonomie gagné</td><td>${roi.coutParJour != null ? '~' + r0(roi.coutParJour) + ' €/jour' : '—'}</td></tr>
+      <tr><td>Équivalent nuits de borne électrique</td><td>${roi.nuitsCamping != null ? '~' + r0(roi.nuitsCamping) + ' nuits (à ' + S.hookupCost + ' €/nuit)' : '—'}</td></tr>
+    </table>
+  </div>
+  <div class="pr-footer">Rapport généré par OffroadWatt — Prix système indicatifs marché européen, hors pose</div>`
 }
 
 // ── AI TAB ───────────────────────────────────────────────────────────────────
@@ -1106,16 +1440,42 @@ function bindEvents() {
   document.getElementById('alt-toggle')?.addEventListener('click', () => set({ altOn: !S.altOn }))
   document.getElementById('alt-amps')?.addEventListener('change', e => set({ altAmps: Math.max(5, parseFloat(e.target.value) || 20) }))
   document.getElementById('alt-hours')?.addEventListener('change', e => set({ altHours: Math.max(0.5, parseFloat(e.target.value) || 2) }))
+  // Battery type filter
+  document.querySelectorAll('[data-btype]').forEach(el => el.addEventListener('click', () => {
+    const t = el.dataset.btype
+    const u = { batType: t }
+    // Si la batterie sélectionnée n'est pas du type choisi, basculer sur la première de ce type
+    if (S.bat.type !== t) {
+      const first = BATS.find(b => b.type === t)
+      if (first) { u.bat = first; u.dod = DOD[first.type] }
+    }
+    set(u)
+  }))
   // Battery options
   document.querySelectorAll('[data-bat]').forEach(el => el.addEventListener('click', () => {
     const b = BATS[parseInt(el.dataset.bat)]
-    set({ bat: b, dod: DOD[b.type] })
+    set({ bat: b, dod: DOD[b.type], batType: b.type })
   }))
   // Parallel count
   document.querySelectorAll('[data-nb]').forEach(el => el.addEventListener('click', () => set({ batNb: parseInt(el.dataset.nb) })))
   // DoD slider
   document.getElementById('dod-range')?.addEventListener('input', e => set({ dod: parseFloat(e.target.value) }))
   // Solar panels
+  document.getElementById('sol-toggle')?.addEventListener('click', () => {
+    const solOn = !S.solOn
+    // Ajout/retrait automatique du régulateur MPPT dans les consommateurs
+    let apps = S.apps
+    if (solOn) {
+      const hasMppt = apps.some(a => /mppt|régulateur/i.test(a.n))
+      if (!hasMppt) {
+        apps = [...apps, { id: Date.now(), n: 'Régulateur MPPT', icon: 'ti-solar-panel', w: 5, h: 24, on: true, cat: 'Système' }]
+      }
+    } else {
+      // Décoché : on retire le régulateur MPPT des consommateurs
+      apps = apps.filter(a => !/mppt|régulateur/i.test(a.n))
+    }
+    set({ solOn, apps })
+  })
   document.querySelectorAll('[data-panel]').forEach(el => el.addEventListener('click', () => set({ solW: parseInt(el.dataset.panel) })))
   document.getElementById('sol-nb')?.addEventListener('change', e => set({ solNb: Math.max(1, parseInt(e.target.value) || 1) }))
   document.getElementById('sol-eff')?.addEventListener('change', e => set({ solEff: Math.min(0.98, Math.max(0.6, (parseInt(e.target.value) || 85) / 100)) }))
@@ -1164,6 +1524,15 @@ function bindEvents() {
   }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
+
+  // Comparateur
+  document.getElementById('capture-a')?.addEventListener('click', () => captureScenario('A'))
+  document.getElementById('capture-b')?.addEventListener('click', () => captureScenario('B'))
+  document.getElementById('goto-dashboard')?.addEventListener('click', () => set({ tab: 'energy' }))
+  document.querySelectorAll('[data-clear-scenario]').forEach(el => el.addEventListener('click', () => {
+    set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
+  }))
+  document.getElementById('hookup-cost')?.addEventListener('change', e => set({ hookupCost: Math.max(0, parseFloat(e.target.value) || 0) }))
 
   // Auth
   document.getElementById('open-auth')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
@@ -1293,6 +1662,7 @@ async function searchAI(q) {
 }
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
+loadPersistedState()
 render()
 loadCatalogFromDB().then(() => render())
 initAuth()
