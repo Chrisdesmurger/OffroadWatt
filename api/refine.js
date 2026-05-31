@@ -6,93 +6,50 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-// ── Step 1: Identify the appliance specs ──────────────────────────────────────
-const IDENTIFY_PROMPT = `You are a hardware specifications expert for 12V mobile and off-grid electrical systems.
+// ── Step 1: Web search agent — finds real consumption data online ─────────────
+const SEARCH_PROMPT = `You are a research agent for 12V mobile electrical systems (campervans, overlanding).
 
-Your task: given an appliance name, identify its TECHNICAL SPECIFICATIONS that affect electrical consumption.
+Your task: search the internet for REAL consumption data for the given appliance.
 
-Focus on:
-- The exact technology (compressor, absorption, resistance, LED, MOSFET, brushless motor…)
-- Nominal electrical power draw from manufacturer data or well-known benchmarks
-- Duty cycle behavior (continuous, cyclic, on-demand)
-- Key environmental factors that affect consumption (ambient temperature, load, usage pattern)
-- Whether the appliance has multiple electrical components (e.g. diesel heater = pump + fan + ECU)
+Search strategy:
+1. Search for the exact brand + model + "12V power consumption" OR "amperage" OR "Ah/day"
+2. Look for: official spec sheets, YouTube campervan reviews, forum threads (sprinter-source, expeditionportal, vanlifeforums), manufacturer PDFs
+3. If the model is generic, search for the most popular variant of that category
+4. Extract: nominal watts, measured average consumption, duty cycle observations from real users
+5. Note if it's 12V direct or via inverter
 
-Be precise and factual. Do not calculate consumption yet — only identify specs.`
+Prioritize real-world measurements over theoretical specs.
+Summarize all consumption-relevant data found: watts nominal, amps at 12V, Ah/day measurements, duty cycle percentages, ambient temperature conditions mentioned.`
 
-const IDENTIFY_TOOL = {
-  name: 'identify_specs',
-  description: 'Identify the technical electrical specifications of the appliance',
-  input_schema: {
-    type: 'object',
-    properties: {
-      canonical_name: {
-        type: 'string',
-        description: 'Best canonical name: brand + model if identifiable, else category + size',
-      },
-      technology: {
-        type: 'string',
-        description: 'Core technology e.g. "variable-speed compressor", "catalytic diesel combustion", "OLED panel"',
-      },
-      nominal_watts: {
-        type: 'number',
-        description: 'Nominal electrical power from specs (peak/rated watts, not average)',
-      },
-      duty_cycle_type: {
-        type: 'string',
-        enum: ['continuous', 'cyclic', 'on-demand', 'standby+burst'],
-        description: 'How the appliance draws power over time',
-      },
-      duty_cycle_low_pct: {
-        type: 'number',
-        description: 'Estimated duty cycle % in mild/low-use conditions (0-100)',
-      },
-      duty_cycle_high_pct: {
-        type: 'number',
-        description: 'Estimated duty cycle % in hot/intensive conditions (0-100)',
-      },
-      key_consumption_factors: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Top 2-3 factors that most affect real-world consumption (e.g. ambient temp, insulation, load)',
-      },
-      electrical_components: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'List of electrical sub-components if multiple (e.g. ["compressor motor 45W", "fan 3W", "thermostat 1W"])',
-      },
-    },
-    required: ['canonical_name', 'technology', 'nominal_watts', 'duty_cycle_type', 'duty_cycle_low_pct', 'duty_cycle_high_pct', 'key_consumption_factors'],
-  },
-}
+// ── Step 2: Structure findings into consumption schema ────────────────────────
+const STRUCTURE_PROMPT = `You are an expert in 12V mobile power systems for campervans.
 
-// ── Step 2: Compute consumption from identified specs ─────────────────────────
-const COMPUTE_PROMPT = `You are an expert in energy consumption calculation for 12V mobile power systems.
-
-Your task: given the technical specifications of an appliance, compute its REALISTIC daily energy consumption for van/campervan off-grid use.
+Your task: given search results about an appliance's electrical consumption, extract and structure the REALISTIC daily energy consumption for van/campervan off-grid use.
 
 CALCULATION RULES:
-- average_watts = nominal_watts × (duty_cycle_pct / 100)
-- For combustion heaters: use ONLY the electrical components (fan, pump, ECU) — ignore thermal output
-- For inverter-connected loads: multiply watts by 1.10 for inverter losses
-- "low" scenario = mild conditions (15-20°C ambient, minimal usage)
-- "high" scenario = demanding conditions (30°C+ ambient OR intensive daily use)
-- Report AVERAGE watts, not peak/nominal watts
-- Report realistic daily usage hours (not "could run 24h" — what a real user actually uses)`
+- average_watts = nominal_watts × duty_cycle_pct / 100
+- For combustion heaters: use ONLY electrical draw (fan, pump, ECU), NOT thermal output kW
+- Ah/day = average_watts × hours / 12 (or use 24V if specified)
+- "low" scenario = mild weather (15-20°C), minimal use
+- "high" scenario = hot weather (30°C+) OR intensive daily use
+- If the search found Ah/day directly: back-calculate watts = Ah × 12 / hours
+- If no data found: use conservative estimates based on the appliance category
 
-const COMPUTE_TOOL = {
+Be transparent about data quality: label whether values come from manufacturer specs, real-world measurements, or estimates.`
+
+const STRUCTURE_TOOL = {
   name: 'return_consumption',
-  description: 'Return the final realistic energy consumption based on the identified specs',
+  description: 'Return structured realistic energy consumption data',
   input_schema: {
     type: 'object',
     properties: {
       name: {
         type: 'string',
-        description: 'Canonical appliance name',
+        description: 'Canonical appliance name — brand + model if found, else generic',
       },
       low: {
         type: 'object',
-        description: 'Low consumption scenario: mild weather / minimal use / winter',
+        description: 'Low scenario: mild weather / minimal use / winter',
         properties: {
           watts: { type: 'number', description: 'Average watts including duty cycle' },
           hours: { type: 'number', description: 'Realistic daily usage hours' },
@@ -102,7 +59,7 @@ const COMPUTE_TOOL = {
       },
       high: {
         type: 'object',
-        description: 'High consumption scenario: hot weather / intensive use / summer',
+        description: 'High scenario: hot weather / intensive use / summer',
         properties: {
           watts: { type: 'number', description: 'Average watts including duty cycle' },
           hours: { type: 'number', description: 'Realistic daily usage hours' },
@@ -112,14 +69,20 @@ const COMPUTE_TOOL = {
       },
       note: {
         type: 'string',
-        description: 'One sentence explaining the key driver of difference: duty cycle % change, usage hours, or ambient temperature effect',
+        description: 'Key driver of the low/high difference (duty cycle, ambient temp, usage hours)',
       },
-      calculation_basis: {
+      data_source: {
         type: 'string',
-        description: 'Brief explanation of the calculation: e.g. "45W nominal × 30% duty cycle at 20°C = 13.5W avg"',
+        enum: ['manufacturer_spec', 'real_world_measurement', 'forum_data', 'estimate'],
+        description: 'Best quality data source found during web search',
+      },
+      sources_found: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Brief list of sources consulted (e.g. "Dometic spec PDF", "sprinter-source forum thread")',
       },
     },
-    required: ['name', 'low', 'high', 'note', 'calculation_basis'],
+    required: ['name', 'low', 'high', 'note', 'data_source'],
   },
 }
 
@@ -146,42 +109,56 @@ export default async function handler(req) {
     'content-type': 'application/json',
   }
 
-  // ── Agent step 1: Identify specs ────────────────────────────────────────────
-  const step1Resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: baseHeaders,
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      temperature: 0,
-      system: IDENTIFY_PROMPT,
-      tools: [IDENTIFY_TOOL],
-      tool_choice: { type: 'tool', name: 'identify_specs' },
-      messages: [{ role: 'user', content: `Appliance: ${name}` }],
-    }),
-  })
+  // ── Agent step 1: Web search for real consumption data ──────────────────────
+  let searchFindings = ''
+  let searchSources = []
 
-  if (!step1Resp.ok) {
-    const err = await step1Resp.text()
-    return new Response(`Anthropic error (step 1): ${err}`, { status: 502, headers: CORS })
+  try {
+    const step1Resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        ...baseHeaders,
+        'anthropic-beta': 'web-search-2025-03-05',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2048,
+        temperature: 0,
+        system: SEARCH_PROMPT,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{
+          role: 'user',
+          content: `Find real 12V electrical consumption data for: "${name}". I need kWh/day, Ah/day, or average watts at 12V from real-world measurements.`,
+        }],
+      }),
+    })
+
+    if (step1Resp.ok) {
+      const step1Data = await step1Resp.json()
+
+      // Extract text findings from the response
+      searchFindings = (step1Data.content || [])
+        .filter(b => b.type === 'text')
+        .map(b => b.text)
+        .join('\n')
+        .trim()
+
+      // Collect any URLs mentioned in tool results
+      searchSources = (step1Data.content || [])
+        .filter(b => b.type === 'tool_result')
+        .flatMap(b => (b.content || []).filter(c => c.url).map(c => c.url))
+        .slice(0, 5)
+    }
+  } catch (e) {
+    // Web search failed — step 2 will fall back to estimation
+    searchFindings = `Web search unavailable. Use expert estimation for: ${name}`
   }
 
-  const step1Data = await step1Resp.json()
-  const specs = step1Data?.content?.find(b => b.type === 'tool_use')?.input
-  if (!specs) return new Response('No specs from step 1', { status: 502, headers: CORS })
+  if (!searchFindings) {
+    searchFindings = `No web data found for "${name}". Use conservative expert estimates based on appliance category.`
+  }
 
-  // ── Agent step 2: Compute consumption from identified specs ─────────────────
-  const specsContext = `
-Appliance: ${specs.canonical_name}
-Technology: ${specs.technology}
-Nominal electrical power: ${specs.nominal_watts}W
-Duty cycle type: ${specs.duty_cycle_type}
-Duty cycle — low conditions: ${specs.duty_cycle_low_pct}%
-Duty cycle — high conditions: ${specs.duty_cycle_high_pct}%
-Key consumption factors: ${(specs.key_consumption_factors || []).join(', ')}
-${specs.electrical_components?.length ? `Electrical sub-components: ${specs.electrical_components.join(', ')}` : ''}
-  `.trim()
-
+  // ── Agent step 2: Structure findings into consumption schema ─────────────────
   const step2Resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: baseHeaders,
@@ -189,10 +166,13 @@ ${specs.electrical_components?.length ? `Electrical sub-components: ${specs.elec
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       temperature: 0,
-      system: COMPUTE_PROMPT,
-      tools: [COMPUTE_TOOL],
+      system: STRUCTURE_PROMPT,
+      tools: [STRUCTURE_TOOL],
       tool_choice: { type: 'tool', name: 'return_consumption' },
-      messages: [{ role: 'user', content: specsContext }],
+      messages: [{
+        role: 'user',
+        content: `Appliance: "${name}"\n\nWeb search findings:\n${searchFindings}`,
+      }],
     }),
   })
 
@@ -205,12 +185,14 @@ ${specs.electrical_components?.length ? `Electrical sub-components: ${specs.elec
   const result = step2Data?.content?.find(b => b.type === 'tool_use')?.input
   if (!result) return new Response('No result from step 2', { status: 502, headers: CORS })
 
-  // Include specs debug info in response (visible in browser devtools)
+  // Include debug info visible in devtools for comparison
   const response = {
     ...result,
+    sources_found: result.sources_found?.length ? result.sources_found : searchSources,
     _agent: {
-      specs_identified: specs,
-      calculation_basis: result.calculation_basis,
+      web_findings_length: searchFindings.length,
+      web_search_used: !searchFindings.startsWith('Web search unavailable'),
+      data_source: result.data_source,
     },
   }
 
