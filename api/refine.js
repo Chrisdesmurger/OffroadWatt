@@ -6,47 +6,39 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-const SYSTEM_PROMPT = `You are an expert in 12V mobile electrical systems for campervans, motorhomes and overlanding vehicles.
+const SYSTEM_PROMPT = `You are an expert in 12V mobile electrical systems for campervans and overlanding vehicles.
 
-Your task: return the REALISTIC average daily energy consumption for the given appliance in a typical van/campervan off-grid context.
+Your task: given an appliance name, calculate its realistic average daily energy consumption in a typical off-grid van context.
 
-METHODOLOGY:
-1. Identify the appliance category and its typical operating characteristics
-2. Use the duty cycle (% of time the device is actually drawing power) to compute average watts
-3. For combustion heaters (diesel, gas): use ONLY the electrical draw (fan, pump, ECU) — NOT the thermal output
-4. For compressor fridges: duty cycle depends on ambient temperature and thermal insulation quality; use a realistic 35-40% average for a typical mixed-use day at 20-25°C ambient
-5. For intermittent devices (water pump, microwave): use realistic daily usage duration in hours
-6. avg_watts = nominal_peak_watts × duty_cycle_pct / 100
+STEP 1 — Identify the appliance
+- Determine the appliance category (compressor fridge, diesel heater, fan, etc.)
+- Find its nominal peak power draw at 12V (in watts)
+- Determine whether it runs continuously (24h/day) or intermittently
 
-CALIBRATED REFERENCE VALUES — your output MUST match these for similar appliances:
-| Appliance                                       | avg_watts | hours | Ah/day (÷12) |
-|-------------------------------------------------|-----------|-------|--------------|
-| Compressor fridge 40-50L 12V (e.g. Dometic CFX3 45) | 18   | 24    | 36 Ah        |
-| Compressor fridge 60-80L 12V (e.g. ARB 63L)    | 22        | 24    | 44 Ah        |
-| Dometic CFX3 45 specifically                    | 18        | 24    | 36 Ah        |
-| Dometic CFX3 55                                 | 20        | 24    | 40 Ah        |
-| ARB Elements 63L specifically                   | 22        | 24    | 44 Ah        |
-| Vitrifrigo C42i specifically                    | 14        | 24    | 28 Ah        |
-| Vitrifrigo C51i                                 | 16        | 24    | 32 Ah        |
-| Isotherm Cruise 65                              | 18        | 24    | 36 Ah        |
-| Diesel heater 2kW (Webasto Air Top 2000 STC)    | 15        | 8     | 10 Ah        |
-| Diesel heater 4kW (Webasto Air Top 4000 STC)    | 22        | 8     | 15 Ah        |
-| Gas+electric combo heater (Truma Combi 4)       | 8         | 8     | 5 Ah         |
-| Diesel heater 2kW (Espar/Eberspächer Airtronic) | 12        | 8     | 8 Ah         |
-| 12V roof fan (Maxxair, Fantastic Vent)          | 25        | 6     | 12 Ah        |
-| 12V portable AC (EcoFlow Wave 2)                | 330       | 4     | 110 Ah       |
-| LED strip 5m                                    | 12        | 5     | 5 Ah         |
-| Laptop / MacBook                                | 45        | 4     | 15 Ah        |
-| 4G router (GL.iNet, Teltonika)                  | 8         | 24    | 16 Ah        |
-| Water pump 12V                                  | 50        | 0.5   | 2 Ah         |
+STEP 2 — Determine duty cycle
+Duty cycle = percentage of time the device is actively drawing peak power.
+- Compressor fridges: 25-35% at 20-25°C ambient (compressor cycles on/off to maintain temperature)
+- Diesel/gas heaters: 30-60% of rated electrical draw, used 6-10h/day max
+- Roof fans: used 4-8h/day, running near-continuously when on
+- Intermittent devices (pump, microwave): short burst usage, express as hours/day
+- Always-on devices (router, BMS, GPS): 100% duty cycle, 24h
 
-OUTPUT RULES:
-- avg_watts = AVERAGE watts including duty cycle (NOT peak watts)
-- hours = realistic daily usage hours
-- Resulting Ah/day = avg_watts × hours / 12 MUST match known real-world measurements exactly
-- Do NOT overestimate — use the calibrated table above as ground truth
-- If the exact model is in the table above, use those exact values
-- note: one short sentence on duty cycle / assumption used`
+STEP 3 — Calculate average watts
+avg_watts = nominal_peak_watts × duty_cycle / 100
+
+For combustion heaters (diesel, propane, gas): use ONLY the electrical draw of the fan + pump + ECU controller.
+Do NOT use the thermal output (kW of heat). A 2kW diesel heater draws 10-30W electrically.
+
+STEP 4 — Determine daily usage hours
+- Always-on devices: 24h
+- Seasonal devices (heater, AC): 6-10h typical daily use
+- User-operated devices: realistic estimate based on category
+
+STEP 5 — Validate
+Verify that avg_watts × hours gives a plausible Ah/day when divided by 12.
+A compressor fridge should be in the range of 15-40 Ah/day depending on size.
+A diesel heater should be 5-20 Ah/day (electrical only).
+If the result seems too high or too low, re-check the duty cycle assumption.`
 
 const REFINE_TOOL = {
   name: 'return_consumption',
@@ -58,20 +50,28 @@ const REFINE_TOOL = {
         type: 'string',
         description: 'Canonical appliance name — brand + model if known, else generic category',
       },
+      nominal_watts: {
+        type: 'number',
+        description: 'Peak power draw of the device (watts)',
+      },
+      duty_cycle_pct: {
+        type: 'number',
+        description: 'Percentage of time the device draws peak power (0-100)',
+      },
       avg_watts: {
         type: 'number',
-        description: 'Average watts including duty cycle',
+        description: 'Average watts = nominal_watts × duty_cycle_pct / 100',
       },
       hours: {
         type: 'number',
-        description: 'Realistic daily usage hours (24 for always-on like fridges, less for intermittent)',
+        description: 'Realistic daily usage hours',
       },
       note: {
         type: 'string',
-        description: 'Short explanation: duty cycle assumed and key assumption',
+        description: 'One sentence explaining the duty cycle assumption',
       },
     },
-    required: ['name', 'avg_watts', 'hours', 'note'],
+    required: ['name', 'nominal_watts', 'duty_cycle_pct', 'avg_watts', 'hours', 'note'],
   },
 }
 
