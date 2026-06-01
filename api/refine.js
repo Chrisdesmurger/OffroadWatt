@@ -6,27 +6,74 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-const SYSTEM_PROMPT = `You are an expert in 12V electrical systems for campervans, caravans and vans (vanlife/overlanding).
-Your task: given an appliance name, return its REALISTIC daily energy consumption for mobile use.
+const SYSTEM_PROMPT = `You are an expert in 12V mobile electrical systems for campervans, motorhomes and overlanding vehicles.
 
-CRITICAL RULES:
-- "watts" = AVERAGE watts including duty cycles (e.g. a 45W compressor fridge running 40% of the time = 18W average)
-- For combustion heaters (diesel/gas): watts = electrical draw of fan/pump/electronics ONLY, not thermal power
-- For intermittent appliances: "hours" = typical daily usage hours
-- Return ONLY valid JSON, no markdown, no explanation outside the JSON
+Your task: return the REALISTIC average daily energy consumption for the given appliance in a typical van/campervan off-grid context.
 
-JSON FORMAT:
-{
-  "name": "canonical appliance name",
-  "low": { "watts": X, "hours": H, "label": "short label (e.g. Winter / Minimal)" },
-  "high": { "watts": X, "hours": H, "label": "short label (e.g. Summer / Intensive)" },
-  "note": "1-line explanation of the difference between low and high"
+METHODOLOGY:
+1. Identify the appliance category and its typical operating characteristics
+2. Use the duty cycle (% of time the device is actually drawing power) to compute average watts
+3. For combustion heaters (diesel, gas): use ONLY the electrical draw (fan, pump, ECU) — NOT the thermal output
+4. For compressor fridges: duty cycle depends on ambient temperature and thermal insulation quality; use a realistic 35-40% average for a typical mixed-use day at 20-25°C ambient
+5. For intermittent devices (water pump, microwave): use realistic daily usage duration in hours
+6. avg_watts = nominal_peak_watts × duty_cycle_pct / 100
+
+CALIBRATED REFERENCE VALUES — your output MUST match these for similar appliances:
+| Appliance                                       | avg_watts | hours | Ah/day (÷12) |
+|-------------------------------------------------|-----------|-------|--------------|
+| Compressor fridge 40-50L 12V (e.g. Dometic CFX3 45) | 18   | 24    | 36 Ah        |
+| Compressor fridge 60-80L 12V (e.g. ARB 63L)    | 22        | 24    | 44 Ah        |
+| Dometic CFX3 45 specifically                    | 18        | 24    | 36 Ah        |
+| Dometic CFX3 55                                 | 20        | 24    | 40 Ah        |
+| ARB Elements 63L specifically                   | 22        | 24    | 44 Ah        |
+| Vitrifrigo C42i specifically                    | 14        | 24    | 28 Ah        |
+| Vitrifrigo C51i                                 | 16        | 24    | 32 Ah        |
+| Isotherm Cruise 65                              | 18        | 24    | 36 Ah        |
+| Diesel heater 2kW (Webasto Air Top 2000 STC)    | 15        | 8     | 10 Ah        |
+| Diesel heater 4kW (Webasto Air Top 4000 STC)    | 22        | 8     | 15 Ah        |
+| Gas+electric combo heater (Truma Combi 4)       | 8         | 8     | 5 Ah         |
+| Diesel heater 2kW (Espar/Eberspächer Airtronic) | 12        | 8     | 8 Ah         |
+| 12V roof fan (Maxxair, Fantastic Vent)          | 25        | 6     | 12 Ah        |
+| 12V portable AC (EcoFlow Wave 2)                | 330       | 4     | 110 Ah       |
+| LED strip 5m                                    | 12        | 5     | 5 Ah         |
+| Laptop / MacBook                                | 45        | 4     | 15 Ah        |
+| 4G router (GL.iNet, Teltonika)                  | 8         | 24    | 16 Ah        |
+| Water pump 12V                                  | 50        | 0.5   | 2 Ah         |
+
+OUTPUT RULES:
+- avg_watts = AVERAGE watts including duty cycle (NOT peak watts)
+- hours = realistic daily usage hours
+- Resulting Ah/day = avg_watts × hours / 12 MUST match known real-world measurements exactly
+- Do NOT overestimate — use the calibrated table above as ground truth
+- If the exact model is in the table above, use those exact values
+- note: one short sentence on duty cycle / assumption used`
+
+const REFINE_TOOL = {
+  name: 'return_consumption',
+  description: 'Return structured realistic average energy consumption',
+  input_schema: {
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+        description: 'Canonical appliance name — brand + model if known, else generic category',
+      },
+      avg_watts: {
+        type: 'number',
+        description: 'Average watts including duty cycle',
+      },
+      hours: {
+        type: 'number',
+        description: 'Realistic daily usage hours (24 for always-on like fridges, less for intermittent)',
+      },
+      note: {
+        type: 'string',
+        description: 'Short explanation: duty cycle assumed and key assumption',
+      },
+    },
+    required: ['name', 'avg_watts', 'hours', 'note'],
+  },
 }
-
-Examples:
-- 12V compressor fridge 45W peak: low={watts:15,hours:24,label:"Winter (15°C)"}, high={watts:28,hours:24,label:"Summer (30°C)"}
-- Diesel heater Webasto: low={watts:30,hours:5,label:"Mild night"}, high={watts:40,hours:10,label:"Deep cold"}
-- Laptop MacBook: low={watts:35,hours:3,label:"Light use"}, high={watts:55,hours:6,label:"Intensive use"}`
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS })
@@ -45,7 +92,7 @@ export default async function handler(req) {
   const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
   if (!apiKey) return new Response('Missing API key', { status: 500, headers: CORS })
 
-  const anthropicResp = await fetch('https://api.anthropic.com/v1/messages', {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': apiKey,
@@ -55,23 +102,27 @@ export default async function handler(req) {
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 512,
+      temperature: 0,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: `Appliance: ${name}` }],
+      tools: [REFINE_TOOL],
+      tool_choice: { type: 'tool', name: 'return_consumption' },
+      messages: [{
+        role: 'user',
+        content: `Appliance: "${name}"`,
+      }],
     }),
   })
 
-  if (!anthropicResp.ok) {
-    const err = await anthropicResp.text()
+  if (!resp.ok) {
+    const err = await resp.text()
     return new Response(`Anthropic error: ${err}`, { status: 502, headers: CORS })
   }
 
-  const data = await anthropicResp.json()
-  const text = data?.content?.[0]?.text || ''
+  const data = await resp.json()
+  const result = data?.content?.find(b => b.type === 'tool_use')?.input
+  if (!result) return new Response('No result from AI', { status: 502, headers: CORS })
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) return new Response('No JSON in response', { status: 502, headers: CORS })
-
-  return new Response(jsonMatch[0], {
+  return new Response(JSON.stringify(result), {
     headers: { ...CORS, 'Content-Type': 'application/json' },
   })
 }

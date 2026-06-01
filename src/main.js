@@ -360,20 +360,18 @@ async function refineWithAI(appId) {
     // 1. Check Supabase cache
     const searchName = encodeURIComponent(app.n)
     const cacheResp = await fetch(
-      `${SB_URL}/rest/v1/equipment_catalog?select=id,name,confirmed_count,consumption_low_w,consumption_high_w,consumption_hours,modes&name=ilike.*${searchName}*&order=confirmed_count.desc&limit=1`,
+      `${SB_URL}/rest/v1/equipment_catalog?select=id,name,confirmed_count,consumption_avg_w,consumption_hours&name=ilike.*${searchName}*&order=confirmed_count.desc&limit=1`,
       { headers: SB_HDR }
     )
     const cacheRows = cacheResp.ok ? await cacheResp.json() : []
     const cached = cacheRows[0]
 
-    let lowW, highW, hours, note, rowId
+    let avgW, hours, note
 
-    if (cached && cached.confirmed_count >= 2) {
+    if (cached && cached.confirmed_count >= 2 && cached.consumption_avg_w) {
       // Locked — use cached data directly
-      lowW  = cached.consumption_low_w
-      highW = cached.consumption_high_w
+      avgW  = cached.consumption_avg_w
       hours = cached.consumption_hours
-      rowId = cached.id
       note  = 'verified'
     } else {
       // Call the AI
@@ -385,26 +383,20 @@ async function refineWithAI(appId) {
       if (!resp.ok) throw new Error(await resp.text())
       const data = await resp.json()
 
-      lowW  = data.low?.watts  ?? null
-      highW = data.high?.watts ?? null
-      hours = data.low?.hours  ?? app.h
-      note  = data.note        ?? ''
+      avgW  = data.avg_watts ?? null
+      hours = data.hours     ?? app.h
+      note  = data.note      ?? ''
 
-      if (!lowW || !highW) throw new Error('Incomplete AI response')
+      if (!avgW) throw new Error('Incomplete AI response')
 
       // Upsert to Supabase & increment confirmed_count
       const newCount = (cached?.confirmed_count ?? 0) + 1
       const upsertPayload = {
         name: data.name || app.n,
-        consumption_low_w:  lowW,
-        consumption_high_w: highW,
-        consumption_hours:  hours,
-        confirmed_count:    newCount,
-        modes: [
-          { label: data.low?.label  || 'Low',  watts: lowW  },
-          { label: data.high?.label || 'High', watts: highW },
-        ],
-        updated_at: new Date().toISOString(),
+        consumption_avg_w: avgW,
+        consumption_hours: hours,
+        confirmed_count:   newCount,
+        updated_at:        new Date().toISOString(),
       }
       if (cached?.id) {
         await fetch(`${SB_URL}/rest/v1/equipment_catalog?id=eq.${cached.id}`, {
@@ -412,7 +404,6 @@ async function refineWithAI(appId) {
           headers: { ...SB_HDR, Prefer: 'return=minimal' },
           body: JSON.stringify(upsertPayload),
         })
-        rowId = cached.id
       } else {
         await fetch(`${SB_URL}/rest/v1/equipment_catalog`, {
           method: 'POST',
@@ -422,17 +413,11 @@ async function refineWithAI(appId) {
       }
     }
 
-    // Apply modes to the appliance (tag with season for global toggle)
     const confirmed = (cached?.confirmed_count ?? 0) >= 2 || note === 'verified'
-    const newModes = [
-      { label: t('refine.low'),  watts: Math.round(lowW),  season: 'winter' },
-      { label: t('refine.high'), watts: Math.round(highW), season: 'summer' },
-    ]
-    const seasonIdx = S.season === 'summer' ? 1 : 0
     set({
       refiningId: null,
       apps: S.apps.map(a => a.id === appId
-        ? { ...a, modes: newModes, activeMode: seasonIdx, w: newModes[seasonIdx].watts, h: hours, sbConfirmed: confirmed }
+        ? { ...a, modes: null, activeMode: null, w: Math.round(avgW), h: hours, sbConfirmed: confirmed }
         : a
       ),
     })
@@ -478,7 +463,6 @@ let S = {
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false,
   refiningId: null,
-  season: 'summer',
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
@@ -500,7 +484,6 @@ function persistState() {
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
       hookupCost: S.hookupCost,
-      season: S.season,
       scenarios: S.scenarios,
     }
     localStorage.setItem(LS_KEY, JSON.stringify(snap))
@@ -531,7 +514,6 @@ function loadPersistedState() {
       altHours: p.altHours ?? S.altHours,
       catFilter: p.catFilter ?? S.catFilter,
       hookupCost: p.hookupCost ?? S.hookupCost,
-      season: p.season ?? S.season,
       scenarios: p.scenarios ?? S.scenarios,
     })
   } catch (_) {}
@@ -654,28 +636,6 @@ function buildAppsTab() {
 
 // ── ENERGY TAB ───────────────────────────────────────────────────────────────
 
-// Auto-switch appliances that have season-tagged modes to the given season
-function applySeasonToApps(season, apps) {
-  return apps.map(a => {
-    if (!a.modes) return a
-    const idx = a.modes.findIndex(m => m.season === season)
-    if (idx === -1) return a
-    return { ...a, activeMode: idx, w: a.modes[idx].watts }
-  })
-}
-
-function buildSeasonBar() {
-  const hasRefined = S.apps.some(a => a.modes && a.modes.some(m => m.season))
-  return `
-  <div class="season-bar">
-    <span class="season-lbl"><i class="ti ti-sun-moon" style="font-size:12px"></i>${t('season.label')}</span>
-    <div class="season-btns">
-      <button class="season-btn summer${S.season === 'summer' ? ' on' : ''}" data-season="summer">${t('season.summer')}</button>
-      <button class="season-btn winter${S.season === 'winter' ? ' on' : ''}" data-season="winter">${t('season.winter')}</button>
-    </div>
-    <span class="season-hint">${hasRefined ? t('season.hint') : t('season.noApp')}</span>
-  </div>`
-}
 
 function buildAppRow(a) {
   const hasModes   = a.modes && a.modes.length > 1
@@ -784,7 +744,6 @@ function buildEnergyTab() {
   })()
 
   return `
-  ${buildSeasonBar()}
   <div class="col3">
     <div style="display:flex;flex-direction:column;gap:10px">
       ${buildAppsCard()}
@@ -1632,11 +1591,6 @@ function bindEvents() {
       const newW = a.modes[mi]?.watts ?? a.w
       return { ...a, activeMode: mi, w: newW }
     })})
-  }))
-  // Season profile toggle
-  document.querySelectorAll('[data-season]').forEach(el => el.addEventListener('click', () => {
-    const season = el.dataset.season
-    set({ season, apps: applySeasonToApps(season, S.apps) })
   }))
   // Refine with AI
   document.querySelectorAll('[data-refine]').forEach(el => el.addEventListener('click', () => refineWithAI(parseInt(el.dataset.refine))))
