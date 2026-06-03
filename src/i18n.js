@@ -19,7 +19,6 @@ const DICT = {
     'tab.energy': 'Dashboard',
     'tab.apps': 'Appliances',
     'tab.compare': 'Compare',
-    'tab.ai': 'AI Search',
     'tab.deploy': 'Deployment',
 
     // Categories
@@ -169,31 +168,9 @@ const DICT = {
     'compare.hookupNights': '{n} nights',
     'compare.exportPdf': 'Export comparison to PDF',
 
-    // AI tab
-    'ai.title': 'AI equipment search',
-    'ai.inCatalog': '{n} in catalog',
-    'ai.subtitle': 'Shared Supabase catalog — instant search, then online for new models. Each result enriches the common database.',
-    'ai.searchesLeft': '{n}/{max} search{s} left today',
-    'ai.quotaReached': 'Daily quota reached — ',
-    'ai.goPro': 'Go Pro',
-    'ai.forUnlimited': ' for unlimited searches',
-    'ai.placeholder': 'E.g. Webasto diesel heater, Dometic 12V fridge, Shurflo water pump…',
-    'ai.search': 'Search',
-    'ai.error': 'Error',
-    'ai.offlineCatalog': 'Offline catalog — {n} result(s)',
-    'ai.searchingOnline': 'Searching online…',
-    'ai.onlineResults': 'Online results — {n} new',
-    'ai.new': 'New',
-    'ai.switchable': '← Switchable from the dashboard',
-    'ai.addToDashboard': 'Add to dashboard',
-    'ai.emptyPrompt': 'Type an appliance — local catalog first, then online AI search',
-
-    // Refine with AI
-    'refine.btn':      'Refine',
-    'refine.loading':  'AI…',
-    'refine.locked':   'Verified ×2',
-    'refine.error':    'Could not retrieve consumption data. Try again.',
-    'refine.tooltip':  'Get realistic average consumption via AI',
+    // Catalog
+    'modal.catalog.search': 'Search appliance…',
+    'modal.catalog.items': 'items',
 
     // Deploy tab
     'deploy.title': 'Roadmap — Deployment on Vercel',
@@ -249,10 +226,6 @@ const DICT = {
     // Confirm / alerts
     'confirm.deleteConfig': 'Delete this configuration?',
     'alert.error': 'Error: ',
-    'ai.limitReached': 'Daily limit of 5 AI searches reached. Create a Pro account for unlimited searches.',
-    'ai.notParsable': 'AI response not parsable.',
-    'ai.noResults': 'No results found.',
-    'ai.onlineError': 'Online search error',
 
     // Print report
     'pr.title': 'Electrical autonomy report — {vtype}',
@@ -323,7 +296,6 @@ const DICT = {
     'tab.energy': 'Panel',
     'tab.apps': 'Aparatos',
     'tab.compare': 'Comparar',
-    'tab.ai': 'Búsqueda IA',
     'tab.deploy': 'Despliegue',
 
     'cat.Tout': 'Todo',
@@ -459,30 +431,8 @@ const DICT = {
     'compare.hookupNights': '{n} noches',
     'compare.exportPdf': 'Exportar comparativa a PDF',
 
-    'ai.title': 'Búsqueda de equipos por IA',
-    'ai.inCatalog': '{n} en catálogo',
-    'ai.subtitle': 'Catálogo compartido Supabase — búsqueda instantánea, luego en línea para nuevos modelos. Cada resultado enriquece la base común.',
-    'ai.searchesLeft': '{n}/{max} búsqueda{s} restante{s} hoy',
-    'ai.quotaReached': 'Cuota diaria alcanzada — ',
-    'ai.goPro': 'Pasar a Pro',
-    'ai.forUnlimited': ' para búsquedas ilimitadas',
-    'ai.placeholder': 'Ej: calefacción diésel Webasto, nevera 12V Dometic, bomba de agua Shurflo…',
-    'ai.search': 'Buscar',
-    'ai.error': 'Error',
-    'ai.offlineCatalog': 'Catálogo sin conexión — {n} resultado(s)',
-    'ai.searchingOnline': 'Buscando en línea…',
-    'ai.onlineResults': 'Resultados en línea — {n} nuevo(s)',
-    'ai.new': 'Nuevo',
-    'ai.switchable': '← Conmutable desde el panel',
-    'ai.addToDashboard': 'Añadir al panel',
-    'ai.emptyPrompt': 'Escriba un aparato — primero el catálogo local, luego búsqueda IA en línea',
-
-    // Refine with AI
-    'refine.btn':      'Refinar',
-    'refine.loading':  'IA…',
-    'refine.locked':   'Verificado ×2',
-    'refine.error':    'No se pudieron obtener los datos. Inténtalo de nuevo.',
-    'refine.tooltip':  'Obtener consumo promedio realista con IA',
+    'modal.catalog.search': 'Buscar aparato…',
+    'modal.catalog.items': 'elementos',
 
     'deploy.title': 'Hoja de ruta — Despliegue en Vercel',
     'deploy.subtitle': 'Este proyecto es un proyecto Vite real. Estos son los pasos para ejecutarlo localmente y en producción.',
@@ -530,10 +480,6 @@ const DICT = {
 
     'confirm.deleteConfig': '¿Eliminar esta configuración?',
     'alert.error': 'Error: ',
-    'ai.limitReached': 'Límite de 5 búsquedas IA por día alcanzado. Cree una cuenta Pro para búsquedas ilimitadas.',
-    'ai.notParsable': 'Respuesta de IA no analizable.',
-    'ai.noResults': 'No se encontraron resultados.',
-    'ai.onlineError': 'Error de búsqueda en línea',
 
     'pr.title': 'Informe de autonomía eléctrica — {vtype}',
     'pr.generatedOn': 'Generado el {date}',
@@ -602,7 +548,6 @@ const DICT = {
     'tab.energy': 'Dashboard',
     'tab.apps': 'Appareils',
     'tab.compare': 'Comparer',
-    'tab.ai': 'Recherche IA',
     'tab.deploy': 'Déploiement',
 
     'cat.Tout': 'Tout',
@@ -738,30 +683,8 @@ const DICT = {
     'compare.hookupNights': '{n} nuits',
     'compare.exportPdf': 'Exporter le comparatif en PDF',
 
-    'ai.title': "Recherche d'équipements par IA",
-    'ai.inCatalog': '{n} en catalogue',
-    'ai.subtitle': 'Catalogue partagé Supabase — recherche instantanée, puis en ligne pour les nouveaux modèles. Chaque résultat enrichit la base commune.',
-    'ai.searchesLeft': '{n}/{max} recherche{s} restante{s} aujourd\'hui',
-    'ai.quotaReached': 'Quota journalier atteint — ',
-    'ai.goPro': 'Passer en Pro',
-    'ai.forUnlimited': ' pour des recherches illimitées',
-    'ai.placeholder': 'Ex: chauffage diesel Webasto, réfrigérateur 12V Dometic, pompe eau Shurflo…',
-    'ai.search': 'Chercher',
-    'ai.error': 'Erreur',
-    'ai.offlineCatalog': 'Catalogue hors ligne — {n} résultat(s)',
-    'ai.searchingOnline': 'Recherche en ligne…',
-    'ai.onlineResults': 'Résultats en ligne — {n} nouveau(x)',
-    'ai.new': 'Nouveau',
-    'ai.switchable': '← Switchable depuis le dashboard',
-    'ai.addToDashboard': 'Ajouter au dashboard',
-    'ai.emptyPrompt': "Tapez un équipement — catalogue local d'abord, puis recherche IA en ligne",
-
-    // Affiner avec l'IA
-    'refine.btn':      'Affiner',
-    'refine.loading':  'IA…',
-    'refine.locked':   'Vérifié ×2',
-    'refine.error':    'Impossible de récupérer les données. Réessaie.',
-    'refine.tooltip':  'Obtenir la conso moyenne réaliste via IA',
+    'modal.catalog.search': 'Rechercher un appareil…',
+    'modal.catalog.items': 'appareils',
 
     'deploy.title': 'Feuille de route — Déploiement sur Vercel',
     'deploy.subtitle': 'Ce projet est un vrai projet Vite. Voici les étapes pour le faire tourner en local et en production.',
@@ -809,11 +732,6 @@ const DICT = {
 
     'confirm.deleteConfig': 'Supprimer cette configuration ?',
     'alert.error': 'Erreur : ',
-    'ai.limitReached': 'Limite de 5 recherches IA par jour atteinte. Créez un compte Pro pour des recherches illimitées.',
-    'ai.notParsable': 'Réponse IA non parsable.',
-    'ai.noResults': 'Aucun résultat trouvé.',
-    'ai.onlineError': 'Erreur de recherche en ligne',
-
     'pr.title': "Rapport d'autonomie électrique — {vtype}",
     'pr.generatedOn': 'Généré le {date}',
     'pr.appliances': 'Appareils consommateurs',

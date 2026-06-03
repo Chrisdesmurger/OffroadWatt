@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OffroadWatt — Electrical autonomy calculator</title>
-<meta name="description" content="Calculate the electrical autonomy of your motorhome, caravan or van. Battery, solar panels, appliances — all in one.">
+<title>OffroadWatt — Calculateur d'autonomie électrique</title>
+<meta name="description" content="Calculez l'autonomie électrique de votre camping-car, caravane ou van. Batterie, panneaux solaires, appareils — tout en un.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
@@ -193,24 +193,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .modebtn:hover{border-color:var(--b2)}.modebtn.on{border-color:var(--am);background:rgba(240,160,48,.08)}
 .modew{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--am)}.modebtn.on .modew{color:var(--am)}
 .model{font-size:10px;color:var(--t3)}.modebtn.on .model{color:var(--t2)}
-/* ── Refine button ── */
-.refinebtn{background:none;border:1px solid var(--b2);border-radius:3px;color:var(--t3);cursor:pointer;font-size:10px;font-family:var(--mono);padding:3px 7px;display:inline-flex;align-items:center;gap:4px;transition:all .1s;white-space:nowrap}
-.refinebtn:hover{border-color:var(--so);color:var(--so)}.refinebtn.loading{opacity:.6;cursor:default}
-.refine-locked{font-size:10px;color:var(--te);background:rgba(45,212,191,.08);border:1px solid var(--te);border-radius:3px;padding:2px 6px;white-space:nowrap}
-.rspin{display:inline-block;width:8px;height:8px;border:1.5px solid var(--b2);border-top-color:var(--so);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-
-/* ── Source pills (energy source per appliance) ── */
-.src-pills{display:flex;gap:3px;margin-left:4px}
-.srcpill{background:none;border:1px solid var(--b2);border-radius:3px;color:var(--t3);cursor:pointer;font-size:9px;font-family:var(--mono);padding:2px 7px;transition:all .1s;white-space:nowrap}
-.srcpill:hover{border-color:var(--b2);color:var(--t2)}
-.srcpill.on{border-color:var(--te2);color:var(--te);background:rgba(45,212,191,.08)}
 
 /* ── Auth button ── */
-.lang-switch{display:inline-flex;gap:2px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:2px}
-.lang-opt{background:none;border:none;color:var(--t3);font-family:var(--mono);font-size:10px;font-weight:600;padding:4px 7px;border-radius:4px;cursor:pointer;transition:all .12s}
-.lang-opt:hover{color:var(--am)}.lang-opt.on{background:var(--am);color:#1a1206}
 .auth-btn{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:6px 10px;color:var(--t2);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .auth-btn:hover{border-color:var(--am2);color:var(--am)}.auth-btn.on{border-color:var(--te2);color:var(--te);background:rgba(45,212,191,.06)}
 .pro-badge{background:rgba(167,139,250,.15);border:1px solid #4c3680;color:var(--pu);font-size:8px;padding:1px 5px;border-radius:2px;font-family:var(--mono)}
