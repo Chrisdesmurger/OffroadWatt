@@ -111,39 +111,107 @@ const SUN_ZONES = [
 ]
 
 const CATALOG = [
-  { n: 'Réfrigérateur compresseur 12V', icon: 'ti-fridge', w: 45, h: 24, cat: 'Cuisine' },
-  { n: 'Réfrigérateur à absorption', icon: 'ti-fridge', w: 180, h: 24, cat: 'Cuisine' },
-  { n: 'Congélateur portable 12V', icon: 'ti-snowflake', w: 55, h: 24, cat: 'Cuisine' },
-  { n: 'Plaque induction 1 feu', icon: 'ti-flame', w: 1500, h: 0.5, cat: 'Cuisine' },
-  { n: 'Micro-ondes', icon: 'ti-microwave', w: 900, h: 0.3, cat: 'Cuisine' },
-  { n: 'Machine à café', icon: 'ti-coffee', w: 800, h: 0.2, cat: 'Cuisine' },
-  { n: 'Cafetière filtre', icon: 'ti-cup', w: 700, h: 0.2, cat: 'Cuisine' },
-  { n: 'Bouilloire électrique', icon: 'ti-droplet', w: 1500, h: 0.1, cat: 'Cuisine' },
-  { n: 'Ventilateur 12V', icon: 'ti-wind', w: 20, h: 8, cat: 'Confort' },
-  { n: 'Climatiseur 12V portatif', icon: 'ti-air-conditioning', w: 400, h: 4, cat: 'Confort' },
-  { n: 'Chauffage diesel (Webasto/Eberspächer)', icon: 'ti-temperature', w: 40, h: 8, cat: 'Confort' },
-  { n: 'Chauffage électrique soufflant', icon: 'ti-temperature', w: 1000, h: 3, cat: 'Confort' },
-  { n: 'Couverture chauffante 12V', icon: 'ti-bed', w: 60, h: 6, cat: 'Confort' },
-  { n: 'Chauffe-eau électrique', icon: 'ti-droplets', w: 1200, h: 0.5, cat: 'Confort' },
-  { n: 'Laptop / MacBook', icon: 'ti-device-laptop', w: 65, h: 4, cat: 'Tech' },
-  { n: 'Smartphone ×2', icon: 'ti-device-mobile', w: 15, h: 3, cat: 'Tech' },
-  { n: 'Tablette', icon: 'ti-device-tablet', w: 20, h: 3, cat: 'Tech' },
-  { n: 'Télévision 24"', icon: 'ti-device-tv', w: 80, h: 3, cat: 'Tech' },
-  { n: 'Drone (chargeur)', icon: 'ti-drone', w: 60, h: 2, cat: 'Tech' },
-  { n: 'Appareil photo', icon: 'ti-camera', w: 10, h: 2, cat: 'Tech' },
-  { n: 'Routeur 4G/WiFi', icon: 'ti-wifi', w: 10, h: 24, cat: 'Tech' },
-  { n: 'Enceinte Bluetooth', icon: 'ti-music', w: 10, h: 4, cat: 'Tech' },
-  { n: 'Pompe à eau 12V', icon: 'ti-droplet', w: 50, h: 0.5, cat: 'Eau' },
-  { n: 'Douche extérieure chauffante', icon: 'ti-droplets', w: 200, h: 0.3, cat: 'Eau' },
-  { n: 'WC électrique (Dometic)', icon: 'ti-toilet-paper', w: 30, h: 0.2, cat: 'Eau' },
-  { n: 'Éclairage LED bande 5m', icon: 'ti-bulb', w: 12, h: 5, cat: 'Éclairage' },
-  { n: 'Spots LED encastrés ×4', icon: 'ti-lamp', w: 20, h: 4, cat: 'Éclairage' },
-  { n: "Lumière d'ambiance 12V", icon: 'ti-lamp-2', w: 8, h: 4, cat: 'Éclairage' },
-  { n: 'Phares de travail ext.', icon: 'ti-focus', w: 50, h: 2, cat: 'Éclairage' },
-  { n: 'Convertisseur 12V→230V', icon: 'ti-plug', w: 30, h: 24, cat: 'Système' },
-  { n: 'Régulateur MPPT', icon: 'ti-solar-panel', w: 5, h: 24, cat: 'Système' },
-  { n: 'BMS batterie Lithium', icon: 'ti-battery-charging', w: 3, h: 24, cat: 'Système' },
-  { n: 'Alarme / GPS tracker', icon: 'ti-map-pin', w: 5, h: 24, cat: 'Système' },
+  // ── Cuisine ──────────────────────────────────────────────────────────────────
+  { n: 'Réfrigérateur compresseur 12V 40L (Dometic CFX3 40)', icon: 'ti-fridge', w: 45, h: 24, cat: 'Cuisine' },
+  { n: 'Réfrigérateur compresseur 12V 55L (ARB Elements)', icon: 'ti-fridge', w: 50, h: 24, cat: 'Cuisine' },
+  { n: 'Réfrigérateur compresseur 12V 75L (Dometic CFX3 75)', icon: 'ti-fridge', w: 55, h: 24, cat: 'Cuisine' },
+  { n: 'Congélateur portable 12V 30L (BougeRV)', icon: 'ti-snowflake', w: 45, h: 24, cat: 'Cuisine' },
+  { n: 'Réfrigérateur à absorption 3 voies 90L (Dometic RM8401)', icon: 'ti-fridge', w: 180, h: 24, cat: 'Cuisine' },
+  { n: 'Cave à vin portable 12V (Dometic W12)', icon: 'ti-bottle', w: 40, h: 24, cat: 'Cuisine' },
+  { n: 'Plaque induction 1 feu 1800W (Duxtop 9600LS)', icon: 'ti-flame', w: 1800, h: 0.5, cat: 'Cuisine' },
+  { n: 'Plaque induction 2 feux 3500W (Caso Triple2500)', icon: 'ti-flame', w: 3500, h: 0.5, cat: 'Cuisine' },
+  { n: 'Plaque gaz + allumage électrique', icon: 'ti-flame', w: 3, h: 0.5, cat: 'Cuisine' },
+  { n: 'Micro-ondes 700W (Inverter)', icon: 'ti-microwave', w: 900, h: 0.25, cat: 'Cuisine' },
+  { n: 'Micro-ondes 1000W (Dometic MWO 24)', icon: 'ti-microwave', w: 1200, h: 0.25, cat: 'Cuisine' },
+  { n: 'Machine à café expresso 230V (DeLonghi)', icon: 'ti-coffee', w: 1450, h: 0.15, cat: 'Cuisine' },
+  { n: 'Machine à café 12V (RoadPro)', icon: 'ti-coffee', w: 150, h: 0.2, cat: 'Cuisine' },
+  { n: 'Cafetière filtre 230V (Moulinex)', icon: 'ti-cup', w: 700, h: 0.2, cat: 'Cuisine' },
+  { n: 'Bouilloire électrique 230V 1.5L', icon: 'ti-droplet', w: 2200, h: 0.08, cat: 'Cuisine' },
+  { n: 'Bouilloire 12V 1L (Wagan Tech)', icon: 'ti-droplet', w: 120, h: 0.25, cat: 'Cuisine' },
+  { n: 'Grille-pain 230V 2 tranches (Philips)', icon: 'ti-bread', w: 900, h: 0.1, cat: 'Cuisine' },
+  { n: 'Mini-four 230V 15L (Russell Hobbs)', icon: 'ti-tool', w: 1200, h: 0.5, cat: 'Cuisine' },
+  { n: 'Mixeur plongeant 230V (Bamix)', icon: 'ti-blender', w: 200, h: 0.05, cat: 'Cuisine' },
+  { n: 'Hotte aspirante 12V (ventilateur)', icon: 'ti-wind', w: 25, h: 1, cat: 'Cuisine' },
+  // ── Confort ──────────────────────────────────────────────────────────────────
+  { n: 'Ventilateur 12V bureau (Caframo Sirocco II)', icon: 'ti-wind', w: 5, h: 8, cat: 'Confort' },
+  { n: 'Ventilateur plafond 12V (Fantastic Fan)', icon: 'ti-wind', w: 22, h: 8, cat: 'Confort' },
+  { n: 'Aérateur de toit 12V (Dometic Fan-Tastic 3350)', icon: 'ti-wind', w: 35, h: 8, cat: 'Confort' },
+  { n: 'Climatiseur portable 12V 800W (Webasto Air Top Evo 40)', icon: 'ti-air-conditioning', w: 230, h: 6, cat: 'Confort' },
+  { n: 'Climatiseur split 24V 1000W (Dometic FreshJet 2200)', icon: 'ti-air-conditioning', w: 420, h: 6, cat: 'Confort' },
+  { n: 'Chauffage diesel 2kW (Webasto Air Top 2000 STC)', icon: 'ti-temperature', w: 10, h: 8, cat: 'Confort' },
+  { n: 'Chauffage diesel 4kW (Eberspächer D4)', icon: 'ti-temperature', w: 15, h: 8, cat: 'Confort' },
+  { n: 'Chauffage diesel 5kW (Autoterm Air 5D)', icon: 'ti-temperature', w: 18, h: 8, cat: 'Confort' },
+  { n: 'Chauffage gaz + électronique (Truma Combi 4)', icon: 'ti-temperature', w: 15, h: 8, cat: 'Confort' },
+  { n: 'Chauffage électrique soufflant 1000W', icon: 'ti-temperature', w: 1000, h: 3, cat: 'Confort' },
+  { n: 'Couverture chauffante 12V (Motortrend)', icon: 'ti-bed', w: 60, h: 6, cat: 'Confort' },
+  { n: 'Matelas chauffant 12V (Kingleting)', icon: 'ti-bed', w: 40, h: 8, cat: 'Confort' },
+  { n: 'Chauffe-eau instantané 12V (Fogatti InstaShower)', icon: 'ti-droplets', w: 180, h: 0.5, cat: 'Confort' },
+  { n: 'Chauffe-eau cumulus 10L 230V (Truma Ultrastore)', icon: 'ti-droplets', w: 900, h: 1, cat: 'Confort' },
+  { n: 'Radiateur à eau chaude (chauffage gaz)', icon: 'ti-temperature', w: 8, h: 10, cat: 'Confort' },
+  { n: 'Rideau moustiquaire électrique porte', icon: 'ti-wind', w: 5, h: 12, cat: 'Confort' },
+  // ── Tech ─────────────────────────────────────────────────────────────────────
+  { n: 'Laptop 15" (MacBook Pro M3)', icon: 'ti-device-laptop', w: 30, h: 6, cat: 'Tech' },
+  { n: 'Laptop 15" PC (Dell XPS 15)', icon: 'ti-device-laptop', w: 65, h: 6, cat: 'Tech' },
+  { n: 'Laptop gaming 17" (ASUS ROG)', icon: 'ti-device-laptop', w: 180, h: 4, cat: 'Tech' },
+  { n: 'Smartphone (iPhone 15 Pro, charge)', icon: 'ti-device-mobile', w: 10, h: 2, cat: 'Tech' },
+  { n: 'Smartphones ×2 (charge)', icon: 'ti-device-mobile', w: 20, h: 2, cat: 'Tech' },
+  { n: 'Tablette (iPad Air, charge)', icon: 'ti-device-tablet', w: 20, h: 3, cat: 'Tech' },
+  { n: 'Télévision 24" LED (Avtex)', icon: 'ti-device-tv', w: 25, h: 3, cat: 'Tech' },
+  { n: 'Télévision 32" LED (Cello)', icon: 'ti-device-tv', w: 40, h: 3, cat: 'Tech' },
+  { n: 'Box TNT satellite (Foxsat)', icon: 'ti-device-tv', w: 15, h: 4, cat: 'Tech' },
+  { n: 'Routeur 4G/WiFi (GL.iNet GL-E750)', icon: 'ti-wifi', w: 6, h: 24, cat: 'Tech' },
+  { n: 'Routeur 4G haut débit (Pepwave MAX BR1)', icon: 'ti-wifi', w: 15, h: 24, cat: 'Tech' },
+  { n: 'Amplificateur WiFi (Netgear Orbi)', icon: 'ti-wifi', w: 20, h: 24, cat: 'Tech' },
+  { n: 'Drone DJI Mini 4 Pro (charge batterie)', icon: 'ti-drone', w: 30, h: 1.5, cat: 'Tech' },
+  { n: 'Drone DJI Air 3 (charge batterie)', icon: 'ti-drone', w: 60, h: 1.5, cat: 'Tech' },
+  { n: 'Appareil photo mirrorless (Sony A7, charge)', icon: 'ti-camera', w: 10, h: 1.5, cat: 'Tech' },
+  { n: 'GoPro ×2 (charge)', icon: 'ti-camera', w: 10, h: 2, cat: 'Tech' },
+  { n: 'Enceinte Bluetooth portable (JBL Charge 5)', icon: 'ti-music', w: 15, h: 4, cat: 'Tech' },
+  { n: 'Système audio amplifié 12V (Alpine)', icon: 'ti-music', w: 50, h: 3, cat: 'Tech' },
+  { n: 'Console de jeu portable (Nintendo Switch)', icon: 'ti-device-gamepad', w: 18, h: 3, cat: 'Tech' },
+  { n: 'Imprimante jet d\'encre 230V (Canon PIXMA)', icon: 'ti-printer', w: 12, h: 0.5, cat: 'Tech' },
+  { n: 'Disque dur externe USB (2.5")', icon: 'ti-database', w: 3, h: 4, cat: 'Tech' },
+  // ── Eau ──────────────────────────────────────────────────────────────────────
+  { n: 'Pompe à eau 12V (Flojet 2840)', icon: 'ti-droplet', w: 30, h: 0.5, cat: 'Eau' },
+  { n: 'Pompe à eau 12V haute pression (Shurflo 4008)', icon: 'ti-droplet', w: 50, h: 0.5, cat: 'Eau' },
+  { n: 'Pompe à eau pression auto (Jabsco PAR-MAX 3)', icon: 'ti-droplet', w: 65, h: 0.5, cat: 'Eau' },
+  { n: 'Pompe de transfert eau 12V', icon: 'ti-droplet', w: 50, h: 0.3, cat: 'Eau' },
+  { n: 'Douche extérieure solaire chauffante (Nemo Helio)', icon: 'ti-droplets', w: 10, h: 0.3, cat: 'Eau' },
+  { n: 'Chauffe-eau solaire 25L (pompe + controller)', icon: 'ti-droplets', w: 20, h: 0.5, cat: 'Eau' },
+  { n: 'WC électrique à cassette (Dometic CTS 4110)', icon: 'ti-toilet-paper', w: 35, h: 0.3, cat: 'Eau' },
+  { n: 'WC à compostage électrique (Nature\'s Head)', icon: 'ti-toilet-paper', w: 5, h: 24, cat: 'Eau' },
+  { n: 'Dessalinisateur 12V (Katadyn Power Survivor)', icon: 'ti-droplet', w: 40, h: 2, cat: 'Eau' },
+  { n: 'Filtre à eau UV (SteriPen) + pompe', icon: 'ti-droplet', w: 8, h: 0.5, cat: 'Eau' },
+  { n: 'Moniteur niveau eau (jauge)', icon: 'ti-droplet', w: 1, h: 24, cat: 'Eau' },
+  { n: 'Pompe vide-cave / évacuation', icon: 'ti-droplet', w: 80, h: 0.2, cat: 'Eau' },
+  // ── Éclairage ────────────────────────────────────────────────────────────────
+  { n: 'Éclairage LED bande 5m 12V (Govee)', icon: 'ti-bulb', w: 12, h: 5, cat: 'Éclairage' },
+  { n: 'Spots LED encastrés ×4 12V (3W chacun)', icon: 'ti-lamp', w: 12, h: 4, cat: 'Éclairage' },
+  { n: 'Spots LED encastrés ×6 12V (3W chacun)', icon: 'ti-lamp', w: 18, h: 4, cat: 'Éclairage' },
+  { n: 'Plafonnier LED 12V principal (12W)', icon: 'ti-bulb', w: 12, h: 5, cat: 'Éclairage' },
+  { n: 'Luminaire LED cuisine 12V (8W)', icon: 'ti-lamp', w: 8, h: 3, cat: 'Éclairage' },
+  { n: "Lampe d'ambiance 12V (Paulmann)", icon: 'ti-lamp-2', w: 6, h: 5, cat: 'Éclairage' },
+  { n: 'Éclairage de lecture 12V (2×3W)', icon: 'ti-lamp', w: 6, h: 2, cat: 'Éclairage' },
+  { n: 'Lumière extérieure LED auvent 12V', icon: 'ti-lamp', w: 10, h: 3, cat: 'Éclairage' },
+  { n: 'Phares de travail LED 12V ×2 (20W chacun)', icon: 'ti-focus', w: 40, h: 2, cat: 'Éclairage' },
+  { n: 'Projecteur LED 12V 50W (chantier)', icon: 'ti-focus', w: 50, h: 2, cat: 'Éclairage' },
+  { n: 'Éclairage coffres extérieurs 12V', icon: 'ti-bulb', w: 5, h: 1, cat: 'Éclairage' },
+  // ── Système ──────────────────────────────────────────────────────────────────
+  { n: 'Onduleur / Convertisseur 12V→230V 1000W (Victron Phoenix)', icon: 'ti-plug', w: 10, h: 24, cat: 'Système' },
+  { n: 'Onduleur/chargeur 12V 1500W (Victron MultiPlus)', icon: 'ti-plug', w: 15, h: 24, cat: 'Système' },
+  { n: 'Régulateur MPPT 75/15 (Victron)', icon: 'ti-solar-panel', w: 2, h: 24, cat: 'Système' },
+  { n: 'Régulateur MPPT 100/50 (Victron)', icon: 'ti-solar-panel', w: 4, h: 24, cat: 'Système' },
+  { n: 'Régulateur MPPT 150/35 (EPever Tracer)', icon: 'ti-solar-panel', w: 4, h: 24, cat: 'Système' },
+  { n: 'Chargeur DC-DC B2B 30A (Victron Orion-Tr Smart)', icon: 'ti-car', w: 15, h: 4, cat: 'Système' },
+  { n: 'Chargeur DC-DC B2B 40A (Sterling BB1240)', icon: 'ti-car', w: 20, h: 4, cat: 'Système' },
+  { n: 'BMS batterie Lithium (Daly 100A)', icon: 'ti-battery-charging', w: 3, h: 24, cat: 'Système' },
+  { n: 'Moniteur batterie 500A (Victron BMV-712)', icon: 'ti-battery', w: 1, h: 24, cat: 'Système' },
+  { n: 'Moniteur batterie (Renogy 500A)', icon: 'ti-battery', w: 1, h: 24, cat: 'Système' },
+  { n: 'Alarme 12V + sirène', icon: 'ti-alarm', w: 3, h: 24, cat: 'Système' },
+  { n: 'GPS tracker 12V (câblé, Rewire Security)', icon: 'ti-map-pin', w: 2, h: 24, cat: 'Système' },
+  { n: 'Centrale de commande 12V (Victron Cerbo GX)', icon: 'ti-settings', w: 4, h: 24, cat: 'Système' },
+  { n: 'Répartiteur de charge (VSR 12V)', icon: 'ti-plug', w: 1, h: 4, cat: 'Système' },
+  { n: 'Réchauffeur de batterie 12V (en hiver)', icon: 'ti-temperature', w: 25, h: 8, cat: 'Système' },
 ]
 
 const CATS = ['Tout', 'Cuisine', 'Confort', 'Tech', 'Eau', 'Éclairage', 'Système']
@@ -152,36 +220,13 @@ const CATICONS = {
   Eau: 'ti-droplet', Éclairage: 'ti-bulb', Système: 'ti-settings', Tout: 'ti-apps',
 }
 
-// ─── API KEY ──────────────────────────────────────────────────────────────────
-const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || ''
-
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
-const SB_HDR  = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
 
 // Client Supabase (auth + requêtes authentifiées)
 const supabase = createClient(SB_URL, SB_KEY)
-
-// ─── AI RATE LIMIT ────────────────────────────────────────────────────────────
-
-const AI_LIMIT_FREE = 5
-
-function getAiSearchesLeft() {
-  if (S.user?.plan === 'pro') return Infinity
-  const today = new Date().toDateString()
-  const stored = JSON.parse(localStorage.getItem('ow_ai_searches') || '{}')
-  if (stored.date !== today) return AI_LIMIT_FREE
-  return Math.max(0, AI_LIMIT_FREE - (stored.count || 0))
-}
-
-function consumeAiSearch() {
-  const today = new Date().toDateString()
-  const stored = JSON.parse(localStorage.getItem('ow_ai_searches') || '{}')
-  const count = stored.date === today ? (stored.count || 0) + 1 : 1
-  localStorage.setItem('ow_ai_searches', JSON.stringify({ date: today, count }))
-}
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
@@ -263,83 +308,6 @@ async function deleteConfig(configId) {
   await loadUserConfigs()
 }
 
-// Cache mémoire pour éviter des requêtes répétées à Supabase dans la session
-let _catalogCache = null
-let _catalogCacheAt = 0
-
-async function loadCatalogFromDB() {
-  if (_catalogCache && Date.now() - _catalogCacheAt < 60_000) return _catalogCache
-  try {
-    const res = await fetch(`${SB_URL}/rest/v1/equipment_catalog?select=*&order=created_at.desc&limit=500`, { headers: SB_HDR })
-    if (!res.ok) return []
-    _catalogCache = await res.json()
-    _catalogCacheAt = Date.now()
-    return _catalogCache
-  } catch { return [] }
-}
-
-async function searchCatalog(q) {
-  if (!q.trim()) return []
-  const terms = q.toLowerCase().split(/\s+/).filter(t => t.length > 2)
-  if (!terms.length) return []
-
-  // Recherche via full-text Postgres (rapide)
-  const tsQuery = terms.join(' | ')
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/equipment_catalog?select=*&fts=search_vector.phfts(french).${encodeURIComponent(tsQuery)}&limit=10`,
-      { headers: SB_HDR }
-    )
-    if (res.ok) {
-      const rows = await res.json()
-      if (rows.length) return rows
-    }
-  } catch {}
-
-  // Fallback : filtre client sur le cache
-  const catalog = await loadCatalogFromDB()
-  return catalog.filter(r => {
-    const hay = [r.name, r.brand, r.type, r.description].join(' ').toLowerCase()
-    return terms.some(t => hay.includes(t))
-  })
-}
-
-async function mergeIntoCatalog(newResults) {
-  if (!newResults.length) return
-  const rows = newResults.map(r => ({
-    name: r.name,
-    brand: r.brand || null,
-    voltage: r.voltage || 12,
-    price_eur: r.price_eur || null,
-    description: r.description || null,
-    type: r.type || null,
-    efficiency: r.efficiency || null,
-    modes: r.modes || null,
-    search_keywords: [r.name, r.brand, r.type].filter(Boolean).map(s => s.toLowerCase()),
-  }))
-  try {
-    await fetch(`${SB_URL}/rest/v1/equipment_catalog`, {
-      method: 'POST',
-      headers: { ...SB_HDR, 'Prefer': 'resolution=ignore-duplicates' },
-      body: JSON.stringify(rows),
-    })
-    _catalogCache = null // invalider le cache
-  } catch {}
-}
-
-// Mapping type Supabase → catégorie locale
-function sbTypeToCat(type) {
-  if (!type) return null
-  const t = type.toLowerCase()
-  if (/chauffage|climatiseur|clim|ventilat|confort|couverture/.test(t)) return 'Confort'
-  if (/réfrigér|frigo|congél|micro.onde|café|bouilloire|plaque|cuisine|cuisson/.test(t)) return 'Cuisine'
-  if (/éclairage|lampe|led|lumière|spot|phare/.test(t)) return 'Éclairage'
-  if (/pompe|eau|douche|wc|toilette/.test(t)) return 'Eau'
-  if (/laptop|ordinat|télé|tv|smartphone|téléphone|routeur|drone|appareil.photo|enceinte|tablette/.test(t)) return 'Tech'
-  if (/convertisseur|régulat|bms|alarme|gps|système|onduleur/.test(t)) return 'Système'
-  return null
-}
-
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
 let S = {
@@ -371,7 +339,6 @@ let S = {
   bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
   solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
   altOn: true, altAmps: 20, altHours: 2,
-  aiQuery: '', aiResults: [], aiCatalogResults: [], aiOnlineResults: [], aiLoading: false, aiError: null,
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false,
   scenarios: { A: null, B: null }, hookupCost: 4,
@@ -494,7 +461,6 @@ function buildHTML() {
     ${S.tab === 'apps'    ? buildAppsTab()    : ''}
     ${S.tab === 'energy'  ? buildEnergyTab()  : ''}
     ${S.tab === 'compare' ? buildCompareTab() : ''}
-    ${S.tab === 'ai'      ? buildAITab()      : ''}
   `
 }
 
@@ -534,8 +500,8 @@ function buildHeader() {
 function buildTabs() {
   return `
   <div class="tabs">
-    ${[['energy','ti-bolt','tab.energy'],['apps','ti-plug','tab.apps'],['ai','ti-sparkles','tab.ai'],['compare','ti-arrows-diff','tab.compare']].map(([k,ic,lb]) => `
-      <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${t(lb)}</div>`).join('')}
+    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['compare','ti-arrows-diff','Comparer']].map(([k,ic,lb]) => `
+      <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${lb}</div>`).join('')}
   </div>`
 }
 
@@ -1143,85 +1109,6 @@ function buildCompareReport(A, B, cA, cB, kA, kB, roi) {
   <div class="pr-footer">${t('pr.compare.footer')}</div>`
 }
 
-// ── AI TAB ───────────────────────────────────────────────────────────────────
-
-function buildAIResultCard(r, i, source) {
-  const modes = r.modes && r.modes.length > 1 ? r.modes : null
-  const mainWatts = modes ? modes[0]?.watts : (r.watts ?? null)
-  const canAdd = mainWatts != null || modes
-
-  return `
-  <div class="ai-item">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-      <div class="ain">${r.name}${r.brand ? ` <span style="font-size:10px;color:var(--t3)">— ${r.brand}</span>` : ''}
-        ${source === 'catalog' ? `<span class="src-badge catalog"><i class="ti ti-database"></i></span>` : source === 'online' ? `<span class="src-badge online"><i class="ti ti-world"></i> ${t('ai.new')}</span>` : ''}
-      </div>
-      ${r.efficiency ? `<span style="font-size:10px;color:var(--te);font-family:var(--mono);white-space:nowrap">${r.efficiency}</span>` : ''}
-    </div>
-    <div class="aimeta">
-      ${r.voltage ? `<span>${r.voltage}V</span>` : ''}
-      ${r.price_eur ? `<span class="aip">~${r.price_eur} €</span>` : ''}
-      ${r.type ? `<span style="color:var(--t3)">${r.type}</span>` : ''}
-    </div>
-    <div class="aid">${r.description}</div>
-    ${modes ? `
-      <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">
-        ${modes.map(m => `<span style="background:var(--s3);border:1px solid var(--b1);border-radius:3px;padding:2px 7px;font-size:10px;font-family:var(--mono)"><span style="color:var(--am)">${m.watts} W</span> <span style="color:var(--t3)">${m.label}</span></span>`).join('')}
-      </div>
-      <div style="font-size:10px;color:var(--t3);margin-top:3px">${t('ai.switchable')}</div>` :
-      mainWatts != null ? `<div class="aimeta" style="margin-top:4px"><span class="aiw">${mainWatts} W</span><span style="font-size:10px;color:var(--t3)">12V</span></div>` : ''}
-    ${canAdd ? `<button class="aiadd" data-ai="${i}"><i class="ti ti-plus" style="font-size:10px"></i> ${t('ai.addToDashboard')}</button>` : ''}
-  </div>`
-}
-
-function buildAITab() {
-  const catalogSize = _catalogCache ? _catalogCache.length : '…'
-  const catResults = S.aiCatalogResults
-  const onlResults = S.aiOnlineResults
-  const searchesLeft = getAiSearchesLeft()
-  const isPro = S.user?.plan === 'pro'
-
-  return `
-  <div class="card">
-    <div class="ct">
-      <i class="ti ti-sparkles"></i>${t('ai.title')}
-      ${catalogSize > 0 ? `<span class="cat-badge"><i class="ti ti-database" style="font-size:10px"></i> ${t('ai.inCatalog', { n: catalogSize })}</span>` : ''}
-    </div>
-    <p style="font-size:12px;color:var(--t2);margin-bottom:8px">${t('ai.subtitle')}</p>
-    ${!isPro ? `
-    <div class="ai-quota${searchesLeft === 0 ? ' depleted' : ''}">
-      <i class="ti ti-${searchesLeft > 0 ? 'bolt' : 'lock'}" style="font-size:11px"></i>
-      ${searchesLeft > 0
-        ? `<span>${t('ai.searchesLeft', { n: searchesLeft, max: AI_LIMIT_FREE, s: searchesLeft > 1 ? 's' : '' })}</span>`
-        : `<span>${t('ai.quotaReached')}<button class="quota-cta" id="open-auth-quota">${t('ai.goPro')}</button>${t('ai.forUnlimited')}</span>`}
-    </div>` : ''}
-    <div class="ai-row">
-      <input class="ai-in" id="aiq" type="text" placeholder="${t('ai.placeholder')}" value="${S.aiQuery}">
-      <button class="aibtn" id="ai-search" ${S.aiLoading || searchesLeft === 0 ? 'disabled' : ''}>
-        ${S.aiLoading ? '<div class="loading"><span></span><span></span><span></span></div>' : `<i class="ti ti-search"></i> ${t('ai.search')}`}
-      </button>
-    </div>
-    ${S.aiError ? `<div class="api-warn" style="margin-top:8px"><strong>⚠️ ${t('ai.error')}</strong> — ${S.aiError}</div>` : ''}
-
-    ${catResults.length ? `
-      <div class="ai-section-hd"><i class="ti ti-database"></i> ${t('ai.offlineCatalog', { n: catResults.length })}</div>
-      ${catResults.map((r, i) => buildAIResultCard(r, i, 'catalog')).join('')}` : ''}
-
-    ${S.aiLoading ? `
-      <div class="ai-section-hd" style="color:var(--so)"><i class="ti ti-world"></i> ${t('ai.searchingOnline')}
-        <div class="loading" style="display:inline-flex;margin-left:6px"><span></span><span></span><span></span></div>
-      </div>` : onlResults.length ? `
-      <div class="ai-section-hd" style="color:var(--te)"><i class="ti ti-world"></i> ${t('ai.onlineResults', { n: onlResults.length })}</div>
-      ${onlResults.map((r, i) => buildAIResultCard(r, catResults.length + i, 'online')).join('')}` : ''}
-
-    ${!catResults.length && !onlResults.length && !S.aiLoading && !S.aiError ? `
-      <div style="text-align:center;padding:28px;color:var(--t3)">
-        <i class="ti ti-search" style="font-size:26px;opacity:.3;display:block;margin-bottom:5px"></i>
-        <div style="font-size:11px">${t('ai.emptyPrompt')}</div>
-      </div>` : ''}
-  </div>`
-}
-
 // ── MODAL ────────────────────────────────────────────────────────────────────
 
 function buildModal() {
@@ -1303,7 +1190,7 @@ function buildModal() {
           </button>
         </div>
         ${isFree ? `<div style="font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">
-          ${t('modal.configs.freeInfo', { n: AI_LIMIT_FREE })}
+          Plan gratuit — 1 configuration sauvegardée
         </div>` : ''}
         ${S.userConfigs.length === 0
           ? `<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">
@@ -1333,49 +1220,35 @@ function buildModal() {
   }
 
   if (m.type === 'catalog') {
-    const cf = m.catFilter || 'Cuisine'
-    const localItems = CATALOG.filter(c => c.cat === cf)
+    const cf = m.catFilter || 'Tout'
+    const search = (m.search || '').toLowerCase().trim()
+    const batV = S.bat?.v || 12
+    const toAhLocal = (wh) => { const ah = wh / batV; return ah >= 10 ? Math.round(ah) : +ah.toFixed(1) }
 
-    // Mapper le champ `type` Supabase vers une catégorie locale
-    const sbItems = (_catalogCache || []).filter(item => sbTypeToCat(item.type) === cf)
-
-    const totalCount = localItems.length + sbItems.length
+    const allItems = search
+      ? CATALOG.filter(c => c.n.toLowerCase().includes(search))
+      : (cf === 'Tout' ? CATALOG : CATALOG.filter(c => c.cat === cf))
 
     return `
     <div class="ov" id="modal-overlay">
       <div class="mo">
-        <h3><i class="ti ti-book"></i> ${t('modal.catalog.title')} <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${t('modal.catalog.count', { n: totalCount })}</span></h3>
+        <h3><i class="ti ti-book"></i> Catalogue d'appareils <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${CATALOG.length} appareils</span></h3>
+        <input id="catalog-search" type="text" placeholder="Rechercher un appareil…" value="${m.search || ''}"
+          style="width:100%;margin-bottom:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
         <div class="catcatalog">
-          ${['Cuisine','Confort','Tech','Eau','Éclairage','Système'].map(c => `
-            <div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
+          ${['Tout','Cuisine','Confort','Tech','Eau','Éclairage','Système'].map(c => `
+            <div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${c}</div>`).join('')}
         </div>
         <div class="catgrid">
-          ${localItems.map(item => `
+          ${allItems.map(item => `
             <div class="catitem" data-catalog="${CATALOG.indexOf(item)}">
               <div>
-                <div class="cin">${ta(item.n)}</div>
-                <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span></div>
+                <div class="cin">${item.n}</div>
+                <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span><span style="color:var(--te)">${toAhLocal(item.w * item.h)} Ah/j</span></div>
               </div>
               <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
             </div>`).join('')}
-          ${sbItems.length ? `
-            ${localItems.length ? `<div class="catgrid-sep" style="grid-column:1/-1"><span><i class="ti ti-database" style="font-size:10px"></i> ${t('modal.catalog.aiCatalog', { n: sbItems.length })}</span></div>` : ''}
-            ${sbItems.map((item, i) => {
-              const watts = item.modes?.[0]?.watts ?? 0
-              const hasModes = item.modes && item.modes.length > 1
-              return `
-              <div class="catitem catitem-ai" data-sb-catalog="${_catalogCache.indexOf(item)}">
-                <div>
-                  <div class="cin">${item.name}${item.brand ? ` <span style="font-size:10px;color:var(--t3)">${item.brand}</span>` : ''}</div>
-                  <div class="cim">
-                    <span class="ciw">${hasModes ? item.modes.map(m => m.watts + 'W').join(' / ') : watts + 'W'}</span>
-                    ${item.price_eur ? `<span style="color:var(--te)">~${item.price_eur}€</span>` : ''}
-                  </div>
-                </div>
-                <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
-              </div>`
-            }).join('')}` : ''}
-          ${totalCount === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${t('modal.catalog.emptyCat')}</div>` : ''}
+          ${allItems.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">Aucun appareil trouvé</div>` : ''}
         </div>
         <div class="mo-btns"><button id="close-modal" class="mo-cancel">${t('btn.close')}</button></div>
       </div>
@@ -1475,12 +1348,6 @@ function bindEvents() {
   document.getElementById('sol-eff')?.addEventListener('change', e => set({ solEff: Math.min(0.98, Math.max(0.6, (parseInt(e.target.value) || 85) / 100)) }))
   document.getElementById('sun-zone')?.addEventListener('change', e => set({ sunIdx: parseInt(e.target.value) }))
   document.getElementById('custom-sun')?.addEventListener('input', e => { S.customSunH = e.target.value; render() })
-  // AI search
-  document.getElementById('aiq')?.addEventListener('input', e => { S.aiQuery = e.target.value })
-  document.getElementById('ai-search')?.addEventListener('click', () => {
-    const q = document.getElementById('aiq')?.value?.trim()
-    if (q) { S.aiQuery = q; searchAI(q) }
-  })
   // Mode switch on appliance card
   document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
     const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)
@@ -1490,8 +1357,6 @@ function bindEvents() {
       return { ...a, activeMode: mi, w: newW }
     })})
   }))
-  // Add from AI results
-  document.querySelectorAll('[data-ai]').forEach(el => el.addEventListener('click', () => addFromAI(parseInt(el.dataset.ai))))
   // Open modals
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
   // Modal overlay close
@@ -1505,19 +1370,9 @@ function bindEvents() {
     const item = CATALOG[parseInt(el.dataset.catalog)]
     set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
   }))
-  // Add from Supabase AI catalog
-  document.querySelectorAll('[data-sb-catalog]').forEach(el => el.addEventListener('click', () => {
-    const item = _catalogCache?.[parseInt(el.dataset.sbCatalog)]
-    if (!item) return
-    const modes = item.modes && item.modes.length > 1 ? item.modes : null
-    const watts = modes ? (modes[0]?.watts ?? 0) : (item.modes?.[0]?.watts ?? 0)
-    const cat = sbTypeToCat(item.type) || 'Tech'
-    const iconMap = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-    const name = item.name + (item.brand ? ` (${item.brand})` : '')
-    set({ apps: [...S.apps, { id: Date.now(), n: name, icon: iconMap[cat] || 'ti-plug', w: watts, h: 4, on: true, cat, modes, activeMode: 0 }], modal: null, tab: 'energy' })
-  }))
   // Add catalog
-  document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Cuisine' } }))
+  document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } }))
+  document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 
   // Comparateur
   document.getElementById('capture-a')?.addEventListener('click', () => captureScenario('A'))
@@ -1530,7 +1385,6 @@ function bindEvents() {
 
   // Auth
   document.getElementById('open-auth')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
-  document.getElementById('open-auth-quota')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
   document.getElementById('open-configs')?.addEventListener('click', () => set({ modal: { type: 'configs' } }))
   document.getElementById('auth-google')?.addEventListener('click', () => signInWithGoogle())
   document.getElementById('auth-email-send')?.addEventListener('click', () => {
@@ -1567,97 +1421,8 @@ function confirmCustom() {
   set({ apps: [...S.apps, { id: Date.now(), n, icon: icons[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
-function addFromAI(i) {
-  const r = S.aiResults[i]
-  const modes = r.modes && r.modes.length > 1 ? r.modes : null
-  const watts = modes ? (modes[0]?.watts ?? 0) : (r.watts ?? 0)
-  const name = r.name + (r.brand ? ` (${r.brand})` : '')
-  const cats = { réfrigérateur: 'Cuisine', frigo: 'Cuisine', chauffage: 'Confort', clim: 'Confort', éclairage: 'Éclairage', pompe: 'Eau', tv: 'Tech', laptop: 'Tech', micro: 'Cuisine', convertisseur: 'Système', régulateur: 'Système' }
-  const cat = Object.entries(cats).find(([k]) => r.type?.toLowerCase().includes(k))?.[1] || 'Tech'
-  const icons = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-temperature', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-  set({ apps: [...S.apps, { id: Date.now(), n: name, icon: icons[cat] || 'ti-plug', w: watts, h: 4, on: true, cat, modes, activeMode: 0 }], tab: 'energy' })
-}
-
-// ─── AI SEARCH ───────────────────────────────────────────────────────────────
-
-async function searchAI(q) {
-  // Vérification rate limit (free: 5/jour)
-  const left = getAiSearchesLeft()
-  if (left <= 0) {
-    set({ aiError: t('ai.limitReached') })
-    return
-  }
-
-  // 1. Recherche dans Supabase (instantanée)
-  set({ aiLoading: true, aiError: null, aiCatalogResults: [], aiOnlineResults: [], aiResults: [] })
-  const catalogHits = await searchCatalog(q)
-  if (catalogHits.length) {
-    set({ aiCatalogResults: catalogHits, aiResults: catalogHits })
-  }
-
-  // 2. Appel API en streaming
-  try {
-    const res = await fetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: q }),
-    })
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.error || `HTTP ${res.status}`)
-    }
-
-    // Lire le flux progressivement
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder()
-    let accumulated = ''
-
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      accumulated += decoder.decode(value, { stream: true })
-    }
-
-    // Consommer une recherche du quota
-    consumeAiSearch()
-
-    // Parser le JSON complet une fois le flux terminé
-    const cleaned = accumulated.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
-    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) throw new Error(t('ai.notParsable'))
-    const data = JSON.parse(jsonMatch[0])
-    const onlineResults = data.results || []
-
-    // Ne garder que les résultats nouveaux (absents du catalogue)
-    const catalogKeys = new Set(catalogHits.map(r => (r.name + (r.brand || '')).toLowerCase().replace(/\s/g, '')))
-    const newResults = onlineResults.filter(r => {
-      const k = (r.name + (r.brand || '')).toLowerCase().replace(/\s/g, '')
-      return !catalogKeys.has(k)
-    })
-
-    // Sauvegarder en base
-    mergeIntoCatalog(onlineResults)
-
-    set({
-      aiLoading: false,
-      aiOnlineResults: newResults,
-      aiCatalogResults: catalogHits,
-      aiResults: [...catalogHits, ...newResults],
-      aiError: (!catalogHits.length && !onlineResults.length) ? t('ai.noResults') : null,
-    })
-  } catch (e) {
-    set({
-      aiLoading: false,
-      aiError: catalogHits.length ? null : (e.message || t('ai.onlineError')),
-      aiOnlineResults: [],
-    })
-  }
-}
-
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
 loadPersistedState()
 render()
-loadCatalogFromDB().then(() => render())
 initAuth()
