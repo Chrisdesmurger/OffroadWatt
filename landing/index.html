@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OffroadWatt — Calculateur d'autonomie électrique</title>
+<meta name="description" content="Planifiez votre installation électrique pour camping-car, caravane ou van. Calcul instantané de l'autonomie batterie, solaire et alternateur.">
+<meta property="og:title" content="OffroadWatt — Votre autonomie électrique maîtrisée">
+<meta property="og:description" content="Calculateur intelligent pour camping-car, caravane et van. Gratuit, sans inscription.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#090b0a;--bg2:#0f1310;--bg3:#141a16;
+  --card:#141a16;--border:#1e2820;--border2:#2a3830;
+  --amber:#f0a030;--amber2:#e08820;--amber3:rgba(240,160,48,.12);
+  --teal:#2dd4bf;--teal2:#0f9985;--teal3:rgba(45,212,191,.10);
+  --green:#4ade80;--green3:rgba(74,222,128,.10);
+  --t1:#ddeedd;--t2:#7a9985;--t3:#4a6455;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  --r:8px;--r2:14px;--r3:20px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);line-height:1.6;overflow-x:hidden}
+
+/* ── NAV ─────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;gap:16px;
+  padding:0 32px;height:64px;
+  background:rgba(9,11,10,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:box-shadow .3s;
+}
+.logo{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber);text-decoration:none}
+.logo em{color:var(--t3);font-style:normal}
+.nav-links{display:flex;gap:24px;margin-left:auto;align-items:center}
+.nav-link{color:var(--t2);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-link:hover{color:var(--t1)}
+.lang-sel{display:flex;gap:3px}
+.lang-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--t3);cursor:pointer;transition:all .2s}
+.lang-btn.on,.lang-btn:hover{border-color:var(--amber);color:var(--amber)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--r);font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;text-decoration:none;border:none;font-family:var(--sans)}
+.btn-outline{background:none;border:1px solid var(--border2);color:var(--t2)}
+.btn-outline:hover{border-color:var(--amber);color:var(--amber)}
+.btn-primary{background:var(--amber);color:#090b0a}
+.btn-primary:hover{background:var(--amber2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(240,160,48,.25)}
+.btn-teal{background:var(--teal);color:#090b0a}
+.btn-teal:hover{background:var(--teal2);transform:translateY(-1px)}
+.btn-lg{padding:15px 32px;font-size:16px;border-radius:var(--r2)}
+.btn-ghost{background:var(--bg3);border:1px solid var(--border2);color:var(--t1)}
+.btn-ghost:hover{border-color:var(--amber);background:var(--amber3)}
+@media(max-width:768px){.nav-link{display:none}.nav-links{gap:10px}}
+
+/* ── HERO ────────────────────────────────────────────── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:80px 24px 60px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(240,160,48,.13) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%,rgba(45,212,191,.07) 0%,transparent 50%);
+}
+.hero-grid{
+  position:absolute;inset:0;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black 0%,transparent 70%);
+  opacity:.4;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--amber3);border:1px solid rgba(240,160,48,.3);color:var(--amber);
+  border-radius:100px;padding:7px 18px;font-size:11px;font-weight:600;
+  font-family:var(--mono);text-transform:uppercase;letter-spacing:1.2px;
+  margin-bottom:28px;position:relative;z-index:1;
+}
+.hero h1{
+  font-size:clamp(36px,7vw,72px);font-weight:700;line-height:1.1;
+  margin-bottom:24px;position:relative;z-index:1;letter-spacing:-1.5px;
+}
+.hero h1 .hl{color:var(--amber)}
+.hero>p{
+  font-size:clamp(15px,2.5vw,19px);color:var(--t2);max-width:580px;
+  margin-bottom:40px;position:relative;z-index:1;
+}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.hero-sub{margin-top:18px;font-size:12px;color:var(--t3);position:relative;z-index:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+.hero-sub i{font-size:14px;color:var(--green)}
+
+/* App preview */
+.hero-preview{margin-top:60px;position:relative;z-index:1;max-width:860px;width:100%}
+.preview-bar{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--r2) var(--r2) 0 0;
+  padding:12px 16px;display:flex;align-items:center;gap:8px;
+}
+.preview-dot{width:10px;height:10px;border-radius:50%}
+.preview-url{
+  flex:1;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:4px 12px;font-size:11px;
+  font-family:var(--mono);color:var(--t3);text-align:center;margin:0 8px;
+}
+.preview-screen{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-bottom:1px solid var(--border2);border-radius:0 0 var(--r2) var(--r2);
+  padding:20px;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,.5);
+}
+.fake-app{display:grid;grid-template-columns:1fr 200px;gap:12px;min-height:260px}
+@media(max-width:600px){.fake-app{grid-template-columns:1fr}}
+.fake-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.fake-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:4px}
+.fake-lbl i{color:var(--amber)}
+.fake-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.fake-icon{width:28px;height:28px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.fake-name{font-size:12px;color:var(--t1);flex:1}
+.fake-wh{font-family:var(--mono);font-size:11px;color:var(--amber)}
+.fake-tog{width:28px;height:16px;border-radius:8px;background:var(--teal);position:relative;flex-shrink:0}
+.fake-tog::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:white;top:2px;right:2px}
+.fake-stat{text-align:center;padding:12px;border-bottom:1px solid var(--border)}
+.fake-stat-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--amber)}
+.fake-stat-lbl{font-size:10px;color:var(--t3);margin-top:2px}
+.fake-bar{height:4px;border-radius:2px;background:var(--border);margin:4px 0}
+.fake-bar-fill{height:100%;border-radius:2px}
+
+/* ── STATS ───────────────────────────────────────────── */
+.stats-strip{
+  background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:36px 24px;
+}
+.stats-inner{display:flex;gap:0;flex-wrap:wrap;justify-content:center;align-items:center;max-width:800px;margin:0 auto}
+.stat{text-align:center;padding:0 40px}
+.stat-val{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--amber)}
+.stat-lbl{font-size:13px;color:var(--t3);margin-top:3px}
+.stat-sep{width:1px;height:44px;background:var(--border)}
+@media(max-width:600px){.stat{padding:16px 20px}.stat-sep{display:none}}
+
+/* ── SECTION ─────────────────────────────────────────── */
+section{padding:100px 24px}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:10px;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--teal);margin-bottom:16px;
+}
+.section-badge i{font-size:14px}
+.section-title{font-size:clamp(26px,4vw,44px);font-weight:700;margin-bottom:14px;line-height:1.15;letter-spacing:-.5px}
+.section-sub{font-size:17px;color:var(--t2);max-width:560px;margin-bottom:56px;line-height:1.65}
+.centered{text-align:center}
+.centered .section-sub{margin-left:auto;margin-right:auto}
+
+/* ── FEATURES ────────────────────────────────────────── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.features-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.features-grid{grid-template-columns:1fr}}
+.feature-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:28px;
+  transition:all .3s;position:relative;overflow:hidden;
+}
+.feature-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:radial-gradient(ellipse at top left,var(--amber3),transparent 60%);
+  transition:opacity .3s;
+}
+.feature-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{
+  width:48px;height:48px;border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:18px;position:relative;z-index:1;
+}
+.ic-a{background:var(--amber3);color:var(--amber)}
+.ic-t{background:var(--teal3);color:var(--teal)}
+.ic-g{background:var(--green3);color:var(--green)}
+.feature-title{font-size:17px;font-weight:600;margin-bottom:8px;position:relative;z-index:1}
+.feature-desc{font-size:14px;color:var(--t2);line-height:1.65;position:relative;z-index:1}
+
+/* ── HOW IT WORKS ────────────────────────────────────── */
+.hiw-bg{background:var(--bg2)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;position:relative}
+@media(max-width:768px){.steps{grid-template-columns:1fr;gap:36px}}
+.steps::before{
+  content:'';position:absolute;top:28px;left:16.5%;right:16.5%;
+  height:1px;background:linear-gradient(90deg,transparent,var(--border2) 30%,var(--border2) 70%,transparent);
+}
+@media(max-width:768px){.steps::before{display:none}}
+.step{text-align:center;position:relative}
+.step-num{
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber);
+  margin:0 auto 20px;background:var(--bg2);position:relative;z-index:1;
+}
+.step-title{font-size:18px;font-weight:600;margin-bottom:10px}
+.step-desc{font-size:14px;color:var(--t2);line-height:1.65}
+
+/* ── VEHICLES ────────────────────────────────────────── */
+.vehicles{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:600px){.vehicles{grid-template-columns:1fr}}
+.vehicle-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:32px 24px;text-align:center;
+  transition:all .3s;cursor:pointer;
+}
+.vehicle-card:hover{border-color:var(--amber);background:var(--amber3);transform:translateY(-2px)}
+.vehicle-icon{font-size:52px;margin-bottom:16px;display:block}
+.vehicle-title{font-size:19px;font-weight:700;margin-bottom:8px}
+.vehicle-desc{font-size:13px;color:var(--t2);line-height:1.6}
+
+/* ── AI SECTION ──────────────────────────────────────── */
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+@media(max-width:768px){.ai-grid{grid-template-columns:1fr;gap:40px}}
+.ai-demo{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:24px;position:relative;overflow:hidden;
+}
+.ai-demo::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,212,191,.15),transparent 70%);
+}
+.ai-input-row{display:flex;gap:8px;margin-bottom:16px}
+.ai-input-box{
+  flex:1;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:10px 14px;font-size:13px;
+  color:var(--t1);font-family:var(--sans);
+}
+.ai-result{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:13px;display:flex;align-items:center;gap:10px;
+  margin-bottom:8px;transition:all .2s;
+}
+.ai-result:hover{border-color:var(--teal);transform:translateX(4px)}
+.ai-badge{
+  font-family:var(--mono);font-size:8px;text-transform:uppercase;
+  letter-spacing:1px;padding:3px 8px;border-radius:100px;flex-shrink:0;
+}
+.badge-c{background:var(--teal3);color:var(--teal);border:1px solid var(--teal2)}
+.badge-o{background:rgba(240,160,48,.1);color:var(--amber);border:1px solid var(--amber2)}
+.ai-r-name{flex:1;font-size:13px;font-weight:500}
+.ai-r-w{font-family:var(--mono);font-size:12px;color:var(--amber)}
+.ai-typing{display:flex;gap:4px;align-items:center;padding:8px 2px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:blink 1.2s infinite}
+.ai-dot:nth-child(2){animation-delay:.2s}
+.ai-dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+/* ── PRICING ─────────────────────────────────────────── */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:780px;margin:0 auto}
+@media(max-width:600px){.pricing-grid{grid-template-columns:1fr}}
+.pricing-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:32px;
+}
+.pricing-card.featured{
+  border-color:var(--amber);background:rgba(240,160,48,.07);
+  position:relative;overflow:hidden;
+}
+.pricing-card.featured::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,160,48,.18),transparent 70%);
+}
+.pricing-badge{
+  display:inline-block;background:var(--amber);color:#090b0a;
+  font-family:var(--mono);font-size:9px;text-transform:uppercase;
+  letter-spacing:1px;padding:4px 10px;border-radius:100px;
+  margin-bottom:14px;font-weight:700;
+}
+.pricing-name{font-size:22px;font-weight:700;margin-bottom:6px}
+.pricing-price{font-family:var(--mono);font-size:40px;font-weight:700;margin-bottom:4px}
+.pricing-price span{font-size:16px;font-weight:400;color:var(--t2)}
+.pricing-desc{font-size:13px;color:var(--t2);margin-bottom:24px;line-height:1.5}
+.pricing-feats{list-style:none;margin-bottom:28px}
+.pricing-feats li{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;
+}
+.pricing-feats li:last-child{border:none}
+.pricing-feats li i{color:var(--green);flex-shrink:0;font-size:16px}
+.pricing-feats li.off{color:var(--t3)}
+.pricing-feats li.off i{color:var(--t3)}
+
+/* ── SIGNUP ──────────────────────────────────────────── */
+.signup-section{background:var(--bg2);position:relative;overflow:hidden}
+.signup-glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:700px;height:350px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(240,160,48,.08),transparent 70%);
+  pointer-events:none;
+}
+.signup-box{max-width:540px;margin:0 auto;text-align:center;position:relative;z-index:1}
+.signup-form{display:flex;gap:8px;margin-top:32px}
+@media(max-width:500px){.signup-form{flex-direction:column}}
+.signup-input{
+  flex:1;background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--r);padding:13px 16px;font-size:14px;
+  color:var(--t1);font-family:var(--sans);outline:none;transition:border-color .2s;
+}
+.signup-input:focus{border-color:var(--amber)}
+.signup-input::placeholder{color:var(--t3)}
+.signup-input.err{border-color:#f87171}
+.signup-success{
+  display:none;background:var(--green3);border:1px solid rgba(74,222,128,.4);
+  border-radius:var(--r2);padding:24px;margin-top:24px;text-align:center;
+}
+.signup-success.show{display:block}
+.signup-success i{font-size:32px;color:var(--green);display:block;margin-bottom:10px}
+.signup-note{font-size:12px;color:var(--t3);margin-top:14px}
+
+/* ── FOOTER ──────────────────────────────────────────── */
+footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px 32px}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:44px}
+@media(max-width:768px){.footer-top{grid-template-columns:1fr;gap:32px}}
+.footer-logo{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber);margin-bottom:12px}
+.footer-logo em{color:var(--t3);font-style:normal}
+.footer-desc{font-size:13px;color:var(--t2);max-width:280px;line-height:1.65}
+.footer-col h4{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:16px}
+.footer-links{list-style:none}
+.footer-links li{margin-bottom:10px}
+.footer-links a{color:var(--t2);text-decoration:none;font-size:13px;transition:color .2s}
+.footer-links a:hover{color:var(--t1)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:var(--t3)}
+.footer-badges{display:flex;gap:8px}
+.footer-badge{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:4px 10px;font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+
+/* ── SCROLL ANIMATIONS ───────────────────────────────── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s,transform .65s}
+.reveal.in{opacity:1;transform:none}
+.reveal-d1{transition-delay:.1s}
+.reveal-d2{transition-delay:.2s}
+.reveal-d3{transition-delay:.3s}
+
+/* ── UTILS ───────────────────────────────────────────── */
+@media(max-width:480px){section{padding:72px 20px}.hero{padding:80px 20px 48px}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────── -->
+<nav id="nav">
+  <a href="#" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="#features" class="nav-link" data-i18n="nav.features">Fonctionnalités</a>
+    <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>
+    <a href="#pricing" class="nav-link" data-i18n="nav.pricing">Tarifs</a>
+    <div class="lang-sel">
+      <button class="lang-btn" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="es">ES</button>
+    </div>
+    <a href="#" class="btn btn-outline" id="nav-login" data-i18n="nav.login">Se connecter</a>
+    <a href="#signup" class="btn btn-primary" data-i18n="nav.cta">
+      <i class="ti ti-bolt"></i>
+      <span data-i18n="nav.cta">Essayer gratuitement</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-badge reveal">
+    <i class="ti ti-bolt"></i>
+    <span data-i18n="hero.badge">Calculateur d'autonomie électrique</span>
+  </div>
+
+  <h1 class="reveal">
+    <span data-i18n="hero.t1">Planifiez votre</span><br>
+    <span class="hl" data-i18n="hero.t2">autonomie électrique</span><br>
+    <span data-i18n="hero.t3">partez l'esprit léger.</span>
+  </h1>
+
+  <p class="reveal" data-i18n="hero.sub">
+    Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires
+    et trouvez la batterie idéale pour votre camping-car, caravane ou van.
+  </p>
+
+  <div class="hero-ctas reveal">
+    <a href="#signup" class="btn btn-primary btn-lg">
+      <i class="ti ti-bolt"></i>
+      <span data-i18n="hero.cta1">Créer un compte gratuit</span>
+    </a>
+    <a id="hero-app-link" href="https://offroad-watt.vercel.app" class="btn btn-ghost btn-lg" target="_blank">
+      <i class="ti ti-player-play"></i>
+      <span data-i18n="hero.cta2">Voir l'application</span>
+    </a>
+  </div>
+
+  <p class="hero-sub reveal">
+    <i class="ti ti-shield-check"></i>
+    <span data-i18n="hero.note1">Gratuit · Sans installation ·</span>
+    <span data-i18n="hero.note2">Données confidentielles</span>
+  </p>
+
+  <!-- Fake app preview -->
+  <div class="hero-preview reveal">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#f87171"></div>
+      <div class="preview-dot" style="background:#fbbf24"></div>
+      <div class="preview-dot" style="background:#4ade80"></div>
+      <div class="preview-url">offroad-watt.vercel.app</div>
+    </div>
+    <div class="preview-screen">
+      <div class="fake-app">
+        <div>
+          <div class="fake-card" style="margin-bottom:10px">
+            <div class="fake-lbl"><i class="ti ti-plug"></i> <span data-i18n="preview.apps">Appareils actifs</span> · 5/9</div>
+            <div class="fake-row">
+              <div class="fake-icon">🧊</div>
+              <span class="fake-name" data-i18n="preview.fridge">Réfrigérateur</span>
+              <span class="fake-wh">5.0 Ah</span>
+              <div class="fake-tog"></div>
+            </div>
+            <div class="fake-row">
+              <div class="fake-icon">💡</div>
+              <span class="fake-name" data-i18n="preview.lights">Éclairage LED</span>
+              <span class="fake-wh">1.6 Ah</span>
+              <div class="fake-tog"></div>
+            </div>
+            <div class="fake-row">
+              <div class="fake-icon">📱</div>
+              <span class="fake-name" data-i18n="preview.chargers">Chargeurs USB</span>
+              <span class="fake-wh">0.8 Ah</span>
+              <div class="fake-tog"></div>
+            </div>
+            <div class="fake-row" style="border:none">
+              <div class="fake-icon" style="opacity:.4">🌀</div>
+              <span class="fake-name" style="opacity:.4" data-i18n="preview.fan">Ventilateur</span>
+              <span class="fake-wh" style="opacity:.4">—</span>
+              <div class="fake-tog" style="background:var(--border)"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="fake-card" style="margin-bottom:10px">
+            <div class="fake-lbl" style="color:var(--amber)"><i class="ti ti-battery" style="color:var(--amber)"></i> <span data-i18n="preview.balance">Bilan</span></div>
+            <div class="fake-stat">
+              <div class="fake-stat-val">4.2</div>
+              <div class="fake-stat-lbl" data-i18n="preview.days">jours d'autonomie</div>
+            </div>
+            <div style="margin-top:12px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
+                <span data-i18n="preview.cons">Consommation</span>
+                <span style="color:var(--t1);font-family:var(--mono)">18 Ah/j</span>
+              </div>
+              <div class="fake-bar"><div class="fake-bar-fill" style="width:45%;background:linear-gradient(90deg,var(--teal),var(--amber))"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin:8px 0 4px">
+                <span data-i18n="preview.solar">Solaire</span>
+                <span style="color:var(--teal);font-family:var(--mono)">+12 Ah/j</span>
+              </div>
+              <div class="fake-bar"><div class="fake-bar-fill" style="width:30%;background:var(--teal)"></div></div>
+            </div>
+          </div>
+          <div class="fake-card" style="background:rgba(240,160,48,.08);border-color:rgba(240,160,48,.3)">
+            <div class="fake-lbl" style="color:var(--amber)"><i class="ti ti-trophy" style="color:var(--amber)"></i> <span data-i18n="preview.rec">Recommandé</span></div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Lithium 150 Ah 12V</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--t2)">~520 €</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ──────────────────────────────────────────────── -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat reveal">
+      <div class="stat-val">33+</div>
+      <div class="stat-lbl" data-i18n="stats.apps">Appareils préconfigurés</div>
+    </div>
+    <div class="stat-sep reveal"></div>
+    <div class="stat reveal reveal-d1">
+      <div class="stat-val">34</div>
+      <div class="stat-lbl" data-i18n="stats.bats">Modèles de batteries</div>
+    </div>
+    <div class="stat-sep reveal"></div>
+    <div class="stat reveal reveal-d2">
+      <div class="stat-val">41</div>
+      <div class="stat-lbl" data-i18n="stats.zones">Zones géographiques</div>
+    </div>
+    <div class="stat-sep reveal"></div>
+    <div class="stat reveal reveal-d3">
+      <div class="stat-val">3</div>
+      <div class="stat-lbl" data-i18n="stats.langs">Langues disponibles</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FEATURES ──────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-badge reveal"><i class="ti ti-sparkles"></i> <span data-i18n="feat.badge">Fonctionnalités</span></div>
+      <h2 class="section-title reveal" data-i18n="feat.title">Tout ce dont vous avez besoin</h2>
+      <p class="section-sub reveal" data-i18n="feat.sub">Un outil complet pour dimensionner votre installation électrique off-road avec une précision professionnelle.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon ic-a"><i class="ti ti-battery-charging"></i></div>
+        <div class="feature-title" data-i18n="f1.t">Calcul batterie intelligent</div>
+        <div class="feature-desc" data-i18n="f1.d">34 modèles AGM, GEL et Lithium (12V/24V). Le calculateur recommande la batterie optimale selon votre consommation réelle.</div>
+      </div>
+      <div class="feature-card reveal reveal-d1">
+        <div class="feature-icon ic-t"><i class="ti ti-sun"></i></div>
+        <div class="feature-title" data-i18n="f2.t">Solaire & Alternateur</div>
+        <div class="feature-desc" data-i18n="f2.d">Intégrez la production solaire (41 zones mondiales, MPPT) et la recharge alternateur pour calculer l'autonomie réelle.</div>
+      </div>
+      <div class="feature-card reveal reveal-d2">
+        <div class="feature-icon ic-g"><i class="ti ti-robot"></i></div>
+        <div class="feature-title" data-i18n="f3.t">Recherche IA</div>
+        <div class="feature-desc" data-i18n="f3.d">Tapez le nom de n'importe quel équipement. L'IA trouve sa consommation exacte et enrichit le catalogue communautaire.</div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon ic-a"><i class="ti ti-file-description"></i></div>
+        <div class="feature-title" data-i18n="f4.t">Export PDF</div>
+        <div class="feature-desc" data-i18n="f4.d">Générez un rapport A4 complet : tableau des appareils, bilan énergétique en Ah, recommandations de batteries du marché.</div>
+      </div>
+      <div class="feature-card reveal reveal-d1">
+        <div class="feature-icon ic-t"><i class="ti ti-arrows-diff"></i></div>
+        <div class="feature-title" data-i18n="f5.t">Comparateur de setups</div>
+        <div class="feature-desc" data-i18n="f5.d">Comparez deux configurations côte à côte avec calcul du ROI. Prenez la meilleure décision d'investissement.</div>
+      </div>
+      <div class="feature-card reveal reveal-d2">
+        <div class="feature-icon ic-g"><i class="ti ti-world"></i></div>
+        <div class="feature-title" data-i18n="f6.t">Multilingue EN/FR/ES</div>
+        <div class="feature-desc" data-i18n="f6.d">Interface disponible en anglais, français et espagnol avec détection automatique de la langue de votre navigateur.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────────── -->
+<section class="hiw-bg" id="hiw">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-badge reveal"><i class="ti ti-list-numbers"></i> <span data-i18n="hiw.badge">Comment ça marche</span></div>
+      <h2 class="section-title reveal" data-i18n="hiw.title">Prêt en 3 minutes</h2>
+      <p class="section-sub reveal" data-i18n="hiw.sub">Aucune installation requise. Ouvrez l'application et configurez votre installation électrique en quelques clics.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div class="step-title" data-i18n="s1.t">Listez vos appareils</div>
+        <p class="step-desc" data-i18n="s1.d">Sélectionnez vos équipements dans le catalogue de 33 presets ou entrez vos propres watts. Activez et désactivez chaque appareil.</p>
+      </div>
+      <div class="step reveal reveal-d1">
+        <div class="step-num">2</div>
+        <div class="step-title" data-i18n="s2.t">Configurez votre banque</div>
+        <p class="step-desc" data-i18n="s2.d">Choisissez votre batterie, ajoutez vos panneaux solaires et renseignez votre alternateur. Tout se calcule automatiquement en Ah.</p>
+      </div>
+      <div class="step reveal reveal-d2">
+        <div class="step-num">3</div>
+        <div class="step-title" data-i18n="s3.t">Obtenez votre autonomie</div>
+        <p class="step-desc" data-i18n="s3.d">L'autonomie s'affiche en temps réel. Exportez en PDF, sauvegardez vos configurations ou comparez deux setups différents.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── VEHICLE TYPES ──────────────────────────────────────── -->
+<section>
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-badge reveal"><i class="ti ti-car"></i> <span data-i18n="veh.badge">Pour tous les véhicules</span></div>
+      <h2 class="section-title reveal" data-i18n="veh.title">Votre compagnon de voyage</h2>
+      <p class="section-sub reveal" data-i18n="veh.sub">Qu'importe votre véhicule, OffroadWatt s'adapte à vos besoins électriques spécifiques.</p>
+    </div>
+    <div class="vehicles">
+      <div class="vehicle-card reveal">
+        <span class="vehicle-icon">🚌</span>
+        <div class="vehicle-title" data-i18n="v1.t">Camping-car</div>
+        <div class="vehicle-desc" data-i18n="v1.d">Frigo, climatisation, TV, cuisine... Dimensionnez pour un confort maximal en autonomie totale sur plusieurs jours.</div>
+      </div>
+      <div class="vehicle-card reveal reveal-d1">
+        <span class="vehicle-icon">🚐</span>
+        <div class="vehicle-title" data-i18n="v2.t">Van aménagé</div>
+        <div class="vehicle-desc" data-i18n="v2.d">Léger et efficace. Optimisez chaque watt pour un setup minimaliste et haute performance adapté à la mobilité.</div>
+      </div>
+      <div class="vehicle-card reveal reveal-d2">
+        <span class="vehicle-icon">🚗</span>
+        <div class="vehicle-title" data-i18n="v3.t">Caravane</div>
+        <div class="vehicle-desc" data-i18n="v3.d">Gérez la recharge depuis le véhicule tracteur et planifiez vos nuits hors connexion en toute sérénité.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── AI SECTION ─────────────────────────────────────────── -->
+<section class="hiw-bg">
+  <div class="section-inner">
+    <div class="ai-grid">
+      <div>
+        <div class="section-badge reveal"><i class="ti ti-robot"></i> <span data-i18n="ai.badge">Intelligence artificielle</span></div>
+        <h2 class="section-title reveal" data-i18n="ai.title">Un catalogue enrichi par l'IA</h2>
+        <p style="color:var(--t2);font-size:16px;margin-bottom:24px;line-height:1.7" class="reveal" data-i18n="ai.desc">
+          Tapez le nom d'un équipement — réfrigérateur 12V, panneau solaire, convertisseur Webasto —
+          et l'IA trouve instantanément sa consommation réelle. Les résultats enrichissent
+          automatiquement le catalogue communautaire partagé.
+        </p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px" class="reveal">
+          <li style="display:flex;align-items:center;gap:10px;font-size:14px">
+            <i class="ti ti-check" style="color:var(--green)"></i>
+            <span data-i18n="ai.f1">Recherche par nom de produit exact</span>
+          </li>
+          <li style="display:flex;align-items:center;gap:10px;font-size:14px">
+            <i class="ti ti-check" style="color:var(--green)"></i>
+            <span data-i18n="ai.f2">Consommation multi-modes (veille, min, max)</span>
+          </li>
+          <li style="display:flex;align-items:center;gap:10px;font-size:14px">
+            <i class="ti ti-check" style="color:var(--green)"></i>
+            <span data-i18n="ai.f3">Catalogue communautaire partagé et enrichi</span>
+          </li>
+          <li style="display:flex;align-items:center;gap:10px;font-size:14px">
+            <i class="ti ti-check" style="color:var(--green)"></i>
+            <span data-i18n="ai.f4">Résultats en moins de 5 secondes</span>
+          </li>
+        </ul>
+        <div style="margin-top:28px" class="reveal">
+          <a href="#signup" class="btn btn-teal">
+            <i class="ti ti-bolt"></i>
+            <span data-i18n="ai.cta">Accéder à la recherche IA</span>
+          </a>
+        </div>
+      </div>
+      <div class="ai-demo reveal">
+        <div class="fake-lbl" style="margin-bottom:14px;color:var(--teal)">
+          <i class="ti ti-search" style="color:var(--teal)"></i>
+          <span data-i18n="ai.search">Recherche IA</span>
+        </div>
+        <div class="ai-input-row">
+          <div class="ai-input-box" data-i18n-placeholder="ai.placeholder">Webasto Air Top 2000 STC...</div>
+          <button class="btn btn-teal" style="padding:10px 14px;font-size:13px"><i class="ti ti-search"></i></button>
+        </div>
+        <div class="ai-result">
+          <div class="ai-badge badge-c">Catalogue</div>
+          <span class="ai-r-name">Dometic CFF 35 Compressor</span>
+          <span class="ai-r-w">45W</span>
+        </div>
+        <div class="ai-result">
+          <div class="ai-badge badge-o">Online</div>
+          <span class="ai-r-name">Webasto Air Top 2000 STC</span>
+          <span class="ai-r-w">80W</span>
+        </div>
+        <div class="ai-result">
+          <div class="ai-badge badge-o">Online</div>
+          <span class="ai-r-name">Victron SmartSolar MPPT 75/15</span>
+          <span class="ai-r-w">15W</span>
+        </div>
+        <div class="ai-typing">
+          <div class="ai-dot"></div>
+          <div class="ai-dot"></div>
+          <div class="ai-dot"></div>
+          <span style="font-size:11px;color:var(--t3);margin-left:5px" data-i18n="ai.searching">Recherche en cours...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-badge reveal"><i class="ti ti-tag"></i> <span data-i18n="price.badge">Tarifs</span></div>
+      <h2 class="section-title reveal" data-i18n="price.title">Simple et transparent</h2>
+      <p class="section-sub reveal" data-i18n="price.sub">Commencez gratuitement. Passez Pro quand vous avez besoin de plus.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <div class="pricing-name" data-i18n="p1.name">Gratuit</div>
+        <div class="pricing-price">0€ <span data-i18n="p1.period">/ toujours</span></div>
+        <div class="pricing-desc" data-i18n="p1.desc">Parfait pour découvrir et dimensionner votre installation électrique.</div>
+        <ul class="pricing-feats">
+          <li><i class="ti ti-check"></i> <span data-i18n="p1.f1">Calcul d'autonomie complet en temps réel</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p1.f2">33 appareils préconfigurés + appareils custom</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p1.f3">Export PDF (rapport complet)</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p1.f4">Comparateur de setups A/B</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p1.f5">5 recherches IA par jour</span></li>
+          <li class="off"><i class="ti ti-x"></i> <span data-i18n="p1.f6">1 seule configuration sauvegardée</span></li>
+        </ul>
+        <a href="https://offroad-watt.vercel.app" class="btn btn-ghost" style="width:100%;justify-content:center" target="_blank" data-i18n="p1.cta">Commencer gratuitement</a>
+      </div>
+      <div class="pricing-card featured reveal reveal-d1">
+        <div class="pricing-badge" data-i18n="p2.badge">Recommandé</div>
+        <div class="pricing-name" data-i18n="p2.name">Pro</div>
+        <div class="pricing-price">4,99€ <span data-i18n="p2.period">/ mois</span></div>
+        <div class="pricing-desc" data-i18n="p2.desc">Pour les voyageurs sérieux qui veulent tout optimiser sans limite.</div>
+        <ul class="pricing-feats">
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f1">Tout du plan Gratuit</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f2">Configurations sauvegardées illimitées</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f3">Recherches IA illimitées</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f4">Synchronisation multi-appareils</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f5">Support prioritaire</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f6">Accès anticipé aux nouvelles fonctionnalités</span></li>
+        </ul>
+        <a href="#signup" class="btn btn-primary" style="width:100%;justify-content:center;position:relative;z-index:1" data-i18n="p2.cta">S'inscrire en Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SIGNUP ─────────────────────────────────────────────── -->
+<section class="signup-section" id="signup">
+  <div class="signup-glow"></div>
+  <div class="section-inner">
+    <div class="signup-box">
+      <div class="section-badge" style="justify-content:center;margin-bottom:16px">
+        <i class="ti ti-mail"></i> <span data-i18n="signup.badge">Inscription</span>
+      </div>
+      <h2 class="section-title reveal" data-i18n="signup.title">Commencez dès maintenant</h2>
+      <p style="color:var(--t2);font-size:17px;line-height:1.65" class="reveal" data-i18n="signup.sub">
+        Créez votre compte gratuitement pour sauvegarder vos configurations
+        et accéder à toutes les fonctionnalités de l'application.
+      </p>
+      <div class="signup-form reveal">
+        <input type="email" class="signup-input" id="signup-email"
+          placeholder="votre@email.com"
+          data-i18n-placeholder="signup.placeholder">
+        <button class="btn btn-primary" id="signup-btn" onclick="doSignup()">
+          <i class="ti ti-send"></i>
+          <span data-i18n="signup.btn">Continuer</span>
+        </button>
+      </div>
+      <div class="signup-success" id="signup-success">
+        <i class="ti ti-mail-check"></i>
+        <strong data-i18n="signup.ok1">Vérifiez votre boîte mail !</strong>
+        <p style="font-size:13px;color:var(--t2);margin-top:8px;line-height:1.6" data-i18n="signup.ok2">
+          Un lien magique vous a été envoyé. Cliquez dessus pour accéder directement à l'application OffroadWatt.
+        </p>
+      </div>
+      <p class="signup-note reveal" data-i18n="signup.note">
+        ✓ Gratuit · ✓ Pas de carte bancaire · ✓ Résiliable à tout moment
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">Offroad<em>Watt</em></div>
+        <p class="footer-desc" data-i18n="footer.desc">
+          Le calculateur d'autonomie électrique pour camping-car, caravane et van.
+          Planifiez. Optimisez. Voyagez.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.h1">Application</h4>
+        <ul class="footer-links">
+          <li><a href="https://offroad-watt.vercel.app" target="_blank" data-i18n="footer.open">Ouvrir l'app</a></li>
+          <li><a href="#features" data-i18n="footer.feat">Fonctionnalités</a></li>
+          <li><a href="#pricing" data-i18n="footer.price">Tarifs</a></li>
+          <li><a href="#signup" data-i18n="footer.signup">S'inscrire</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.h2">Liens</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/Chrisdesmurger/OffroadWatt" target="_blank">GitHub</a></li>
+          <li><a href="#" data-i18n="footer.privacy">Confidentialité</a></li>
+          <li><a href="#" data-i18n="footer.terms">Conditions</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy" data-i18n="footer.copy">© 2025 OffroadWatt. Tous droits réservés.</p>
+      <div class="footer-badges">
+        <span class="footer-badge">Vercel</span>
+        <span class="footer-badge">Supabase</span>
+        <span class="footer-badge">Claude AI</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const APP_URL = 'https://offroad-watt.vercel.app'
+const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
+const sb = window.supabase.createClient(SB_URL, SB_KEY)
+
+// ── i18n ────────────────────────────────────────────────────
+const DICT = {
+fr:{
+'nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.pricing':'Tarifs','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
+'hero.badge':'Calculateur d\'autonomie électrique',
+'hero.t1':'Planifiez votre','hero.t2':'autonomie électrique','hero.t3':'partez l\'esprit léger.',
+'hero.sub':'Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires et trouvez la batterie idéale pour votre camping-car, caravane ou van.',
+'hero.cta1':'Créer un compte gratuit','hero.cta2':'Voir l\'application',
+'hero.note1':'Gratuit · Sans installation ·','hero.note2':'Données confidentielles',
+'preview.apps':'Appareils actifs','preview.fridge':'Réfrigérateur','preview.lights':'Éclairage LED','preview.chargers':'Chargeurs USB','preview.fan':'Ventilateur',
+'preview.balance':'Bilan','preview.days':'jours d\'autonomie','preview.cons':'Consommation','preview.solar':'Solaire','preview.rec':'Recommandé',
+'stats.apps':'Appareils préconfigurés','stats.bats':'Modèles de batteries','stats.zones':'Zones géographiques','stats.langs':'Langues disponibles',
+'feat.badge':'Fonctionnalités','feat.title':'Tout ce dont vous avez besoin','feat.sub':'Un outil complet pour dimensionner votre installation électrique off-road avec une précision professionnelle.',
+'f1.t':'Calcul batterie intelligent','f1.d':'34 modèles AGM, GEL et Lithium (12V/24V). Le calculateur recommande la batterie optimale selon votre consommation réelle.',
+'f2.t':'Solaire & Alternateur','f2.d':'Intégrez la production solaire (41 zones mondiales, MPPT) et la recharge alternateur pour calculer l\'autonomie réelle.',
+'f3.t':'Recherche IA','f3.d':'Tapez le nom de n\'importe quel équipement. L\'IA trouve sa consommation exacte et enrichit le catalogue communautaire.',
+'f4.t':'Export PDF','f4.d':'Générez un rapport A4 complet : tableau des appareils, bilan énergétique en Ah, recommandations de batteries du marché.',
+'f5.t':'Comparateur de setups','f5.d':'Comparez deux configurations côte à côte avec calcul du ROI. Prenez la meilleure décision d\'investissement.',
+'f6.t':'Multilingue EN/FR/ES','f6.d':'Interface disponible en anglais, français et espagnol avec détection automatique de la langue de votre navigateur.',
+'hiw.badge':'Comment ça marche','hiw.title':'Prêt en 3 minutes','hiw.sub':'Aucune installation requise. Ouvrez l\'application et configurez votre installation électrique en quelques clics.',
+'s1.t':'Listez vos appareils','s1.d':'Sélectionnez vos équipements dans le catalogue de 33 presets ou entrez vos propres watts. Activez et désactivez chaque appareil.',
+'s2.t':'Configurez votre banque','s2.d':'Choisissez votre batterie, ajoutez vos panneaux solaires et renseignez votre alternateur. Tout se calcule automatiquement en Ah.',
+'s3.t':'Obtenez votre autonomie','s3.d':'L\'autonomie s\'affiche en temps réel. Exportez en PDF, sauvegardez vos configurations ou comparez deux setups différents.',
+'veh.badge':'Pour tous les véhicules','veh.title':'Votre compagnon de voyage','veh.sub':'Qu\'importe votre véhicule, OffroadWatt s\'adapte à vos besoins électriques spécifiques.',
+'v1.t':'Camping-car','v1.d':'Frigo, climatisation, TV, cuisine... Dimensionnez pour un confort maximal en autonomie totale sur plusieurs jours.',
+'v2.t':'Van aménagé','v2.d':'Léger et efficace. Optimisez chaque watt pour un setup minimaliste et haute performance adapté à la mobilité.',
+'v3.t':'Caravane','v3.d':'Gérez la recharge depuis le véhicule tracteur et planifiez vos nuits hors connexion en toute sérénité.',
+'ai.badge':'Intelligence artificielle','ai.title':'Un catalogue enrichi par l\'IA',
+'ai.desc':'Tapez le nom d\'un équipement — réfrigérateur 12V, panneau solaire, convertisseur Webasto — et l\'IA trouve instantanément sa consommation réelle.',
+'ai.f1':'Recherche par nom de produit exact','ai.f2':'Consommation multi-modes (veille, min, max)','ai.f3':'Catalogue communautaire partagé et enrichi','ai.f4':'Résultats en moins de 5 secondes',
+'ai.cta':'Accéder à la recherche IA','ai.search':'Recherche IA','ai.placeholder':'Webasto Air Top 2000 STC...','ai.searching':'Recherche en cours...',
+'price.badge':'Tarifs','price.title':'Simple et transparent','price.sub':'Commencez gratuitement. Passez Pro quand vous avez besoin de plus.',
+'p1.name':'Gratuit','p1.period':'/ toujours','p1.desc':'Parfait pour découvrir et dimensionner votre installation électrique.',
+'p1.f1':'Calcul d\'autonomie complet en temps réel','p1.f2':'33 appareils préconfigurés + appareils custom','p1.f3':'Export PDF (rapport complet)','p1.f4':'Comparateur de setups A/B','p1.f5':'5 recherches IA par jour','p1.f6':'1 seule configuration sauvegardée',
+'p1.cta':'Commencer gratuitement',
+'p2.badge':'Recommandé','p2.name':'Pro','p2.period':'/ mois','p2.desc':'Pour les voyageurs sérieux qui veulent tout optimiser sans limite.',
+'p2.f1':'Tout du plan Gratuit','p2.f2':'Configurations sauvegardées illimitées','p2.f3':'Recherches IA illimitées','p2.f4':'Synchronisation multi-appareils','p2.f5':'Support prioritaire','p2.f6':'Accès anticipé aux nouvelles fonctionnalités',
+'p2.cta':'S\'inscrire en Pro',
+'signup.badge':'Inscription','signup.title':'Commencez dès maintenant',
+'signup.sub':'Créez votre compte gratuitement pour sauvegarder vos configurations et accéder à toutes les fonctionnalités de l\'application.',
+'signup.placeholder':'votre@email.com','signup.btn':'Continuer',
+'signup.ok1':'Vérifiez votre boîte mail !','signup.ok2':'Un lien magique vous a été envoyé. Cliquez dessus pour accéder directement à l\'application OffroadWatt.',
+'signup.note':'✓ Gratuit · ✓ Pas de carte bancaire · ✓ Résiliable à tout moment',
+'footer.desc':'Le calculateur d\'autonomie électrique pour camping-car, caravane et van. Planifiez. Optimisez. Voyagez.',
+'footer.h1':'Application','footer.open':'Ouvrir l\'app','footer.feat':'Fonctionnalités','footer.price':'Tarifs','footer.signup':'S\'inscrire',
+'footer.h2':'Liens','footer.privacy':'Confidentialité','footer.terms':'Conditions',
+'footer.copy':'© 2025 OffroadWatt. Tous droits réservés.',
+},
+en:{
+'nav.features':'Features','nav.hiw':'How it works','nav.pricing':'Pricing','nav.login':'Sign in','nav.cta':'Try for free',
+'hero.badge':'Electrical autonomy calculator',
+'hero.t1':'Plan your','hero.t2':'electrical autonomy','hero.t3':'travel worry-free.',
+'hero.sub':'Calculate your consumption in real time, size your solar panels and find the ideal battery for your motorhome, caravan or van.',
+'hero.cta1':'Create a free account','hero.cta2':'View the app',
+'hero.note1':'Free · No install ·','hero.note2':'Private data',
+'preview.apps':'Active appliances','preview.fridge':'Refrigerator','preview.lights':'LED Lighting','preview.chargers':'USB Chargers','preview.fan':'Fan',
+'preview.balance':'Balance','preview.days':'days of autonomy','preview.cons':'Consumption','preview.solar':'Solar','preview.rec':'Recommended',
+'stats.apps':'Pre-configured appliances','stats.bats':'Battery models','stats.zones':'Geographic zones','stats.langs':'Available languages',
+'feat.badge':'Features','feat.title':'Everything you need','feat.sub':'A complete tool to size your off-road electrical installation with professional precision.',
+'f1.t':'Smart battery calculator','f1.d':'34 AGM, GEL and Lithium models (12V/24V). The calculator recommends the optimal battery for your actual consumption.',
+'f2.t':'Solar & Alternator','f2.d':'Integrate solar production (41 global zones, MPPT) and alternator charging to calculate real-world autonomy.',
+'f3.t':'AI Search','f3.d':'Type any equipment name. AI instantly finds its exact consumption and enriches the community catalog.',
+'f4.t':'PDF Export','f4.d':'Generate a complete A4 report: appliance table, energy balance in Ah, market battery recommendations.',
+'f5.t':'Setup comparator','f5.d':'Compare two configurations side by side with ROI calculation. Make the best investment decision.',
+'f6.t':'EN/FR/ES multilingual','f6.d':'Interface in English, French and Spanish with automatic browser language detection.',
+'hiw.badge':'How it works','hiw.title':'Ready in 3 minutes','hiw.sub':'No installation required. Open the app and configure your electrical setup in a few clicks.',
+'s1.t':'List your appliances','s1.d':'Select your equipment from 33 catalog presets or enter your own wattage. Enable and disable each appliance.',
+'s2.t':'Configure your bank','s2.d':'Choose your battery, add solar panels and enter your alternator. Everything is automatically calculated in Ah.',
+'s3.t':'Get your autonomy','s3.d':'Autonomy displays in real time. Export to PDF, save your configurations or compare two different setups.',
+'veh.badge':'For all vehicles','veh.title':'Your travel companion','veh.sub':'Whatever your vehicle, OffroadWatt adapts to your specific electrical needs.',
+'v1.t':'Motorhome','v1.d':'Fridge, AC, TV, kitchen... Size for maximum comfort in total autonomy over several days.',
+'v2.t':'Camper van','v2.d':'Light and efficient. Optimize every watt for a minimalist high-performance setup adapted to mobility.',
+'v3.t':'Caravan','v3.d':'Manage charging from the towing vehicle and plan your off-grid nights with peace of mind.',
+'ai.badge':'Artificial intelligence','ai.title':'A catalog enriched by AI',
+'ai.desc':'Type an equipment name — 12V fridge, solar panel, Webasto inverter — and AI instantly finds its real consumption.',
+'ai.f1':'Search by exact product name','ai.f2':'Multi-mode consumption (standby, min, max)','ai.f3':'Shared and enriched community catalog','ai.f4':'Results in under 5 seconds',
+'ai.cta':'Access AI search','ai.search':'AI Search','ai.placeholder':'Webasto Air Top 2000 STC...','ai.searching':'Searching...',
+'price.badge':'Pricing','price.title':'Simple and transparent','price.sub':'Start for free. Go Pro when you need more.',
+'p1.name':'Free','p1.period':'/ forever','p1.desc':'Perfect to discover and size your electrical installation.',
+'p1.f1':'Full real-time autonomy calculation','p1.f2':'33 pre-configured appliances + custom','p1.f3':'PDF export (complete report)','p1.f4':'A/B setup comparator','p1.f5':'5 AI searches per day','p1.f6':'1 saved configuration only',
+'p1.cta':'Get started free',
+'p2.badge':'Recommended','p2.name':'Pro','p2.period':'/ month','p2.desc':'For serious travelers who want to optimize everything without limits.',
+'p2.f1':'Everything in Free','p2.f2':'Unlimited saved configurations','p2.f3':'Unlimited AI searches','p2.f4':'Multi-device sync','p2.f5':'Priority support','p2.f6':'Early access to new features',
+'p2.cta':'Sign up for Pro',
+'signup.badge':'Sign up','signup.title':'Get started now',
+'signup.sub':'Create your free account to save your configurations and access all application features.',
+'signup.placeholder':'your@email.com','signup.btn':'Continue',
+'signup.ok1':'Check your inbox!','signup.ok2':'A magic link has been sent to you. Click it to access the OffroadWatt app directly.',
+'signup.note':'✓ Free · ✓ No credit card · ✓ Cancel anytime',
+'footer.desc':'The electrical autonomy calculator for motorhomes, caravans and vans. Plan. Optimize. Travel.',
+'footer.h1':'App','footer.open':'Open app','footer.feat':'Features','footer.price':'Pricing','footer.signup':'Sign up',
+'footer.h2':'Links','footer.privacy':'Privacy','footer.terms':'Terms',
+'footer.copy':'© 2025 OffroadWatt. All rights reserved.',
+},
+es:{
+'nav.features':'Características','nav.hiw':'Cómo funciona','nav.pricing':'Precios','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
+'hero.badge':'Calculadora de autonomía eléctrica',
+'hero.t1':'Planifica tu','hero.t2':'autonomía eléctrica','hero.t3':'viaja sin preocupaciones.',
+'hero.sub':'Calcula tu consumo en tiempo real, dimensiona tus paneles solares y encuentra la batería ideal para tu autocaravana, caravana o furgoneta.',
+'hero.cta1':'Crear cuenta gratis','hero.cta2':'Ver la aplicación',
+'hero.note1':'Gratis · Sin instalar ·','hero.note2':'Datos privados',
+'preview.apps':'Aparatos activos','preview.fridge':'Nevera','preview.lights':'Iluminación LED','preview.chargers':'Cargadores USB','preview.fan':'Ventilador',
+'preview.balance':'Balance','preview.days':'días de autonomía','preview.cons':'Consumo','preview.solar':'Solar','preview.rec':'Recomendado',
+'stats.apps':'Aparatos preconfigurados','stats.bats':'Modelos de baterías','stats.zones':'Zonas geográficas','stats.langs':'Idiomas disponibles',
+'feat.badge':'Características','feat.title':'Todo lo que necesitas','feat.sub':'Una herramienta completa para dimensionar tu instalación eléctrica off-road con precisión profesional.',
+'f1.t':'Cálculo inteligente de baterías','f1.d':'34 modelos AGM, GEL y Litio (12V/24V). La calculadora recomienda la batería óptima para tu consumo real.',
+'f2.t':'Solar y Alternador','f2.d':'Integra la producción solar (41 zonas globales, MPPT) y la carga por alternador para calcular la autonomía real.',
+'f3.t':'Búsqueda con IA','f3.d':'Escribe el nombre de cualquier equipo. La IA encuentra su consumo exacto y enriquece el catálogo comunitario.',
+'f4.t':'Exportar PDF','f4.d':'Genera un informe A4 completo: tabla de aparatos, balance energético en Ah, recomendaciones del mercado.',
+'f5.t':'Comparador de setups','f5.d':'Compara dos configuraciones con cálculo de ROI. Toma la mejor decisión de inversión.',
+'f6.t':'Multilingüe EN/FR/ES','f6.d':'Interfaz en inglés, francés y español con detección automática del idioma del navegador.',
+'hiw.badge':'Cómo funciona','hiw.title':'Listo en 3 minutos','hiw.sub':'Sin instalación requerida. Abre la aplicación y configura tu instalación eléctrica en unos pocos clics.',
+'s1.t':'Lista tus aparatos','s1.d':'Selecciona tu equipamiento del catálogo de 33 presets o introduce tus propios vatios. Activa y desactiva cada aparato.',
+'s2.t':'Configura tu banco','s2.d':'Elige tu batería, añade paneles solares e introduce tu alternador. Todo se calcula automáticamente en Ah.',
+'s3.t':'Obtén tu autonomía','s3.d':'La autonomía se muestra en tiempo real. Exporta a PDF, guarda configuraciones o compara dos setups diferentes.',
+'veh.badge':'Para todos los vehículos','veh.title':'Tu compañero de viaje','veh.sub':'Sea cual sea tu vehículo, OffroadWatt se adapta a tus necesidades eléctricas específicas.',
+'v1.t':'Autocaravana','v1.d':'Nevera, aire acondicionado, TV, cocina... Dimensiona para el máximo confort en autonomía total durante varios días.',
+'v2.t':'Furgoneta camper','v2.d':'Ligera y eficiente. Optimiza cada vatio para un setup minimalista de alto rendimiento adaptado a la movilidad.',
+'v3.t':'Caravana','v3.d':'Gestiona la carga desde el vehículo tractor y planifica tus noches sin conexión con total tranquilidad.',
+'ai.badge':'Inteligencia artificial','ai.title':'Un catálogo enriquecido por IA',
+'ai.desc':'Escribe el nombre de un equipo — nevera 12V, panel solar, inversor Webasto — y la IA encuentra instantáneamente su consumo real.',
+'ai.f1':'Búsqueda por nombre de producto exacto','ai.f2':'Consumo multi-modo (standby, mín, máx)','ai.f3':'Catálogo comunitario compartido y enriquecido','ai.f4':'Resultados en menos de 5 segundos',
+'ai.cta':'Acceder a la búsqueda IA','ai.search':'Búsqueda IA','ai.placeholder':'Webasto Air Top 2000 STC...','ai.searching':'Buscando...',
+'price.badge':'Precios','price.title':'Simple y transparente','price.sub':'Empieza gratis. Pasa a Pro cuando necesites más.',
+'p1.name':'Gratis','p1.period':'/ siempre','p1.desc':'Perfecto para descubrir y dimensionar tu instalación eléctrica.',
+'p1.f1':'Cálculo de autonomía completo en tiempo real','p1.f2':'33 aparatos preconfigurados + personalizados','p1.f3':'Exportar PDF (informe completo)','p1.f4':'Comparador de setups A/B','p1.f5':'5 búsquedas IA por día','p1.f6':'Solo 1 configuración guardada',
+'p1.cta':'Empezar gratis',
+'p2.badge':'Recomendado','p2.name':'Pro','p2.period':'/ mes','p2.desc':'Para viajeros serios que quieren optimizarlo todo sin límites.',
+'p2.f1':'Todo del plan Gratis','p2.f2':'Configuraciones guardadas ilimitadas','p2.f3':'Búsquedas IA ilimitadas','p2.f4':'Sincronización multi-dispositivo','p2.f5':'Soporte prioritario','p2.f6':'Acceso anticipado a nuevas funciones',
+'p2.cta':'Registrarse en Pro',
+'signup.badge':'Registro','signup.title':'Empieza ahora',
+'signup.sub':'Crea tu cuenta gratis para guardar tus configuraciones y acceder a todas las funciones de la aplicación.',
+'signup.placeholder':'tu@email.com','signup.btn':'Continuar',
+'signup.ok1':'¡Revisa tu correo!','signup.ok2':'Se te ha enviado un enlace mágico. Haz clic en él para acceder directamente a la aplicación OffroadWatt.',
+'signup.note':'✓ Gratis · ✓ Sin tarjeta · ✓ Cancela cuando quieras',
+'footer.desc':'La calculadora de autonomía eléctrica para autocaravanas, caravanas y furgonetas. Planifica. Optimiza. Viaja.',
+'footer.h1':'Aplicación','footer.open':'Abrir app','footer.feat':'Características','footer.price':'Precios','footer.signup':'Registrarse',
+'footer.h2':'Enlaces','footer.privacy':'Privacidad','footer.terms':'Términos',
+'footer.copy':'© 2025 OffroadWatt. Todos los derechos reservados.',
+}
+}
+
+// Detect language
+let _lang = localStorage.getItem('ow_land_lang') || (navigator.language||'fr').slice(0,2).toLowerCase()
+if(!['fr','en','es'].includes(_lang)) _lang = 'fr'
+
+function t(k){ return DICT[_lang]?.[k] || DICT.fr[k] || k }
+
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n) })
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder) })
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === _lang))
+  document.documentElement.lang = _lang
+}
+
+document.querySelectorAll('.lang-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    _lang = b.dataset.lang
+    localStorage.setItem('ow_land_lang', _lang)
+    applyLang()
+  })
+})
+
+applyLang()
+
+// "Se connecter" → redirect to app with auth modal
+document.getElementById('nav-login').href = APP_URL
+
+// ── SIGNUP (Magic Link) ─────────────────────────────────────
+async function doSignup(){
+  const email = document.getElementById('signup-email').value.trim()
+  const input = document.getElementById('signup-email')
+  const btn   = document.getElementById('signup-btn')
+
+  if(!email || !email.includes('@')){
+    input.classList.add('err')
+    input.focus()
+    return
+  }
+  input.classList.remove('err')
+  btn.disabled = true
+  btn.innerHTML = '<i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:16px"></i>'
+
+  try {
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: APP_URL, shouldCreateUser: true }
+    })
+    if(error) throw error
+    document.getElementById('signup-success').classList.add('show')
+    document.querySelector('.signup-form').style.display = 'none'
+  } catch(err){
+    console.error(err)
+    btn.disabled = false
+    btn.innerHTML = '<i class="ti ti-send"></i><span>' + t('signup.btn') + '</span>'
+    alert(err.message || 'Une erreur est survenue.')
+  }
+}
+
+document.getElementById('signup-email').addEventListener('keydown', e => {
+  if(e.key === 'Enter') doSignup()
+  document.getElementById('signup-email').classList.remove('err')
+})
+
+// ── SCROLL ANIMATIONS ──────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target) } })
+}, { threshold: 0.08 })
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+
+// ── NAV SHADOW ON SCROLL ────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.boxShadow =
+    window.scrollY > 10 ? '0 4px 32px rgba(0,0,0,.45)' : 'none'
+}, { passive: true })
+</script>
+</body>
+</html>
