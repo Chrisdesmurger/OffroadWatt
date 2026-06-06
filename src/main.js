@@ -834,7 +834,7 @@ function buildEnergyTab() {
         ${S.user ? `${t('save.myConfig')}${S.userConfigs.length ? ` <span class="save-count">${S.userConfigs.length}</span>` : ''}` : t('save.accountRequired')}
       </button>
 
-      <button class="pdf-btn" id="export-pdf" onclick="window.print()">
+      <button class="pdf-btn" id="export-pdf">
         <i class="ti ti-printer"></i> ${t('export.pdf')}
       </button>
 
@@ -1001,12 +1001,8 @@ function buildCompareTab() {
     </div>`
   } else {
     const cA = calc(A), cB = calc(B)
-    const kA = systemCost(A), kB = systemCost(B)
     const r0 = (n) => Math.round(n)
-    const surcout = kB.total - kA.total
     const gainAut = (isFinite(cB.autDays) && isFinite(cA.autDays)) ? cB.autDays - cA.autDays : null
-    const coutParJour = (gainAut && gainAut > 0 && surcout > 0) ? surcout / gainAut : null
-    const nuitsCamping = (surcout > 0 && S.hookupCost > 0) ? surcout / S.hookupCost : null
     const winner = isFinite(cB.autDays) && isFinite(cA.autDays) ? (cB.autDays > cA.autDays ? 'B' : cA.autDays > cB.autDays ? 'A' : null) : null
 
     body = `
@@ -1021,51 +1017,32 @@ function buildCompareTab() {
         ${cmpRow(t('compare.row.coverage'), cA.solCovPct, cB.solCovPct, r0, { unit: ' %' })}
         ${cmpRow(t('compare.row.autonomy'), cA.autDays, cB.autDays, fmtDays, { delta: false })}
       </tbody>
-      <tbody class="cmp-cost">
-        ${cmpRow(t('compare.row.batCost'), kA.batCost, kB.batCost, r0, { higherBetter: false, unit: ' €' })}
-        ${cmpRow(t('compare.row.solCost'), kA.solCost, kB.solCost, r0, { higherBetter: false, unit: ' €' })}
-        ${(A.altOn || B.altOn) ? cmpRow(t('compare.row.altCost'), kA.altCost, kB.altCost, r0, { higherBetter: false, unit: ' €' }) : ''}
-        ${cmpRow(t('compare.row.totalCost'), kA.total, kB.total, r0, { higherBetter: false, unit: ' €' })}
-      </tbody>
     </table>
 
     ${winner ? `<div class="cmp-winner"><i class="ti ti-trophy"></i> ${t('compare.winner', { w: winner })}</div>` : ''}
 
+    ${gainAut != null ? `
     <div class="card" style="margin-top:12px">
-      <div class="ct te"><i class="ti ti-calculator"></i>${t('compare.roiTitle')}</div>
-      ${surcout === 0 ? `<div style="font-size:12px;color:var(--t3)">${t('compare.sameCost')}</div>` : `
+      <div class="ct te"><i class="ti ti-trending-up"></i>${t('compare.autGainTitle')}</div>
       <div class="roi-grid">
         <div class="roi-item">
-          <div class="roi-v" style="color:${surcout > 0 ? 'var(--am)' : 'var(--gr)'}">${surcout > 0 ? '+' : ''}${r0(surcout)} €</div>
-          <div class="roi-l">${t('compare.extraCostB')}</div>
+          <div class="roi-v" style="color:var(--te)">${(gainAut > 0 ? '+' : '') + gainAut.toFixed(1)}</div>
+          <div class="roi-l">${t('compare.autGainDays')}</div>
         </div>
         <div class="roi-item">
-          <div class="roi-v" style="color:var(--te)">${gainAut != null ? (gainAut > 0 ? '+' : '') + gainAut.toFixed(1) + ' j' : '∞'}</div>
-          <div class="roi-l">${t('compare.autGain')}</div>
-        </div>
-        <div class="roi-item">
-          <div class="roi-v">${coutParJour != null ? '~' + r0(coutParJour) + ' €' : '—'}</div>
-          <div class="roi-l">${t('compare.costPerDay')}</div>
-        </div>
-        <div class="roi-item">
-          <div class="roi-v">${nuitsCamping != null ? '~' + r0(nuitsCamping) : '—'}</div>
-          <div class="roi-l">${t('compare.campingNights')}</div>
+          <div class="roi-v" style="color:var(--so)">${r0(cB.solCovPct - cA.solCovPct) > 0 ? '+' : ''}${r0(cB.solCovPct - cA.solCovPct)} %</div>
+          <div class="roi-l">${t('compare.solarGain')}</div>
         </div>
       </div>
-      <div class="roi-param">
-        <label>${t('compare.hookupPrice')}</label>
-        <input id="hookup-cost" type="number" min="0" max="30" step="0.5" value="${S.hookupCost}"> €
-        <span style="color:var(--t3);font-size:10px;margin-left:auto">${t('compare.hookupEquiv', { n: nuitsCamping != null ? t('compare.hookupNights', { n: r0(nuitsCamping) }) : '—' })}</span>
-      </div>`}
-    </div>
+    </div>` : ''}
 
-    <button class="pdf-btn" id="export-compare-pdf" onclick="window.print()" style="margin-top:12px">
+    <button class="pdf-btn" id="export-compare-pdf" style="margin-top:12px">
       <i class="ti ti-printer"></i> ${t('compare.exportPdf')}
     </button>`
 
     printReport = `
     <div class="print-report" id="print-report-compare">
-      ${buildCompareReport(A, B, cA, cB, kA, kB, { surcout, gainAut, coutParJour, nuitsCamping })}
+      ${buildCompareReport(A, B, cA, cB)}
     </div>`
   }
 
@@ -1082,10 +1059,11 @@ function buildCompareTab() {
   ${printReport}`
 }
 
-function buildCompareReport(A, B, cA, cB, kA, kB, roi) {
+function buildCompareReport(A, B, cA, cB) {
   const now = new Date().toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
   const r0 = (n) => Math.round(n)
   const row = (label, vA, vB, unit = '') => `<tr><td>${label}</td><td class="num">${typeof vA === 'number' ? r0(vA) : vA}${unit}</td><td class="num">${typeof vB === 'number' ? r0(vB) : vB}${unit}</td></tr>`
+  const gainAut = (isFinite(cB.autDays) && isFinite(cA.autDays)) ? cB.autDays - cA.autDays : null
   return `
   <div class="pr-header">
     <div class="pr-logo">OffroadWatt</div>
@@ -1116,27 +1094,14 @@ function buildCompareReport(A, B, cA, cB, kA, kB, roi) {
       </tbody>
     </table>
   </div>
+  ${gainAut != null ? `
   <div class="pr-section">
-    <div class="pr-sh">${t('pr.compare.systemCost')}</div>
-    <table class="pr-table">
-      <thead><tr><th>${t('pr.compare.post')}</th><th class="num">Setup A</th><th class="num">Setup B</th></tr></thead>
-      <tbody>
-        ${row(t('pr.compare.batteries'), kA.batCost, kB.batCost, ' €')}
-        ${row(t('pr.compare.solar'), kA.solCost, kB.solCost, ' €')}
-        ${(A.altOn || B.altOn) ? row(t('pr.compare.alternator'), kA.altCost, kB.altCost, ' €') : ''}
-        <tr class="pr-total"><td>${t('pr.compare.systemTotal')}</td><td class="num">${kA.total} €</td><td class="num">${kB.total} €</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="pr-section">
-    <div class="pr-sh">${t('pr.compare.roi')}</div>
+    <div class="pr-sh">${t('compare.autGainTitle')}</div>
     <table class="pr-kv">
-      <tr class="pr-hi"><td>${t('pr.compare.extraCostB')}</td><td>${roi.surcout > 0 ? '+' : ''}${r0(roi.surcout)} €</td></tr>
-      <tr><td>${t('pr.compare.autGain')}</td><td>${roi.gainAut != null ? (roi.gainAut > 0 ? '+' : '') + t('pr.compare.gainDays', { n: roi.gainAut.toFixed(1) }) : t('unit.unlimited')}</td></tr>
-      <tr><td>${t('pr.compare.costPerDay')}</td><td>${roi.coutParJour != null ? '~' + t('pr.compare.perDay', { n: r0(roi.coutParJour) }) : '—'}</td></tr>
-      <tr><td>${t('pr.compare.hookupEquiv')}</td><td>${roi.nuitsCamping != null ? '~' + t('pr.compare.nights', { n: r0(roi.nuitsCamping), price: S.hookupCost }) : '—'}</td></tr>
+      <tr class="${gainAut > 0 ? 'pr-ok' : ''}"><td>${t('compare.autGainDays')}</td><td>${gainAut > 0 ? '+' : ''}${gainAut.toFixed(1)} ${t('unit.days')}</td></tr>
+      <tr><td>${t('compare.solarGain')}</td><td>${r0(cB.solCovPct - cA.solCovPct) > 0 ? '+' : ''}${r0(cB.solCovPct - cA.solCovPct)} %</td></tr>
     </table>
-  </div>
+  </div>` : ''}
   <div class="pr-footer">${t('pr.compare.footer')}</div>`
 }
 
@@ -1179,6 +1144,27 @@ function buildModal() {
           <span style="color:var(--t3);font-size:11px">${t('modal.sent.valid')}</span>
         </p>
         <div class="mo-btns" style="margin-top:14px"><button id="close-modal" class="mo-cancel" style="flex:1">${t('btn.close')}</button></div>
+      </div>
+    </div>`
+  }
+
+  if (m.type === 'export-pdf') {
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:420px">
+        <h3><i class="ti ti-file-export"></i> ${t('modal.pdf.title')}</h3>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:14px">${t('modal.pdf.desc')}</p>
+        <input id="pdf-email" type="email" placeholder="${t('modal.auth.emailPlaceholder')}"
+          style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px"
+          value="${S.user?.email || ''}">
+        <button id="pdf-email-send" class="mo-ok" style="width:100%;margin-bottom:10px" ${S.authLoading ? 'disabled' : ''}>
+          ${S.authLoading ? t('modal.auth.sending') : `<i class="ti ti-send" style="font-size:11px"></i> ${t('modal.pdf.sendAndPrint')}`}
+        </button>
+        <div style="text-align:center">
+          <button id="pdf-skip" style="font-size:11px;background:none;border:none;color:var(--t3);cursor:pointer;text-decoration:underline;padding:4px">
+            ${t('modal.pdf.skipPrint')}
+          </button>
+        </div>
       </div>
     </div>`
   }
@@ -1412,7 +1398,32 @@ function bindEvents() {
   document.querySelectorAll('[data-clear-scenario]').forEach(el => el.addEventListener('click', () => {
     set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
   }))
-  document.getElementById('hookup-cost')?.addEventListener('change', e => set({ hookupCost: Math.max(0, parseFloat(e.target.value) || 0) }))
+  // Export PDF buttons
+  document.getElementById('export-pdf')?.addEventListener('click', () => {
+    if (S.user) { window.print(); return }
+    set({ modal: { type: 'export-pdf' } })
+  })
+  document.getElementById('export-compare-pdf')?.addEventListener('click', () => {
+    if (S.user) { window.print(); return }
+    set({ modal: { type: 'export-pdf' } })
+  })
+  // Export PDF modal actions
+  document.getElementById('pdf-email-send')?.addEventListener('click', async () => {
+    const email = document.getElementById('pdf-email')?.value?.trim()
+    if (email) {
+      set({ authLoading: true })
+      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
+      set({ authLoading: false, modal: null })
+      if (error) { alert(t('alert.error') + error.message); return }
+    } else {
+      set({ modal: null })
+    }
+    window.print()
+  })
+  document.getElementById('pdf-skip')?.addEventListener('click', () => {
+    set({ modal: null })
+    window.print()
+  })
 
   // Auth
   document.getElementById('open-auth')?.addEventListener('click', () => set({ modal: { type: 'auth' } }))
