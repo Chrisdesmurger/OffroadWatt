@@ -6,7 +6,7 @@
 - [x] Google Search Console — sitemap soumis (`https://www.offroadwatt.com/sitemap.xml`)
 - [x] Section FAQ sur le site vitrine (FR/EN/ES, questions à fort volume)
 - [ ] Bing Webmaster Tools — soumettre le sitemap
-- [ ] Vérifier domaine `offroadwatt.com` dans Resend (DNS SPF/DKIM)
+- [x] Vérifier domaine `offroadwatt.com` dans Resend (DNS SPF/DKIM)
 - [ ] Posts dans les communautés ciblées :
   - [ ] Reddit : r/vandwellers, r/overlanding, r/campervans
   - [ ] Forums francophones : caravaning.fr, campingcar-infos.com
