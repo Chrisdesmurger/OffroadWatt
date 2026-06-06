@@ -1024,6 +1024,11 @@ function applyLang(){
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder) })
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === _lang))
   document.documentElement.lang = _lang
+  // Switch OG image based on active language
+  const ogSuffix = _lang === 'fr' ? '' : '-' + _lang
+  const ogUrl = 'https://www.offroadwatt.com/og-image' + ogSuffix + '.png'
+  document.querySelector('meta[property="og:image"]')?.setAttribute('content', ogUrl)
+  document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', ogUrl)
 }
 
 document.querySelectorAll('.lang-btn').forEach(b => {
