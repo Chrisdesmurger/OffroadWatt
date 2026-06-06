@@ -37,6 +37,9 @@
 - [x] Sauvegarde / chargement de configurations
 - [x] Ajouter `RESEND_API_KEY` dans Vercel (env var)
 - [x] Configurer SMTP custom Supabase (noreply@offroadwatt.com)
+- [x] Template email récapitulatif — design + i18n (FR/EN/ES)
+- [x] Template email magic link — design OffroadWatt (FR)
+- [ ] Templates email multilingues — magic link EN/ES (Supabase ne supporte qu'un template, solution à étudier : détection langue via URL param ou template bilingue FR/EN)
 - [ ] Stripe — paiement plan Pro (~4,99€/mois)
 
 ### Moyen terme
