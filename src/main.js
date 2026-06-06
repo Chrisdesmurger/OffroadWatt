@@ -453,8 +453,39 @@ function render() {
   bindEvents()
 }
 
+function buildMobBar() {
+  const { cons, recharge, net, usable, autDays, solCovPct } = calc()
+  const isDanger = net > usable
+  const color = isDanger ? 'var(--rd)' : 'var(--te)'
+  let autVal, autUnit
+  if (!isFinite(autDays)) {
+    autVal = '∞'; autUnit = t('unit.days')
+  } else if (autDays < 1) {
+    autVal = (autDays * 24).toFixed(1); autUnit = t('unit.hours')
+  } else {
+    autVal = autDays.toFixed(1); autUnit = t('unit.days')
+  }
+  const consAh = toAh(cons)
+  const solarPill = S.solOn && cons > 0
+    ? `<span class="mob-bar-sep">·</span><span class="mob-bar-pill" style="color:var(--so)"><i class="ti ti-sun"></i>${Math.round(solCovPct)}%</span>`
+    : ''
+  const warnPill = isDanger
+    ? `<span class="mob-bar-warn"><i class="ti ti-alert-triangle" style="font-size:10px"></i>${t('autonomy.insufficient')}</span>`
+    : ''
+  return `<div class="mob-bar">
+    <i class="ti ti-clock" style="color:${color};font-size:13px;flex-shrink:0"></i>
+    <span class="mob-bar-val" style="color:${color}">${autVal}</span>
+    <span class="mob-bar-unit">${autUnit}</span>
+    <span class="mob-bar-sep">·</span>
+    <span class="mob-bar-pill"><i class="ti ti-plug"></i>${consAh} Ah/j</span>
+    ${solarPill}
+    ${warnPill}
+  </div>`
+}
+
 function buildHTML() {
   return `
+    ${buildMobBar()}
     ${S.modal ? buildModal() : ''}
     ${buildHeader()}
     ${buildTabs()}

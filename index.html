@@ -23,6 +23,16 @@
 }
 body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh}
 .app{max-width:1400px;margin:0 auto;padding:14px}
+/* ── Mobile sticky autonomy bar ─────────────────────── */
+.mob-bar{display:none;position:fixed;top:0;left:0;right:0;z-index:50;height:46px;align-items:center;padding:0 14px;gap:7px;background:rgba(20,24,23,.96);border-bottom:1px solid var(--b1);backdrop-filter:blur(12px);animation:mbfade .18s ease}
+.mob-bar-val{font-family:var(--mono);font-size:16px;font-weight:700}
+.mob-bar-unit{font-size:10px;color:var(--t3);margin-right:2px}
+.mob-bar-sep{color:var(--b2);font-size:12px;margin:0 1px}
+.mob-bar-pill{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--t2)}
+.mob-bar-pill i{font-size:11px}
+.mob-bar-warn{display:flex;align-items:center;gap:3px;font-size:10px;font-family:var(--mono);background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);border-radius:100px;padding:2px 7px;color:var(--rd)}
+@keyframes mbfade{from{opacity:.45;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(max-width:768px){.mob-bar{display:flex}.app{padding-top:58px}}
 .hdr{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--b1);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap}
 .logo{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--am)}.logo em{color:var(--t3);font-style:normal}
 .sub{font-size:10px;color:var(--t3);margin-top:1px}
