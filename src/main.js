@@ -499,12 +499,13 @@ function buildHeader() {
   const authEl = S.user
     ? `<div class="auth-btn on" id="open-configs" title="${t('auth.myconfigs')}">
         <i class="ti ti-user-circle" style="font-size:15px"></i>
-        <span>${S.user.email.split('@')[0]}</span>
+        <span class="auth-lbl">${S.user.email.split('@')[0]}</span>
         ${S.user.plan === 'pro' ? '<span class="pro-badge">PRO</span>' : ''}
         <i class="ti ti-chevron-down" style="font-size:10px;color:var(--t3)"></i>
       </div>`
-    : `<button class="auth-btn" id="open-auth">
-        <i class="ti ti-user" style="font-size:14px"></i> ${t('auth.signin')}
+    : `<button class="auth-btn" id="open-auth" title="${t('auth.signin')}">
+        <i class="ti ti-user" style="font-size:14px"></i>
+        <span class="auth-lbl">${t('auth.signin')}</span>
       </button>`
 
   const langEl = `<div class="lang-switch">
