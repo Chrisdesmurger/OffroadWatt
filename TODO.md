@@ -36,7 +36,7 @@
 - [x] Auth Supabase (Magic Link + Google OAuth)
 - [x] Sauvegarde / chargement de configurations
 - [x] Ajouter `RESEND_API_KEY` dans Vercel (env var)
-- [ ] Configurer SMTP custom Supabase (noreply@offroadwatt.com)
+- [x] Configurer SMTP custom Supabase (noreply@offroadwatt.com)
 - [ ] Stripe — paiement plan Pro (~4,99€/mois)
 
 ### Moyen terme
