@@ -340,7 +340,7 @@ let S = {
   solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
-  user: null, userConfigs: [], authLoading: false, saveLoading: false,
+  user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false,
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
@@ -835,7 +835,7 @@ function buildEnergyTab() {
       </button>
 
       <button class="pdf-btn" id="export-pdf">
-        <i class="ti ti-printer"></i> ${t('export.pdf')}
+        <i class="ti ti-mail-forward"></i> ${t('export.email')}
       </button>
 
       <div class="capture-row">
@@ -941,6 +941,121 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
   <div class="pr-footer">${t('pr.footer')}</div>`
 }
 
+function buildEmailSummaryHtml() {
+  const { cons, solar, alt, recharge, net, usable, autDays, solCovPct } = calc()
+  const isDanger = net > usable
+  const autStr = !isFinite(autDays) ? '∞' : autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ' j'
+  const zone = SUN_ZONES[S.sunIdx]
+  const dateStr = new Date().toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
+  const autColor = isDanger ? '#f87171' : '#2dd4bf'
+
+  const appRows = S.apps.map(a => {
+    const modeLabel = (a.modes && a.modes.length > 1) ? (a.modes[a.activeMode ?? 0]?.label ?? '') : ''
+    return `<tr style="border-bottom:1px solid #e8e8e5">
+      <td style="padding:6px 8px;color:${a.on ? '#1a1a1a' : '#aaa'}">${ta(a.n)}${!a.on ? ' (off)' : ''}</td>
+      <td style="padding:6px 8px;color:#666;font-size:11px">${tcat(a.cat)}</td>
+      <td style="padding:6px 8px;font-family:monospace;text-align:right;color:${a.on ? '#1a1a1a' : '#aaa'}">${a.w} W</td>
+      <td style="padding:6px 8px;font-family:monospace;text-align:right;color:${a.on ? '#1a1a1a' : '#aaa'}">${a.h} h</td>
+      <td style="padding:6px 8px;font-family:monospace;text-align:right;color:${a.on ? '#c47a18' : '#aaa'}">${a.on ? toAh(a.w * a.h) + ' Ah' : '—'}</td>
+    </tr>`
+  }).join('')
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="background:#f5f5f3;font-family:Arial,sans-serif;color:#1a1a1a;padding:20px 10px;margin:0">
+<div style="max-width:600px;margin:0 auto">
+
+  <!-- Header -->
+  <div style="background:#141817;padding:20px 24px;border-radius:10px 10px 0 0;border:1px solid #2a3330;border-bottom:none">
+    <span style="font-family:monospace;font-size:20px;font-weight:700;color:#c47a18">OffroadWatt</span>
+    <p style="color:#8da89a;font-size:12px;margin:4px 0 0">${dateStr} · ${t('vt.' + S.vtype)}</p>
+  </div>
+
+  <!-- Summary -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#1c201e;border:1px solid #2a3330;border-top:none;border-bottom:none">
+    <tr>
+      <td style="text-align:center;padding:16px 8px;border-right:1px solid #2a3330">
+        <div style="font-family:monospace;font-size:26px;font-weight:700;color:${autColor}">${autStr}</div>
+        <div style="font-size:10px;color:#5a7068;text-transform:uppercase;letter-spacing:1px;margin-top:4px">Autonomie</div>
+      </td>
+      <td style="text-align:center;padding:16px 8px;border-right:1px solid #2a3330">
+        <div style="font-family:monospace;font-size:26px;font-weight:700;color:#e6ede8">${toAh(cons)}</div>
+        <div style="font-size:10px;color:#5a7068;text-transform:uppercase;letter-spacing:1px;margin-top:4px">Ah/jour</div>
+      </td>
+      <td style="text-align:center;padding:16px 8px">
+        <div style="font-family:monospace;font-size:26px;font-weight:700;color:#fbbf24">${Math.round(solCovPct)}%</div>
+        <div style="font-size:10px;color:#5a7068;text-transform:uppercase;letter-spacing:1px;margin-top:4px">Solaire</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Appliances -->
+  <div style="background:#fff;border:1px solid #e0e0de;border-top:none;padding:16px 20px">
+    <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 10px;border-bottom:1px solid #eee;padding-bottom:6px">Appareils</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px">
+      <thead><tr style="border-bottom:2px solid #e0e0de">
+        <th style="text-align:left;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Appareil</th>
+        <th style="text-align:left;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Catégorie</th>
+        <th style="text-align:right;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Watts</th>
+        <th style="text-align:right;padding:4px 8px;font-size:10px;color:#888;font-weight:600">h/j</th>
+        <th style="text-align:right;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Ah/j</th>
+      </tr></thead>
+      <tbody>${appRows}</tbody>
+      <tfoot><tr style="background:#faf9f7">
+        <td colspan="4" style="padding:8px;font-weight:700;font-size:12px">Total consommation</td>
+        <td style="padding:8px;font-family:monospace;font-weight:700;text-align:right;color:#c47a18">${toAh(cons)} Ah/j</td>
+      </tr></tfoot>
+    </table>
+  </div>
+
+  <!-- Config grid -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e0e0de;border-top:none;background:#fff">
+    <tr>
+      <!-- Battery -->
+      <td style="padding:16px 20px;border-right:1px solid #e0e0de;vertical-align:top;width:${S.solOn ? '50%' : '100%'}">
+        <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 8px">Batterie</p>
+        <p style="margin:2px 0;font-size:12px"><strong>${S.bat.ah} Ah ${S.bat.v}V ${tbattype(S.bat.type)}</strong>${S.batNb > 1 ? ` ×${S.batNb}` : ''}</p>
+        <p style="margin:2px 0;font-size:11px;color:#666">DoD : ${Math.round(S.dod * 100)} % · Utilisable : <strong style="color:#2dd4bf">${toAh(usable)} Ah</strong></p>
+      </td>
+      ${S.solOn ? `
+      <!-- Solar -->
+      <td style="padding:16px 20px;vertical-align:top">
+        <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 8px">Solaire</p>
+        <p style="margin:2px 0;font-size:12px"><strong>${S.solW * S.solNb} Wc</strong> (${S.solNb}×${S.solW} Wc)</p>
+        <p style="margin:2px 0;font-size:11px;color:#666">${zone.r === 'Personnalisé' ? 'Custom' : zone.n} · <strong style="color:#fbbf24">${toAh(solar)} Ah/j</strong></p>
+      </td>` : ''}
+    </tr>
+    ${S.altOn ? `<tr><td colspan="2" style="padding:12px 20px;border-top:1px solid #eee">
+      <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 4px">Alternateur</p>
+      <p style="margin:0;font-size:12px;color:#666">${S.altAmps} A · ${S.altHours} h/j · <strong style="color:#a78bfa">${toAh(alt)} Ah/j</strong></p>
+    </td></tr>` : ''}
+  </table>
+
+  <!-- Balance row -->
+  <div style="background:${isDanger ? '#fef2f2' : '#f0fdf9'};border:1px solid ${isDanger ? '#fecaca' : '#a7f3d0'};border-top:none;padding:14px 20px;border-radius:0 0 10px 10px">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="font-size:12px;color:#555">Déficit résiduel</td>
+        <td style="font-family:monospace;font-weight:700;text-align:right;color:${isDanger ? '#dc2626' : '#059669'}">${toAh(net)} Ah/j</td>
+      </tr>
+      <tr>
+        <td style="font-size:14px;font-weight:700;padding-top:6px">Autonomie estimée</td>
+        <td style="font-family:monospace;font-size:18px;font-weight:700;text-align:right;color:${autColor}">${autStr}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center;padding:24px 0 8px">
+    <a href="https://app.offroadwatt.com" style="background:#c47a18;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;display:inline-block">
+      Modifier dans l'application →
+    </a>
+  </div>
+  <p style="text-align:center;font-size:10px;color:#aaa;margin-top:12px">OffroadWatt · app.offroadwatt.com</p>
+
+</div></body></html>`
+}
+
 // ── COMPARE TAB ──────────────────────────────────────────────────────────────
 
 // Résumé court d'un scénario (batterie + solaire + alternateur)
@@ -1037,7 +1152,7 @@ function buildCompareTab() {
     </div>` : ''}
 
     <button class="pdf-btn" id="export-compare-pdf" style="margin-top:12px">
-      <i class="ti ti-printer"></i> ${t('compare.exportPdf')}
+      <i class="ti ti-mail-forward"></i> ${t('export.email')}
     </button>`
 
     printReport = `
@@ -1148,23 +1263,33 @@ function buildModal() {
     </div>`
   }
 
-  if (m.type === 'export-pdf') {
+  if (m.type === 'email-summary') {
+    if (m.sent) {
+      return `
+      <div class="ov" id="modal-overlay">
+        <div class="mo" style="max-width:380px;text-align:center">
+          <div style="font-size:36px;margin-bottom:8px">✅</div>
+          <h3>${t('modal.summary.sentTitle')}</h3>
+          <p style="font-size:12px;color:var(--t2);margin:8px 0 16px">${t('modal.summary.sentBody', { email: `<strong style="color:var(--t1)">${m.email}</strong>` })}</p>
+          <button id="close-modal" class="mo-ok" style="width:100%">${t('btn.close')}</button>
+        </div>
+      </div>`
+    }
     return `
     <div class="ov" id="modal-overlay">
       <div class="mo" style="max-width:420px">
-        <h3><i class="ti ti-file-export"></i> ${t('modal.pdf.title')}</h3>
-        <p style="font-size:11px;color:var(--t2);margin-bottom:14px">${t('modal.pdf.desc')}</p>
-        <input id="pdf-email" type="email" placeholder="${t('modal.auth.emailPlaceholder')}"
+        <h3><i class="ti ti-mail-forward"></i> ${t('modal.summary.title')}</h3>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:14px">${t('modal.summary.desc')}</p>
+        <input id="summary-email" type="email" placeholder="${t('modal.auth.emailPlaceholder')}"
           style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px"
           value="${S.user?.email || ''}">
-        <button id="pdf-email-send" class="mo-ok" style="width:100%;margin-bottom:10px" ${S.authLoading ? 'disabled' : ''}>
-          ${S.authLoading ? t('modal.auth.sending') : `<i class="ti ti-send" style="font-size:11px"></i> ${t('modal.pdf.sendAndPrint')}`}
+        <button id="summary-send" class="mo-ok" style="width:100%" ${S.summaryLoading ? 'disabled' : ''}>
+          ${S.summaryLoading
+            ? `<i class="ti ti-loader-2" style="font-size:11px;animation:spin 1s linear infinite"></i> ${t('modal.summary.sending')}`
+            : `<i class="ti ti-send" style="font-size:11px"></i> ${t('modal.summary.send')}`}
         </button>
-        <div style="text-align:center">
-          <button id="pdf-skip" style="font-size:11px;background:none;border:none;color:var(--t3);cursor:pointer;text-decoration:underline;padding:4px">
-            ${t('modal.pdf.skipPrint')}
-          </button>
-        </div>
+        ${m.error ? `<p style="font-size:11px;color:var(--rd);margin-top:8px;text-align:center">${m.error}</p>` : ''}
+        <div class="mo-btns" style="margin-top:10px"><button id="close-modal" class="mo-cancel">${t('btn.cancel')}</button></div>
       </div>
     </div>`
   }
@@ -1398,31 +1523,31 @@ function bindEvents() {
   document.querySelectorAll('[data-clear-scenario]').forEach(el => el.addEventListener('click', () => {
     set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
   }))
-  // Export PDF buttons
-  document.getElementById('export-pdf')?.addEventListener('click', () => {
-    if (S.user) { window.print(); return }
-    set({ modal: { type: 'export-pdf' } })
-  })
-  document.getElementById('export-compare-pdf')?.addEventListener('click', () => {
-    if (S.user) { window.print(); return }
-    set({ modal: { type: 'export-pdf' } })
-  })
-  // Export PDF modal actions
-  document.getElementById('pdf-email-send')?.addEventListener('click', async () => {
-    const email = document.getElementById('pdf-email')?.value?.trim()
-    if (email) {
-      set({ authLoading: true })
-      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
-      set({ authLoading: false, modal: null })
-      if (error) { alert(t('alert.error') + error.message); return }
-    } else {
-      set({ modal: null })
+  // Email summary buttons
+  const openSummaryModal = () => set({ modal: { type: 'email-summary' } })
+  document.getElementById('export-pdf')?.addEventListener('click', openSummaryModal)
+  document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
+  // Email summary modal — send
+  document.getElementById('summary-send')?.addEventListener('click', async () => {
+    const email = document.getElementById('summary-email')?.value?.trim()
+    if (!email) return
+    set({ summaryLoading: true })
+    try {
+      const html = buildEmailSummaryHtml()
+      const { cons, autDays } = calc()
+      const autStr = !isFinite(autDays) ? '∞' : autDays < 1 ? (autDays * 24).toFixed(1) + 'h' : autDays.toFixed(1) + 'j'
+      const subject = `${t('modal.summary.emailSubject')} — ${autStr} · ${toAh(cons)} Ah/j`
+      const res = await fetch('/api/send-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, subject, html }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Erreur envoi')
+      set({ summaryLoading: false, modal: { type: 'email-summary', sent: true, email } })
+    } catch (err) {
+      set({ summaryLoading: false, modal: { ...S.modal, error: err.message } })
     }
-    window.print()
-  })
-  document.getElementById('pdf-skip')?.addEventListener('click', () => {
-    set({ modal: null })
-    window.print()
   })
 
   // Auth
