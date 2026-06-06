@@ -17,7 +17,7 @@
 - [ ] Lister l'app sur AlternativeTo.net
 - [ ] Lister sur BetaList
 - [ ] Vidéo démo 60s (YouTube / TikTok / Reels)
-- [ ] Ajouter FAQ à la nav du site vitrine (ancre `#faq`)
+- [x] Ajouter FAQ à la nav du site vitrine (ancre `#faq`)
 
 ### Long terme (SEO organique)
 - [ ] Article : "Guide complet autonomie électrique camping-car 2025"
@@ -35,7 +35,7 @@
 - [x] Export email récapitulatif (Resend)
 - [x] Auth Supabase (Magic Link + Google OAuth)
 - [x] Sauvegarde / chargement de configurations
-- [ ] Ajouter `RESEND_API_KEY` dans Vercel (env var)
+- [x] Ajouter `RESEND_API_KEY` dans Vercel (env var)
 - [ ] Configurer SMTP custom Supabase (noreply@offroadwatt.com)
 - [ ] Stripe — paiement plan Pro (~4,99€/mois)
 
