@@ -3,83 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OffroadWatt — Calculateur d'autonomie électrique pour camping-car</title>
-<meta name="description" content="Planifiez votre installation électrique pour camping-car, caravane ou van. Calcul en temps réel de l'autonomie batterie, panneaux solaires et alternateur. Gratuit.">
-<meta name="keywords" content="calculateur autonomie électrique, camping-car, van aménagé, caravane, batterie lithium, panneaux solaires, alternateur, autonomie batterie">
-<meta name="author" content="OffroadWatt">
-<link rel="canonical" href="https://www.offroadwatt.com">
-
-<!-- hreflang — multilingue -->
-<link rel="alternate" hreflang="fr" href="https://www.offroadwatt.com">
-<link rel="alternate" hreflang="en" href="https://www.offroadwatt.com">
-<link rel="alternate" hreflang="es" href="https://www.offroadwatt.com">
-<link rel="alternate" hreflang="x-default" href="https://www.offroadwatt.com">
-
-<!-- Open Graph -->
+<title>OffroadWatt — Calculateur d'autonomie électrique</title>
+<meta name="description" content="Planifiez votre installation électrique pour camping-car, caravane ou van. Calcul instantané de l'autonomie batterie, solaire et alternateur.">
+<meta property="og:title" content="OffroadWatt — Votre autonomie électrique maîtrisée">
+<meta property="og:description" content="Calculateur intelligent pour camping-car, caravane et van. Gratuit, sans inscription.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.offroadwatt.com">
-<meta property="og:site_name" content="OffroadWatt">
-<meta property="og:title" content="OffroadWatt — Calculateur d'autonomie électrique">
-<meta property="og:description" content="Dimensionnez votre installation électrique pour camping-car, van ou caravane. Batteries, solaire, alternateur — tout en Ah, en temps réel.">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:locale:alternate" content="en_US">
-<meta property="og:locale:alternate" content="es_ES">
-<!-- og:image : remplacer par l'URL de votre image 1200×630px -->
-<meta property="og:image" content="https://www.offroadwatt.com/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="OffroadWatt — Calculateur d'autonomie électrique">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="OffroadWatt — Calculateur d'autonomie électrique">
-<meta name="twitter:description" content="Dimensionnez votre installation électrique pour camping-car, van ou caravane. Gratuit.">
-<meta name="twitter:image" content="https://www.offroadwatt.com/og-image.png">
-
-<!-- JSON-LD Structured Data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "OffroadWatt",
-  "description": "Calculateur d'autonomie électrique pour camping-car, caravane et van. Batteries, panneaux solaires, alternateur — calcul en temps réel.",
-  "url": "https://app.offroadwatt.com",
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Web",
-  "browserRequirements": "Requires JavaScript",
-  "inLanguage": ["fr", "en", "es"],
-  "offers": [
-    {
-      "@type": "Offer",
-      "name": "Gratuit",
-      "price": "0",
-      "priceCurrency": "EUR"
-    },
-    {
-      "@type": "Offer",
-      "name": "Pro",
-      "price": "4.99",
-      "priceCurrency": "EUR",
-      "billingIncrement": "P1M"
-    }
-  ],
-  "featureList": [
-    "Calcul autonomie batterie en temps réel",
-    "34 modèles de batteries AGM, GEL, Lithium",
-    "41 zones géographiques pour le solaire",
-    "Grand catalogue d'équipements avec consommation exacte",
-    "Export PDF",
-    "Comparateur de configurations",
-    "Interface multilingue FR/EN/ES"
-  ],
-  "publisher": {
-    "@type": "Organization",
-    "name": "OffroadWatt",
-    "url": "https://www.offroadwatt.com"
-  }
-}
-</script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
@@ -390,6 +318,22 @@ section{padding:100px 24px}
 .signup-success i{font-size:32px;color:var(--green);display:block;margin-bottom:10px}
 .signup-note{font-size:12px;color:var(--t3);margin-top:14px}
 
+/* ── FAQ ─────────────────────────────────────────────── */
+.faq-wrap{max-width:760px;margin:0 auto}
+.faq-item{border:1px solid var(--border);border-radius:var(--r2);margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.faq-item:hover{border-color:var(--border2)}
+.faq-item.open{border-color:var(--amber)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;cursor:pointer;font-size:15px;font-weight:600;color:var(--t1);background:var(--card);transition:background .2s;line-height:1.45}
+.faq-item.open .faq-q{background:rgba(240,160,48,.04)}
+.faq-icon{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .25s;font-size:14px}
+.faq-item.open .faq-icon{background:var(--amber);border-color:var(--amber);color:#090b0a;transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s}
+.faq-item.open .faq-a{max-height:400px;padding-bottom:4px}
+.faq-a-inner{padding:0 20px 18px;font-size:14px;color:var(--t2);line-height:1.75}
+.faq-a-inner strong{color:var(--t1)}
+.faq-a-inner a{color:var(--amber);text-decoration:none}
+.faq-a-inner a:hover{text-decoration:underline}
+
 /* ── FOOTER ──────────────────────────────────────────── */
 footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px 32px}
 .footer-inner{max-width:1100px;margin:0 auto}
@@ -429,6 +373,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     <a href="#features" class="nav-link" data-i18n="nav.features">Fonctionnalités</a>
     <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>
     <a href="#pricing" class="nav-link" data-i18n="nav.pricing">Tarifs</a>
+    <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
     <div class="lang-sel">
       <button class="lang-btn" data-lang="fr">FR</button>
       <button class="lang-btn" data-lang="en">EN</button>
@@ -468,7 +413,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       <i class="ti ti-bolt"></i>
       <span data-i18n="hero.cta1">Créer un compte gratuit</span>
     </a>
-    <a id="hero-app-link" href="https://app.offroadwatt.com" class="btn btn-ghost btn-lg" target="_blank">
+    <a id="hero-app-link" href="https://offroad-watt.vercel.app" class="btn btn-ghost btn-lg" target="_blank">
       <i class="ti ti-player-play"></i>
       <span data-i18n="hero.cta2">Voir l'application</span>
     </a>
@@ -486,7 +431,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       <div class="preview-dot" style="background:#f87171"></div>
       <div class="preview-dot" style="background:#fbbf24"></div>
       <div class="preview-dot" style="background:#4ade80"></div>
-      <div class="preview-url">app.offroadwatt.com</div>
+      <div class="preview-url">offroad-watt.vercel.app</div>
     </div>
     <div class="preview-screen">
       <div class="fake-app">
@@ -595,9 +540,9 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
         <div class="feature-desc" data-i18n="f2.d">Intégrez la production solaire (41 zones mondiales, MPPT) et la recharge alternateur pour calculer l'autonomie réelle.</div>
       </div>
       <div class="feature-card reveal reveal-d2">
-        <div class="feature-icon ic-g"><i class="ti ti-books"></i></div>
-        <div class="feature-title" data-i18n="f3.t">Grand catalogue</div>
-        <div class="feature-desc" data-i18n="f3.d">Des centaines d'équipements préchargés avec leur consommation exacte : réfrigérateurs, chauffages, éclairages, high-tech et bien plus.</div>
+        <div class="feature-icon ic-g"><i class="ti ti-robot"></i></div>
+        <div class="feature-title" data-i18n="f3.t">Recherche IA</div>
+        <div class="feature-desc" data-i18n="f3.d">Tapez le nom de n'importe quel équipement. L'IA trouve sa consommation exacte et enrichit le catalogue communautaire.</div>
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon ic-a"><i class="ti ti-file-description"></i></div>
@@ -674,83 +619,72 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
   </div>
 </section>
 
-<!-- ── CATALOG SECTION ────────────────────────────────────── -->
+<!-- ── AI SECTION ─────────────────────────────────────────── -->
 <section class="hiw-bg">
   <div class="section-inner">
     <div class="ai-grid">
       <div>
-        <div class="section-badge reveal"><i class="ti ti-books"></i> <span data-i18n="cat.badge">Catalogue</span></div>
-        <h2 class="section-title reveal" data-i18n="cat.title">Des centaines d'équipements prêts à l'emploi</h2>
-        <p style="color:var(--t2);font-size:16px;margin-bottom:24px;line-height:1.7" class="reveal" data-i18n="cat.desc">
-          Le catalogue intègre une grande sélection d'équipements réels avec leur consommation
-          exacte. Ajoutez-les en un clic et obtenez immédiatement un calcul précis.
+        <div class="section-badge reveal"><i class="ti ti-robot"></i> <span data-i18n="ai.badge">Intelligence artificielle</span></div>
+        <h2 class="section-title reveal" data-i18n="ai.title">Un catalogue enrichi par l'IA</h2>
+        <p style="color:var(--t2);font-size:16px;margin-bottom:24px;line-height:1.7" class="reveal" data-i18n="ai.desc">
+          Tapez le nom d'un équipement — réfrigérateur 12V, panneau solaire, convertisseur Webasto —
+          et l'IA trouve instantanément sa consommation réelle. Les résultats enrichissent
+          automatiquement le catalogue communautaire partagé.
         </p>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:12px" class="reveal">
           <li style="display:flex;align-items:center;gap:10px;font-size:14px">
             <i class="ti ti-check" style="color:var(--green)"></i>
-            <span data-i18n="cat.f1">Consommation exacte par équipement</span>
+            <span data-i18n="ai.f1">Recherche par nom de produit exact</span>
           </li>
           <li style="display:flex;align-items:center;gap:10px;font-size:14px">
             <i class="ti ti-check" style="color:var(--green)"></i>
-            <span data-i18n="cat.f2">Multi-modes : veille, puissance min et max</span>
+            <span data-i18n="ai.f2">Consommation multi-modes (veille, min, max)</span>
           </li>
           <li style="display:flex;align-items:center;gap:10px;font-size:14px">
             <i class="ti ti-check" style="color:var(--green)"></i>
-            <span data-i18n="cat.f3">6 catégories : cuisine, confort, tech, eau, éclairage, système</span>
+            <span data-i18n="ai.f3">Catalogue communautaire partagé et enrichi</span>
           </li>
           <li style="display:flex;align-items:center;gap:10px;font-size:14px">
             <i class="ti ti-check" style="color:var(--green)"></i>
-            <span data-i18n="cat.f4">Ajout d'appareils personnalisés</span>
+            <span data-i18n="ai.f4">Résultats en moins de 5 secondes</span>
           </li>
         </ul>
         <div style="margin-top:28px" class="reveal">
-          <a href="https://app.offroadwatt.com" class="btn btn-teal" target="_blank">
+          <a href="#signup" class="btn btn-teal">
             <i class="ti ti-bolt"></i>
-            <span data-i18n="cat.cta">Parcourir le catalogue</span>
+            <span data-i18n="ai.cta">Accéder à la recherche IA</span>
           </a>
         </div>
       </div>
       <div class="ai-demo reveal">
         <div class="fake-lbl" style="margin-bottom:14px;color:var(--teal)">
-          <i class="ti ti-books" style="color:var(--teal)"></i>
-          <span data-i18n="cat.label">Catalogue d'équipements</span>
+          <i class="ti ti-search" style="color:var(--teal)"></i>
+          <span data-i18n="ai.search">Recherche IA</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-            <div style="font-size:16px;margin-bottom:4px">🍳</div>
-            <div style="font-size:12px;font-weight:600" data-i18n="cat.cuisine">Cuisine</div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono)">8 appareils</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-            <div style="font-size:16px;margin-bottom:4px">🛋️</div>
-            <div style="font-size:12px;font-weight:600" data-i18n="cat.confort">Confort</div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono)">7 appareils</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-            <div style="font-size:16px;margin-bottom:4px">💻</div>
-            <div style="font-size:12px;font-weight:600" data-i18n="cat.tech">High-tech</div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono)">6 appareils</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-            <div style="font-size:16px;margin-bottom:4px">💡</div>
-            <div style="font-size:12px;font-weight:600" data-i18n="cat.eclairage">Éclairage</div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono)">5 appareils</div>
-          </div>
+        <div class="ai-input-row">
+          <div class="ai-input-box" data-i18n-placeholder="ai.placeholder">Webasto Air Top 2000 STC...</div>
+          <button class="btn btn-teal" style="padding:10px 14px;font-size:13px"><i class="ti ti-search"></i></button>
         </div>
         <div class="ai-result">
-          <span style="font-size:16px">🧊</span>
-          <span class="ai-r-name">Réfrigérateur compresseur 12V</span>
+          <div class="ai-badge badge-c">Catalogue</div>
+          <span class="ai-r-name">Dometic CFF 35 Compressor</span>
           <span class="ai-r-w">45W</span>
         </div>
         <div class="ai-result">
-          <span style="font-size:16px">🌡️</span>
-          <span class="ai-r-name">Chauffage diesel 2kW</span>
-          <span class="ai-r-w">10W / 80W</span>
+          <div class="ai-badge badge-o">Online</div>
+          <span class="ai-r-name">Webasto Air Top 2000 STC</span>
+          <span class="ai-r-w">80W</span>
         </div>
         <div class="ai-result">
-          <span style="font-size:16px">💡</span>
-          <span class="ai-r-name">Bandeau LED 5m</span>
-          <span class="ai-r-w">24W</span>
+          <div class="ai-badge badge-o">Online</div>
+          <span class="ai-r-name">Victron SmartSolar MPPT 75/15</span>
+          <span class="ai-r-w">15W</span>
+        </div>
+        <div class="ai-typing">
+          <div class="ai-dot"></div>
+          <div class="ai-dot"></div>
+          <div class="ai-dot"></div>
+          <span style="font-size:11px;color:var(--t3);margin-left:5px" data-i18n="ai.searching">Recherche en cours...</span>
         </div>
       </div>
     </div>
@@ -775,10 +709,10 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
           <li><i class="ti ti-check"></i> <span data-i18n="p1.f2">33 appareils préconfigurés + appareils custom</span></li>
           <li><i class="ti ti-check"></i> <span data-i18n="p1.f3">Export PDF (rapport complet)</span></li>
           <li><i class="ti ti-check"></i> <span data-i18n="p1.f4">Comparateur de setups A/B</span></li>
-          <li><i class="ti ti-check"></i> <span data-i18n="p1.f5">Accès au catalogue complet d'équipements</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p1.f5">5 recherches IA par jour</span></li>
           <li class="off"><i class="ti ti-x"></i> <span data-i18n="p1.f6">1 seule configuration sauvegardée</span></li>
         </ul>
-        <a href="https://app.offroadwatt.com" class="btn btn-ghost" style="width:100%;justify-content:center" target="_blank" data-i18n="p1.cta">Commencer gratuitement</a>
+        <a href="https://offroad-watt.vercel.app" class="btn btn-ghost" style="width:100%;justify-content:center" target="_blank" data-i18n="p1.cta">Commencer gratuitement</a>
       </div>
       <div class="pricing-card featured reveal reveal-d1">
         <div class="pricing-badge" data-i18n="p2.badge">Recommandé</div>
@@ -788,7 +722,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
         <ul class="pricing-feats">
           <li><i class="ti ti-check"></i> <span data-i18n="p2.f1">Tout du plan Gratuit</span></li>
           <li><i class="ti ti-check"></i> <span data-i18n="p2.f2">Configurations sauvegardées illimitées</span></li>
-          <li><i class="ti ti-check"></i> <span data-i18n="p2.f3">Appareils personnalisés illimités</span></li>
+          <li><i class="ti ti-check"></i> <span data-i18n="p2.f3">Recherches IA illimitées</span></li>
           <li><i class="ti ti-check"></i> <span data-i18n="p2.f4">Synchronisation multi-appareils</span></li>
           <li><i class="ti ti-check"></i> <span data-i18n="p2.f5">Support prioritaire</span></li>
           <li><i class="ti ti-check"></i> <span data-i18n="p2.f6">Accès anticipé aux nouvelles fonctionnalités</span></li>
@@ -835,6 +769,22 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
   </div>
 </section>
 
+<!-- ── FAQ ────────────────────────────────────────────────── -->
+<section id="faq" style="padding:96px 24px">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:56px">
+      <div class="section-badge" style="justify-content:center;margin-bottom:16px">
+        <i class="ti ti-help-circle"></i> <span data-i18n="faq.badge">FAQ</span>
+      </div>
+      <h2 class="section-title reveal" data-i18n="faq.title">Questions fréquentes</h2>
+      <p style="color:var(--t2);font-size:17px;max-width:560px;margin:0 auto" class="reveal" data-i18n="faq.sub">
+        Tout ce que vous devez savoir sur l'autonomie électrique en camping-car, van et caravane.
+      </p>
+    </div>
+    <div class="faq-wrap" id="faq-list"></div>
+  </div>
+</section>
+
 <!-- ── FOOTER ─────────────────────────────────────────────── -->
 <footer>
   <div class="footer-inner">
@@ -849,7 +799,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       <div class="footer-col">
         <h4 data-i18n="footer.h1">Application</h4>
         <ul class="footer-links">
-          <li><a href="https://app.offroadwatt.com" target="_blank" data-i18n="footer.open">Ouvrir l'app</a></li>
+          <li><a href="https://offroad-watt.vercel.app" target="_blank" data-i18n="footer.open">Ouvrir l'app</a></li>
           <li><a href="#features" data-i18n="footer.feat">Fonctionnalités</a></li>
           <li><a href="#pricing" data-i18n="footer.price">Tarifs</a></li>
           <li><a href="#signup" data-i18n="footer.signup">S'inscrire</a></li>
@@ -869,6 +819,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       <div class="footer-badges">
         <span class="footer-badge">Vercel</span>
         <span class="footer-badge">Supabase</span>
+        <span class="footer-badge">Claude AI</span>
       </div>
     </div>
   </div>
@@ -876,7 +827,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
-const APP_URL = 'https://app.offroadwatt.com'
+const APP_URL = 'https://offroad-watt.vercel.app'
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
 const sb = window.supabase.createClient(SB_URL, SB_KEY)
@@ -884,7 +835,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY)
 // ── i18n ────────────────────────────────────────────────────
 const DICT = {
 fr:{
-'nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.pricing':'Tarifs','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
+'nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.pricing':'Tarifs','nav.faq':'FAQ','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
 'hero.badge':'Calculateur d\'autonomie électrique',
 'hero.t1':'Planifiez votre','hero.t2':'autonomie électrique','hero.t3':'partez l\'esprit léger.',
 'hero.sub':'Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires et trouvez la batterie idéale pour votre camping-car, caravane ou van.',
@@ -896,7 +847,7 @@ fr:{
 'feat.badge':'Fonctionnalités','feat.title':'Tout ce dont vous avez besoin','feat.sub':'Un outil complet pour dimensionner votre installation électrique off-road avec une précision professionnelle.',
 'f1.t':'Calcul batterie intelligent','f1.d':'34 modèles AGM, GEL et Lithium (12V/24V). Le calculateur recommande la batterie optimale selon votre consommation réelle.',
 'f2.t':'Solaire & Alternateur','f2.d':'Intégrez la production solaire (41 zones mondiales, MPPT) et la recharge alternateur pour calculer l\'autonomie réelle.',
-'f3.t':'Grand catalogue','f3.d':'Des centaines d\'équipements préchargés avec leur consommation exacte : réfrigérateurs, chauffages, éclairages, high-tech et bien plus.',
+'f3.t':'Recherche IA','f3.d':'Tapez le nom de n\'importe quel équipement. L\'IA trouve sa consommation exacte et enrichit le catalogue communautaire.',
 'f4.t':'Export PDF','f4.d':'Générez un rapport A4 complet : tableau des appareils, bilan énergétique en Ah, recommandations de batteries du marché.',
 'f5.t':'Comparateur de setups','f5.d':'Comparez deux configurations côte à côte avec calcul du ROI. Prenez la meilleure décision d\'investissement.',
 'f6.t':'Multilingue EN/FR/ES','f6.d':'Interface disponible en anglais, français et espagnol avec détection automatique de la langue de votre navigateur.',
@@ -908,30 +859,42 @@ fr:{
 'v1.t':'Camping-car','v1.d':'Frigo, climatisation, TV, cuisine... Dimensionnez pour un confort maximal en autonomie totale sur plusieurs jours.',
 'v2.t':'Van aménagé','v2.d':'Léger et efficace. Optimisez chaque watt pour un setup minimaliste et haute performance adapté à la mobilité.',
 'v3.t':'Caravane','v3.d':'Gérez la recharge depuis le véhicule tracteur et planifiez vos nuits hors connexion en toute sérénité.',
-'cat.badge':'Catalogue','cat.title':'Des centaines d\'équipements prêts à l\'emploi',
-'cat.desc':'Le catalogue intègre une grande sélection d\'équipements réels avec leur consommation exacte. Ajoutez-les en un clic et obtenez immédiatement un calcul précis.',
-'cat.f1':'Consommation exacte par équipement','cat.f2':'Multi-modes : veille, puissance min et max','cat.f3':'6 catégories : cuisine, confort, tech, eau, éclairage, système','cat.f4':'Ajout d\'appareils personnalisés',
-'cat.cta':'Parcourir le catalogue','cat.label':'Catalogue d\'équipements',
-'cat.cuisine':'Cuisine','cat.confort':'Confort','cat.tech':'High-tech','cat.eclairage':'Éclairage',
+'ai.badge':'Intelligence artificielle','ai.title':'Un catalogue enrichi par l\'IA',
+'ai.desc':'Tapez le nom d\'un équipement — réfrigérateur 12V, panneau solaire, convertisseur Webasto — et l\'IA trouve instantanément sa consommation réelle.',
+'ai.f1':'Recherche par nom de produit exact','ai.f2':'Consommation multi-modes (veille, min, max)','ai.f3':'Catalogue communautaire partagé et enrichi','ai.f4':'Résultats en moins de 5 secondes',
+'ai.cta':'Accéder à la recherche IA','ai.search':'Recherche IA','ai.placeholder':'Webasto Air Top 2000 STC...','ai.searching':'Recherche en cours...',
 'price.badge':'Tarifs','price.title':'Simple et transparent','price.sub':'Commencez gratuitement. Passez Pro quand vous avez besoin de plus.',
 'p1.name':'Gratuit','p1.period':'/ toujours','p1.desc':'Parfait pour découvrir et dimensionner votre installation électrique.',
-'p1.f1':'Calcul d\'autonomie complet en temps réel','p1.f2':'33 appareils préconfigurés + appareils custom','p1.f3':'Export PDF (rapport complet)','p1.f4':'Comparateur de setups A/B','p1.f5':'Accès au catalogue complet d\'équipements','p1.f6':'1 seule configuration sauvegardée',
+'p1.f1':'Calcul d\'autonomie complet en temps réel','p1.f2':'33 appareils préconfigurés + appareils custom','p1.f3':'Export PDF (rapport complet)','p1.f4':'Comparateur de setups A/B','p1.f5':'5 recherches IA par jour','p1.f6':'1 seule configuration sauvegardée',
 'p1.cta':'Commencer gratuitement',
 'p2.badge':'Recommandé','p2.name':'Pro','p2.period':'/ mois','p2.desc':'Pour les voyageurs sérieux qui veulent tout optimiser sans limite.',
-'p2.f1':'Tout du plan Gratuit','p2.f2':'Configurations sauvegardées illimitées','p2.f3':'Appareils personnalisés illimités','p2.f4':'Synchronisation multi-appareils','p2.f5':'Support prioritaire','p2.f6':'Accès anticipé aux nouvelles fonctionnalités',
+'p2.f1':'Tout du plan Gratuit','p2.f2':'Configurations sauvegardées illimitées','p2.f3':'Recherches IA illimitées','p2.f4':'Synchronisation multi-appareils','p2.f5':'Support prioritaire','p2.f6':'Accès anticipé aux nouvelles fonctionnalités',
 'p2.cta':'S\'inscrire en Pro',
 'signup.badge':'Inscription','signup.title':'Commencez dès maintenant',
 'signup.sub':'Créez votre compte gratuitement pour sauvegarder vos configurations et accéder à toutes les fonctionnalités de l\'application.',
 'signup.placeholder':'votre@email.com','signup.btn':'Continuer',
 'signup.ok1':'Vérifiez votre boîte mail !','signup.ok2':'Un lien magique vous a été envoyé. Cliquez dessus pour accéder directement à l\'application OffroadWatt.',
 'signup.note':'✓ Gratuit · ✓ Pas de carte bancaire · ✓ Résiliable à tout moment',
+'faq.badge':'FAQ','faq.title':'Questions fréquentes','faq.sub':'Tout ce que vous devez savoir sur l\'autonomie électrique en camping-car, van et caravane.',
+'faq.q1':'Combien de panneaux solaires pour un camping-car ?',
+'faq.a1':'Pour un camping-car standard consommant <strong>80 à 120 Ah/jour</strong>, il faut généralement <strong>2 à 4 panneaux de 200 Wc</strong> (soit 400 à 800 Wc total). En Europe du Sud avec 5 h/j de soleil, 400 Wc produisent ~130 Ah/jour. En Europe du Nord, comptez 30 % de plus. <a href="https://app.offroadwatt.com">Utilisez OffroadWatt</a> pour calculer exactement ce qu\'il vous faut selon votre zone géographique.',
+'faq.q2':'Quelle batterie lithium choisir pour un van aménagé ?',
+'faq.a2':'Pour un van en vie nomade, une batterie <strong>lithium LiFePO4 100 Ah 12V</strong> offre ~80 Ah utilisables (DoD 80 %) et pèse 3× moins qu\'une AGM équivalente. Pour 2 personnes consommant 60-80 Ah/jour, c\'est le minimum. Préférez les marques avec BMS intégré. <strong>200 Ah</strong> offrent plus de confort avec autonomie 2-3 jours sans soleil.',
+'faq.q3':'Différence entre batterie AGM, GEL et lithium ?',
+'faq.a3':'<strong>AGM</strong> : sans entretien, supporte les décharges profondes (50 %), économique (150-300€). <strong>GEL</strong> : résiste mieux à la chaleur, décharge 50 %, idéal pour les régions chaudes. <strong>Lithium (LiFePO4)</strong> : léger, décharge 80-90 %, 2000+ cycles, prix élevé mais coût total inférieur sur 10 ans. Pour la vie nomade, le lithium est désormais le choix de référence.',
+'faq.q4':'Comment calculer la consommation électrique de mon camping-car ?',
+'faq.a4':'Multipliez la <strong>puissance de chaque appareil (W) par ses heures d\'utilisation par jour (h)</strong> pour obtenir les Wh, divisez par la tension (12V) pour les Ah. Ex : frigo 45W × 24h / 12V = 90 Ah/j. Additionnez tous vos appareils. <a href="https://app.offroadwatt.com">OffroadWatt</a> fait ce calcul automatiquement avec 100+ équipements préconfigurés.',
+'faq.q5':'Quelle capacité de batterie pour 1 semaine en autonomie totale ?',
+'faq.a5':'Pour 1 semaine sans branchement électrique : multipliez votre <strong>consommation journalière × 2 à 3 jours</strong> (avec apport solaire, pas 7 jours). Ex : 80 Ah/j × 3 = 240 Ah de capacité lithium. Avec 400 Wc solaires en été, vous maintenez l\'équilibre indéfiniment. L\'hiver ou par temps couvert, doublez la capacité batterie.',
+'faq.q6':'Peut-on recharger ses batteries avec l\'alternateur du véhicule ?',
+'faq.a6':'Oui, c\'est la recharge alternateur (ou B2B). Un alternateur délivre en général <strong>20 à 40 A dédiés</strong> aux batteries secondaires. Sur 2h de route à 30A : 30 × 2 × 0,7 (rendement) = <strong>42 Ah récupérés</strong>. C\'est un complément utile mais insuffisant pour remplacer le solaire sur de longues périodes stationnaires.',
 'footer.desc':'Le calculateur d\'autonomie électrique pour camping-car, caravane et van. Planifiez. Optimisez. Voyagez.',
 'footer.h1':'Application','footer.open':'Ouvrir l\'app','footer.feat':'Fonctionnalités','footer.price':'Tarifs','footer.signup':'S\'inscrire',
 'footer.h2':'Liens','footer.privacy':'Confidentialité','footer.terms':'Conditions',
 'footer.copy':'© 2025 OffroadWatt. Tous droits réservés.',
 },
 en:{
-'nav.features':'Features','nav.hiw':'How it works','nav.pricing':'Pricing','nav.login':'Sign in','nav.cta':'Try for free',
+'nav.features':'Features','nav.hiw':'How it works','nav.pricing':'Pricing','nav.faq':'FAQ','nav.login':'Sign in','nav.cta':'Try for free',
 'hero.badge':'Electrical autonomy calculator',
 'hero.t1':'Plan your','hero.t2':'electrical autonomy','hero.t3':'travel worry-free.',
 'hero.sub':'Calculate your consumption in real time, size your solar panels and find the ideal battery for your motorhome, caravan or van.',
@@ -943,7 +906,7 @@ en:{
 'feat.badge':'Features','feat.title':'Everything you need','feat.sub':'A complete tool to size your off-road electrical installation with professional precision.',
 'f1.t':'Smart battery calculator','f1.d':'34 AGM, GEL and Lithium models (12V/24V). The calculator recommends the optimal battery for your actual consumption.',
 'f2.t':'Solar & Alternator','f2.d':'Integrate solar production (41 global zones, MPPT) and alternator charging to calculate real-world autonomy.',
-'f3.t':'Large catalog','f3.d':'Hundreds of pre-loaded appliances with exact consumption: fridges, heaters, lighting, tech devices and much more.',
+'f3.t':'AI Search','f3.d':'Type any equipment name. AI instantly finds its exact consumption and enriches the community catalog.',
 'f4.t':'PDF Export','f4.d':'Generate a complete A4 report: appliance table, energy balance in Ah, market battery recommendations.',
 'f5.t':'Setup comparator','f5.d':'Compare two configurations side by side with ROI calculation. Make the best investment decision.',
 'f6.t':'EN/FR/ES multilingual','f6.d':'Interface in English, French and Spanish with automatic browser language detection.',
@@ -955,30 +918,42 @@ en:{
 'v1.t':'Motorhome','v1.d':'Fridge, AC, TV, kitchen... Size for maximum comfort in total autonomy over several days.',
 'v2.t':'Camper van','v2.d':'Light and efficient. Optimize every watt for a minimalist high-performance setup adapted to mobility.',
 'v3.t':'Caravan','v3.d':'Manage charging from the towing vehicle and plan your off-grid nights with peace of mind.',
-'cat.badge':'Catalog','cat.title':'Hundreds of appliances ready to use',
-'cat.desc':'The catalog includes a wide selection of real equipment with exact consumption data. Add them in one click for an instant accurate calculation.',
-'cat.f1':'Exact consumption per appliance','cat.f2':'Multi-mode: standby, min and max power','cat.f3':'6 categories: kitchen, comfort, tech, water, lighting, system','cat.f4':'Add custom appliances',
-'cat.cta':'Browse the catalog','cat.label':'Equipment catalog',
-'cat.cuisine':'Kitchen','cat.confort':'Comfort','cat.tech':'High-tech','cat.eclairage':'Lighting',
+'ai.badge':'Artificial intelligence','ai.title':'A catalog enriched by AI',
+'ai.desc':'Type an equipment name — 12V fridge, solar panel, Webasto inverter — and AI instantly finds its real consumption.',
+'ai.f1':'Search by exact product name','ai.f2':'Multi-mode consumption (standby, min, max)','ai.f3':'Shared and enriched community catalog','ai.f4':'Results in under 5 seconds',
+'ai.cta':'Access AI search','ai.search':'AI Search','ai.placeholder':'Webasto Air Top 2000 STC...','ai.searching':'Searching...',
 'price.badge':'Pricing','price.title':'Simple and transparent','price.sub':'Start for free. Go Pro when you need more.',
 'p1.name':'Free','p1.period':'/ forever','p1.desc':'Perfect to discover and size your electrical installation.',
-'p1.f1':'Full real-time autonomy calculation','p1.f2':'33 pre-configured appliances + custom','p1.f3':'PDF export (complete report)','p1.f4':'A/B setup comparator','p1.f5':'Full equipment catalog access','p1.f6':'1 saved configuration only',
+'p1.f1':'Full real-time autonomy calculation','p1.f2':'33 pre-configured appliances + custom','p1.f3':'PDF export (complete report)','p1.f4':'A/B setup comparator','p1.f5':'5 AI searches per day','p1.f6':'1 saved configuration only',
 'p1.cta':'Get started free',
 'p2.badge':'Recommended','p2.name':'Pro','p2.period':'/ month','p2.desc':'For serious travelers who want to optimize everything without limits.',
-'p2.f1':'Everything in Free','p2.f2':'Unlimited saved configurations','p2.f3':'Unlimited custom appliances','p2.f4':'Multi-device sync','p2.f5':'Priority support','p2.f6':'Early access to new features',
+'p2.f1':'Everything in Free','p2.f2':'Unlimited saved configurations','p2.f3':'Unlimited AI searches','p2.f4':'Multi-device sync','p2.f5':'Priority support','p2.f6':'Early access to new features',
 'p2.cta':'Sign up for Pro',
 'signup.badge':'Sign up','signup.title':'Get started now',
 'signup.sub':'Create your free account to save your configurations and access all application features.',
 'signup.placeholder':'your@email.com','signup.btn':'Continue',
 'signup.ok1':'Check your inbox!','signup.ok2':'A magic link has been sent to you. Click it to access the OffroadWatt app directly.',
 'signup.note':'✓ Free · ✓ No credit card · ✓ Cancel anytime',
+'faq.badge':'FAQ','faq.title':'Frequently asked questions','faq.sub':'Everything you need to know about electrical autonomy for motorhomes, campervans and caravans.',
+'faq.q1':'How many solar panels for a motorhome?',
+'faq.a1':'A standard motorhome consuming <strong>80 to 120 Ah/day</strong> typically needs <strong>2 to 4 panels of 200Wp</strong> (400 to 800Wp total). In Southern Europe with 5h/day of sun, 400Wp produces ~130 Ah/day. In Northern Europe, add 30% more. <a href="https://app.offroadwatt.com">Use OffroadWatt</a> to calculate exactly what you need for your geographic zone.',
+'faq.q2':'Which lithium battery for a camper van?',
+'faq.a2':'For full-time van life, a <strong>LiFePO4 100Ah 12V battery</strong> gives ~80 Ah usable (80% DoD) and weighs 3× less than an equivalent AGM. For 2 people consuming 60-80 Ah/day, that\'s the minimum. Look for models with built-in BMS. <strong>200 Ah</strong> provides more comfort with 2-3 days autonomy without sun.',
+'faq.q3':'Difference between AGM, GEL and lithium batteries?',
+'faq.a3':'<strong>AGM</strong>: maintenance-free, handles deep discharge (50%), economical (€150-300). <strong>GEL</strong>: better heat resistance, 50% discharge, ideal for hot climates. <strong>Lithium (LiFePO4)</strong>: lightweight, 80-90% discharge, 2000+ cycles, higher upfront cost but lower total cost over 10 years. For nomadic life, lithium is now the go-to choice.',
+'faq.q4':'How to calculate the electrical consumption of a motorhome?',
+'faq.a4':'Multiply each <strong>appliance power (W) by daily usage hours (h)</strong> to get Wh, divide by voltage (12V) for Ah. Example: fridge 45W × 24h / 12V = 90 Ah/day. Sum all appliances. <a href="https://app.offroadwatt.com">OffroadWatt</a> does this automatically with 100+ pre-configured devices.',
+'faq.q5':'What battery capacity for 1 week of full autonomy?',
+'faq.a5':'For 1 week without hookup: multiply your <strong>daily consumption × 2 to 3 days</strong> (solar helps — you don\'t need 7 days). Example: 80 Ah/day × 3 = 240 Ah lithium capacity. With 400Wp solar in summer, you\'ll maintain balance indefinitely. In winter or overcast conditions, double your battery capacity.',
+'faq.q6':'Can I charge batteries with the vehicle alternator?',
+'faq.a6':'Yes, this is called alternator charging (B2B charger). A typical alternator delivers <strong>20 to 40A dedicated</strong> to the secondary batteries. 2 hours driving at 30A: 30 × 2 × 0.7 (efficiency) = <strong>42 Ah recovered</strong>. It\'s a useful supplement but not a replacement for solar during long stationary periods.',
 'footer.desc':'The electrical autonomy calculator for motorhomes, caravans and vans. Plan. Optimize. Travel.',
 'footer.h1':'App','footer.open':'Open app','footer.feat':'Features','footer.price':'Pricing','footer.signup':'Sign up',
 'footer.h2':'Links','footer.privacy':'Privacy','footer.terms':'Terms',
 'footer.copy':'© 2025 OffroadWatt. All rights reserved.',
 },
 es:{
-'nav.features':'Características','nav.hiw':'Cómo funciona','nav.pricing':'Precios','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
+'nav.features':'Características','nav.hiw':'Cómo funciona','nav.pricing':'Precios','nav.faq':'FAQ','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
 'hero.badge':'Calculadora de autonomía eléctrica',
 'hero.t1':'Planifica tu','hero.t2':'autonomía eléctrica','hero.t3':'viaja sin preocupaciones.',
 'hero.sub':'Calcula tu consumo en tiempo real, dimensiona tus paneles solares y encuentra la batería ideal para tu autocaravana, caravana o furgoneta.',
@@ -990,7 +965,7 @@ es:{
 'feat.badge':'Características','feat.title':'Todo lo que necesitas','feat.sub':'Una herramienta completa para dimensionar tu instalación eléctrica off-road con precisión profesional.',
 'f1.t':'Cálculo inteligente de baterías','f1.d':'34 modelos AGM, GEL y Litio (12V/24V). La calculadora recomienda la batería óptima para tu consumo real.',
 'f2.t':'Solar y Alternador','f2.d':'Integra la producción solar (41 zonas globales, MPPT) y la carga por alternador para calcular la autonomía real.',
-'f3.t':'Gran catálogo','f3.d':'Cientos de equipos precargados con su consumo exacto: neveras, calefacciones, iluminación, dispositivos tech y mucho más.',
+'f3.t':'Búsqueda con IA','f3.d':'Escribe el nombre de cualquier equipo. La IA encuentra su consumo exacto y enriquece el catálogo comunitario.',
 'f4.t':'Exportar PDF','f4.d':'Genera un informe A4 completo: tabla de aparatos, balance energético en Ah, recomendaciones del mercado.',
 'f5.t':'Comparador de setups','f5.d':'Compara dos configuraciones con cálculo de ROI. Toma la mejor decisión de inversión.',
 'f6.t':'Multilingüe EN/FR/ES','f6.d':'Interfaz en inglés, francés y español con detección automática del idioma del navegador.',
@@ -1002,23 +977,35 @@ es:{
 'v1.t':'Autocaravana','v1.d':'Nevera, aire acondicionado, TV, cocina... Dimensiona para el máximo confort en autonomía total durante varios días.',
 'v2.t':'Furgoneta camper','v2.d':'Ligera y eficiente. Optimiza cada vatio para un setup minimalista de alto rendimiento adaptado a la movilidad.',
 'v3.t':'Caravana','v3.d':'Gestiona la carga desde el vehículo tractor y planifica tus noches sin conexión con total tranquilidad.',
-'cat.badge':'Catálogo','cat.title':'Cientos de equipos listos para usar',
-'cat.desc':'El catálogo incluye una amplia selección de equipos reales con su consumo exacto. Añádelos con un clic para obtener un cálculo preciso al instante.',
-'cat.f1':'Consumo exacto por equipo','cat.f2':'Multi-modo: standby, potencia mín y máx','cat.f3':'6 categorías: cocina, confort, tech, agua, iluminación, sistema','cat.f4':'Añadir equipos personalizados',
-'cat.cta':'Explorar el catálogo','cat.label':'Catálogo de equipos',
-'cat.cuisine':'Cocina','cat.confort':'Confort','cat.tech':'High-tech','cat.eclairage':'Iluminación',
+'ai.badge':'Inteligencia artificial','ai.title':'Un catálogo enriquecido por IA',
+'ai.desc':'Escribe el nombre de un equipo — nevera 12V, panel solar, inversor Webasto — y la IA encuentra instantáneamente su consumo real.',
+'ai.f1':'Búsqueda por nombre de producto exacto','ai.f2':'Consumo multi-modo (standby, mín, máx)','ai.f3':'Catálogo comunitario compartido y enriquecido','ai.f4':'Resultados en menos de 5 segundos',
+'ai.cta':'Acceder a la búsqueda IA','ai.search':'Búsqueda IA','ai.placeholder':'Webasto Air Top 2000 STC...','ai.searching':'Buscando...',
 'price.badge':'Precios','price.title':'Simple y transparente','price.sub':'Empieza gratis. Pasa a Pro cuando necesites más.',
 'p1.name':'Gratis','p1.period':'/ siempre','p1.desc':'Perfecto para descubrir y dimensionar tu instalación eléctrica.',
-'p1.f1':'Cálculo de autonomía completo en tiempo real','p1.f2':'33 aparatos preconfigurados + personalizados','p1.f3':'Exportar PDF (informe completo)','p1.f4':'Comparador de setups A/B','p1.f5':'Acceso al catálogo completo de equipos','p1.f6':'Solo 1 configuración guardada',
+'p1.f1':'Cálculo de autonomía completo en tiempo real','p1.f2':'33 aparatos preconfigurados + personalizados','p1.f3':'Exportar PDF (informe completo)','p1.f4':'Comparador de setups A/B','p1.f5':'5 búsquedas IA por día','p1.f6':'Solo 1 configuración guardada',
 'p1.cta':'Empezar gratis',
 'p2.badge':'Recomendado','p2.name':'Pro','p2.period':'/ mes','p2.desc':'Para viajeros serios que quieren optimizarlo todo sin límites.',
-'p2.f1':'Todo del plan Gratis','p2.f2':'Configuraciones guardadas ilimitadas','p2.f3':'Equipos personalizados ilimitados','p2.f4':'Sincronización multi-dispositivo','p2.f5':'Soporte prioritario','p2.f6':'Acceso anticipado a nuevas funciones',
+'p2.f1':'Todo del plan Gratis','p2.f2':'Configuraciones guardadas ilimitadas','p2.f3':'Búsquedas IA ilimitadas','p2.f4':'Sincronización multi-dispositivo','p2.f5':'Soporte prioritario','p2.f6':'Acceso anticipado a nuevas funciones',
 'p2.cta':'Registrarse en Pro',
 'signup.badge':'Registro','signup.title':'Empieza ahora',
 'signup.sub':'Crea tu cuenta gratis para guardar tus configuraciones y acceder a todas las funciones de la aplicación.',
 'signup.placeholder':'tu@email.com','signup.btn':'Continuar',
 'signup.ok1':'¡Revisa tu correo!','signup.ok2':'Se te ha enviado un enlace mágico. Haz clic en él para acceder directamente a la aplicación OffroadWatt.',
 'signup.note':'✓ Gratis · ✓ Sin tarjeta · ✓ Cancela cuando quieras',
+'faq.badge':'FAQ','faq.title':'Preguntas frecuentes','faq.sub':'Todo lo que necesitas saber sobre autonomía eléctrica en autocaravana, furgoneta y caravana.',
+'faq.q1':'¿Cuántos paneles solares necesita una autocaravana?',
+'faq.a1':'Una autocaravana estándar que consume <strong>80 a 120 Ah/día</strong> necesita generalmente <strong>2 a 4 paneles de 200 Wp</strong> (400 a 800 Wp total). En el sur de Europa con 5 h/día de sol, 400 Wp producen ~130 Ah/día. En el norte de Europa, añade un 30% más. <a href="https://app.offroadwatt.com">Usa OffroadWatt</a> para calcular exactamente lo que necesitas.',
+'faq.q2':'¿Qué batería de litio elegir para una furgoneta camper?',
+'faq.a2':'Para vivir en furgoneta, una batería <strong>LiFePO4 100 Ah 12V</strong> ofrece ~80 Ah utilizables (DoD 80%) y pesa 3× menos que una AGM equivalente. Para 2 personas consumiendo 60-80 Ah/día, es el mínimo. Elige modelos con BMS integrado. <strong>200 Ah</strong> proporciona más comodidad con 2-3 días de autonomía sin sol.',
+'faq.q3':'¿Diferencia entre baterías AGM, GEL y litio?',
+'faq.a3':'<strong>AGM</strong>: sin mantenimiento, soporta descarga profunda (50%), económica (150-300€). <strong>GEL</strong>: mejor resistencia al calor, descarga 50%, ideal para climas cálidos. <strong>Litio (LiFePO4)</strong>: ligero, descarga 80-90%, más de 2000 ciclos, precio alto pero coste total inferior en 10 años. Para la vida nómada, el litio es ya la referencia.',
+'faq.q4':'¿Cómo calcular el consumo eléctrico de mi autocaravana?',
+'faq.a4':'Multiplica la <strong>potencia de cada aparato (W) por las horas de uso diario (h)</strong> para obtener Wh, divide por el voltaje (12V) para los Ah. Ej: nevera 45W × 24h / 12V = 90 Ah/día. Suma todos tus aparatos. <a href="https://app.offroadwatt.com">OffroadWatt</a> lo calcula automáticamente con más de 100 equipos preconfigurados.',
+'faq.q5':'¿Qué capacidad de batería para 1 semana en autonomía total?',
+'faq.a5':'Para 1 semana sin conexión eléctrica: multiplica tu <strong>consumo diario × 2 a 3 días</strong> (el solar ayuda, no necesitas 7 días). Ej: 80 Ah/día × 3 = 240 Ah de capacidad litio. Con 400 Wp solares en verano, mantendrás el equilibrio indefinidamente. En invierno o con nubes, dobla la capacidad de batería.',
+'faq.q6':'¿Se puede cargar la batería con el alternador del vehículo?',
+'faq.a6':'Sí, se llama carga por alternador (cargador B2B). Un alternador entrega generalmente <strong>20 a 40 A dedicados</strong> a las baterías secundarias. 2 horas de conducción a 30A: 30 × 2 × 0,7 (rendimiento) = <strong>42 Ah recuperados</strong>. Es un complemento útil, pero insuficiente para reemplazar el solar en períodos estacionarios largos.',
 'footer.desc':'La calculadora de autonomía eléctrica para autocaravanas, caravanas y furgonetas. Planifica. Optimiza. Viaja.',
 'footer.h1':'Aplicación','footer.open':'Abrir app','footer.feat':'Características','footer.price':'Precios','footer.signup':'Registrarse',
 'footer.h2':'Enlaces','footer.privacy':'Privacidad','footer.terms':'Términos',
@@ -1032,16 +1019,32 @@ if(!['fr','en','es'].includes(_lang)) _lang = 'fr'
 
 function t(k){ return DICT[_lang]?.[k] || DICT.fr[k] || k }
 
+function buildFaq(){
+  const list = document.getElementById('faq-list')
+  if(!list) return
+  const items = [1,2,3,4,5,6].map(i => ({ q: t('faq.q'+i), a: t('faq.a'+i) }))
+  list.innerHTML = items.map((item, idx) => `
+    <div class="faq-item" data-faq="${idx}">
+      <div class="faq-q" onclick="toggleFaq(${idx})">
+        <span>${item.q}</span>
+        <span class="faq-icon"><i class="ti ti-plus"></i></span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">${item.a}</div></div>
+    </div>`).join('')
+}
+function toggleFaq(idx){
+  const item = document.querySelector('[data-faq="'+idx+'"]')
+  const wasOpen = item.classList.contains('open')
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'))
+  if(!wasOpen) item.classList.add('open')
+}
+
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n) })
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder) })
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === _lang))
   document.documentElement.lang = _lang
-  // Switch OG image based on active language
-  const ogSuffix = _lang === 'fr' ? '' : '-' + _lang
-  const ogUrl = 'https://www.offroadwatt.com/og-image' + ogSuffix + '.png'
-  document.querySelector('meta[property="og:image"]')?.setAttribute('content', ogUrl)
-  document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', ogUrl)
+  buildFaq()
 }
 
 document.querySelectorAll('.lang-btn').forEach(b => {

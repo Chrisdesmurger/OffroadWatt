@@ -3,7 +3,8 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
-    "api/search.js":  { "maxDuration": 10 },
-    "api/refine.js":  { "maxDuration": 15 }
+    "api/search.js":       { "maxDuration": 10 },
+    "api/refine.js":       { "maxDuration": 15 },
+    "api/send-summary.js": { "maxDuration": 10 }
   }
 }
