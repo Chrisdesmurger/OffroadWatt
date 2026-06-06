@@ -6,7 +6,7 @@
 - [x] Google Search Console — sitemap soumis (`https://www.offroadwatt.com/sitemap.xml`)
 - [x] Section FAQ sur le site vitrine (FR/EN/ES, questions à fort volume)
 - [ ] Bing Webmaster Tools — soumettre le sitemap
-- [ ] Vérifier domaine `offroadwatt.com` dans Resend (DNS SPF/DKIM)
+- [x] Vérifier domaine `offroadwatt.com` dans Resend (DNS SPF/DKIM)
 - [ ] Posts dans les communautés ciblées :
   - [ ] Reddit : r/vandwellers, r/overlanding, r/campervans
   - [ ] Forums francophones : caravaning.fr, campingcar-infos.com
@@ -17,7 +17,7 @@
 - [ ] Lister l'app sur AlternativeTo.net
 - [ ] Lister sur BetaList
 - [ ] Vidéo démo 60s (YouTube / TikTok / Reels)
-- [ ] Ajouter FAQ à la nav du site vitrine (ancre `#faq`)
+- [x] Ajouter FAQ à la nav du site vitrine (ancre `#faq`)
 
 ### Long terme (SEO organique)
 - [ ] Article : "Guide complet autonomie électrique camping-car 2025"
@@ -35,8 +35,11 @@
 - [x] Export email récapitulatif (Resend)
 - [x] Auth Supabase (Magic Link + Google OAuth)
 - [x] Sauvegarde / chargement de configurations
-- [ ] Ajouter `RESEND_API_KEY` dans Vercel (env var)
-- [ ] Configurer SMTP custom Supabase (noreply@offroadwatt.com)
+- [x] Ajouter `RESEND_API_KEY` dans Vercel (env var)
+- [x] Configurer SMTP custom Supabase (noreply@offroadwatt.com)
+- [x] Template email récapitulatif — design + i18n (FR/EN/ES)
+- [x] Template email magic link — design OffroadWatt (FR)
+- [ ] Templates email multilingues — magic link EN/ES (Supabase ne supporte qu'un template, solution à étudier : détection langue via URL param ou template bilingue FR/EN)
 - [ ] Stripe — paiement plan Pro (~4,99€/mois)
 
 ### Moyen terme

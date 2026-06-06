@@ -942,118 +942,138 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
 }
 
 function buildEmailSummaryHtml() {
-  const { cons, solar, alt, recharge, net, usable, autDays, solCovPct } = calc()
+  const { cons, solar, alt, net, usable, autDays, solCovPct } = calc()
   const isDanger = net > usable
   const autStr = !isFinite(autDays) ? '∞' : autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ' j'
   const zone = SUN_ZONES[S.sunIdx]
   const dateStr = new Date().toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
-  const autColor = isDanger ? '#f87171' : '#2dd4bf'
+  const autColor = isDanger ? '#ef4444' : '#2dd4bf'
+  const solPct = Math.min(Math.round(solCovPct), 100)
 
   const appRows = S.apps.map(a => {
     const modeLabel = (a.modes && a.modes.length > 1) ? (a.modes[a.activeMode ?? 0]?.label ?? '') : ''
-    return `<tr style="border-bottom:1px solid #e8e8e5">
-      <td style="padding:6px 8px;color:${a.on ? '#1a1a1a' : '#aaa'}">${ta(a.n)}${!a.on ? ' (off)' : ''}</td>
-      <td style="padding:6px 8px;color:#666;font-size:11px">${tcat(a.cat)}</td>
-      <td style="padding:6px 8px;font-family:monospace;text-align:right;color:${a.on ? '#1a1a1a' : '#aaa'}">${a.w} W</td>
-      <td style="padding:6px 8px;font-family:monospace;text-align:right;color:${a.on ? '#1a1a1a' : '#aaa'}">${a.h} h</td>
-      <td style="padding:6px 8px;font-family:monospace;text-align:right;color:${a.on ? '#c47a18' : '#aaa'}">${a.on ? toAh(a.w * a.h) + ' Ah' : '—'}</td>
+    const off = !a.on
+    const nameHtml = modeLabel
+      ? `${ta(a.n)} <span style="font-size:10px;color:#a0a09a">(${modeLabel})</span>`
+      : ta(a.n)
+    return `<tr>
+      <td style="padding:7px 0;border-bottom:1px solid #f0ede9;color:${off ? '#c0bdb8' : '#2a2925'};font-size:12px">${nameHtml}</td>
+      <td style="padding:7px 8px;border-bottom:1px solid #f0ede9;color:${off ? '#d0cdc8' : '#9a9890'};font-size:10px">${tcat(a.cat)}</td>
+      <td style="padding:7px 8px;border-bottom:1px solid #f0ede9;font-family:'Courier New',monospace;text-align:right;font-size:11px;color:${off ? '#c0bdb8' : '#6a6760'}">${a.w}</td>
+      <td style="padding:7px 8px;border-bottom:1px solid #f0ede9;font-family:'Courier New',monospace;text-align:right;font-size:11px;color:${off ? '#c0bdb8' : '#6a6760'}">${a.h}</td>
+      <td style="padding:7px 0 7px 8px;border-bottom:1px solid #f0ede9;font-family:'Courier New',monospace;text-align:right;font-size:12px;font-weight:600;color:${off ? '#c0bdb8' : '#c47a18'}">${a.on ? toAh(a.w * a.h) + ' Ah' : '—'}</td>
     </tr>`
   }).join('')
 
   return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="background:#f5f5f3;font-family:Arial,sans-serif;color:#1a1a1a;padding:20px 10px;margin:0">
-<div style="max-width:600px;margin:0 auto">
+<html lang="${getLang()}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OffroadWatt</title>
+</head>
+<body style="margin:0;padding:0;background:#f2f1ef;font-family:Arial,'Helvetica Neue',sans-serif;color:#2a2925">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px">
 
   <!-- Header -->
-  <div style="background:#141817;padding:20px 24px;border-radius:10px 10px 0 0;border:1px solid #2a3330;border-bottom:none">
-    <span style="font-family:monospace;font-size:20px;font-weight:700;color:#c47a18">OffroadWatt</span>
-    <p style="color:#8da89a;font-size:12px;margin:4px 0 0">${dateStr} · ${t('vt.' + S.vtype)}</p>
+  <div style="background:#141817;border-radius:14px 14px 0 0;padding:22px 28px;border:1px solid #253029;border-bottom:none">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td><span style="font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#c47a18;letter-spacing:-0.5px">OffroadWatt</span></td>
+        <td style="text-align:right;vertical-align:middle"><span style="font-size:11px;color:#4a6358">${dateStr}</span></td>
+      </tr>
+      <tr><td colspan="2" style="padding-top:4px"><span style="font-size:11px;color:#4a6358">${t('vt.' + S.vtype)}</span></td></tr>
+    </table>
   </div>
 
-  <!-- Summary -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#1c201e;border:1px solid #2a3330;border-top:none;border-bottom:none">
+  <!-- KPI bar -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#1c221f;border:1px solid #253029;border-top:none">
     <tr>
-      <td style="text-align:center;padding:16px 8px;border-right:1px solid #2a3330">
-        <div style="font-family:monospace;font-size:26px;font-weight:700;color:${autColor}">${autStr}</div>
-        <div style="font-size:10px;color:#5a7068;text-transform:uppercase;letter-spacing:1px;margin-top:4px">Autonomie</div>
+      <td style="padding:18px 10px;text-align:center;border-right:1px solid #253029;width:33.3%">
+        <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;color:${autColor};line-height:1">${autStr}</div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#4a6358;margin-top:6px">${t('email.autonomyLabel')}</div>
       </td>
-      <td style="text-align:center;padding:16px 8px;border-right:1px solid #2a3330">
-        <div style="font-family:monospace;font-size:26px;font-weight:700;color:#e6ede8">${toAh(cons)}</div>
-        <div style="font-size:10px;color:#5a7068;text-transform:uppercase;letter-spacing:1px;margin-top:4px">Ah/jour</div>
+      <td style="padding:18px 10px;text-align:center;border-right:1px solid #253029;width:33.3%">
+        <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;color:#dde8e2;line-height:1">${toAh(cons)}</div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#4a6358;margin-top:6px">${t('email.consumptionLabel')}</div>
       </td>
-      <td style="text-align:center;padding:16px 8px">
-        <div style="font-family:monospace;font-size:26px;font-weight:700;color:#fbbf24">${Math.round(solCovPct)}%</div>
-        <div style="font-size:10px;color:#5a7068;text-transform:uppercase;letter-spacing:1px;margin-top:4px">Solaire</div>
+      <td style="padding:18px 10px;text-align:center;width:33.3%">
+        <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;color:#f59e0b;line-height:1">${solPct}%</div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#4a6358;margin-top:6px">${t('email.solarLabel')}</div>
       </td>
     </tr>
   </table>
 
   <!-- Appliances -->
-  <div style="background:#fff;border:1px solid #e0e0de;border-top:none;padding:16px 20px">
-    <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 10px;border-bottom:1px solid #eee;padding-bottom:6px">Appareils</p>
+  <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:20px 24px">
+    <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f0ede9">${t('email.devicesSection')}</div>
     <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px">
-      <thead><tr style="border-bottom:2px solid #e0e0de">
-        <th style="text-align:left;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Appareil</th>
-        <th style="text-align:left;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Catégorie</th>
-        <th style="text-align:right;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Watts</th>
-        <th style="text-align:right;padding:4px 8px;font-size:10px;color:#888;font-weight:600">h/j</th>
-        <th style="text-align:right;padding:4px 8px;font-size:10px;color:#888;font-weight:600">Ah/j</th>
-      </tr></thead>
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:0 0 8px;font-size:10px;font-weight:600;color:#c0bdb8;border-bottom:2px solid #f0ede9">${t('email.deviceCol')}</th>
+          <th style="text-align:left;padding:0 8px 8px;font-size:10px;font-weight:600;color:#c0bdb8;border-bottom:2px solid #f0ede9">${t('email.categoryCol')}</th>
+          <th style="text-align:right;padding:0 8px 8px;font-size:10px;font-weight:600;color:#c0bdb8;border-bottom:2px solid #f0ede9">W</th>
+          <th style="text-align:right;padding:0 8px 8px;font-size:10px;font-weight:600;color:#c0bdb8;border-bottom:2px solid #f0ede9">${t('email.hoursPerDay')}</th>
+          <th style="text-align:right;padding:0 0 8px 8px;font-size:10px;font-weight:600;color:#c0bdb8;border-bottom:2px solid #f0ede9">${t('email.ahPerDay')}</th>
+        </tr>
+      </thead>
       <tbody>${appRows}</tbody>
-      <tfoot><tr style="background:#faf9f7">
-        <td colspan="4" style="padding:8px;font-weight:700;font-size:12px">Total consommation</td>
-        <td style="padding:8px;font-family:monospace;font-weight:700;text-align:right;color:#c47a18">${toAh(cons)} Ah/j</td>
-      </tr></tfoot>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="padding:10px 8px 0 0;font-weight:700;font-size:12px;color:#2a2925;border-top:2px solid #f0ede9">${t('email.totalConsumption')}</td>
+          <td style="padding:10px 0 0 8px;font-family:'Courier New',monospace;font-weight:700;text-align:right;color:#c47a18;border-top:2px solid #f0ede9">${toAh(cons)} Ah</td>
+        </tr>
+      </tfoot>
     </table>
   </div>
 
   <!-- Config grid -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e0e0de;border-top:none;background:#fff">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e4e3e0;border-top:none;background:#faf9f7">
     <tr>
-      <!-- Battery -->
-      <td style="padding:16px 20px;border-right:1px solid #e0e0de;vertical-align:top;width:${S.solOn ? '50%' : '100%'}">
-        <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 8px">Batterie</p>
-        <p style="margin:2px 0;font-size:12px"><strong>${S.bat.ah} Ah ${S.bat.v}V ${tbattype(S.bat.type)}</strong>${S.batNb > 1 ? ` ×${S.batNb}` : ''}</p>
-        <p style="margin:2px 0;font-size:11px;color:#666">DoD : ${Math.round(S.dod * 100)} % · Utilisable : <strong style="color:#2dd4bf">${toAh(usable)} Ah</strong></p>
+      <td style="padding:16px 20px;${S.solOn ? 'border-right:1px solid #e4e3e0;' : ''}vertical-align:top;width:${S.solOn ? '50%' : '100%'}">
+        <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:8px">${t('email.batterySection')}</div>
+        <div style="font-size:13px;font-weight:700;color:#2a2925">${S.bat.ah} Ah ${S.bat.v}V ${tbattype(S.bat.type)}${S.batNb > 1 ? ` ×${S.batNb}` : ''}</div>
+        <div style="font-size:11px;color:#7a7770;margin-top:4px">${t('email.dodLabel')} ${Math.round(S.dod * 100)}% · ${t('email.usableLabel')} <strong style="color:#2dd4bf">${toAh(usable)} Ah</strong></div>
       </td>
-      ${S.solOn ? `
-      <!-- Solar -->
-      <td style="padding:16px 20px;vertical-align:top">
-        <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 8px">Solaire</p>
-        <p style="margin:2px 0;font-size:12px"><strong>${S.solW * S.solNb} Wc</strong> (${S.solNb}×${S.solW} Wc)</p>
-        <p style="margin:2px 0;font-size:11px;color:#666">${zone.r === 'Personnalisé' ? 'Custom' : zone.n} · <strong style="color:#fbbf24">${toAh(solar)} Ah/j</strong></p>
+      ${S.solOn ? `<td style="padding:16px 20px;vertical-align:top">
+        <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:8px">${t('email.solarSection')}</div>
+        <div style="font-size:13px;font-weight:700;color:#2a2925">${S.solW * S.solNb} Wc (${S.solNb}×${S.solW})</div>
+        <div style="font-size:11px;color:#7a7770;margin-top:4px">${zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n} · <strong style="color:#f59e0b">${toAh(solar)} Ah/j</strong></div>
       </td>` : ''}
     </tr>
-    ${S.altOn ? `<tr><td colspan="2" style="padding:12px 20px;border-top:1px solid #eee">
-      <p style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin:0 0 4px">Alternateur</p>
-      <p style="margin:0;font-size:12px;color:#666">${S.altAmps} A · ${S.altHours} h/j · <strong style="color:#a78bfa">${toAh(alt)} Ah/j</strong></p>
+    ${S.altOn ? `<tr><td colspan="2" style="padding:12px 20px;border-top:1px solid #ebe9e5">
+      <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:4px">${t('email.altSection')}</div>
+      <div style="font-size:11px;color:#7a7770">${S.altAmps} A · ${S.altHours} h/j · <strong style="color:#a78bfa">${toAh(alt)} Ah</strong></div>
     </td></tr>` : ''}
   </table>
 
-  <!-- Balance row -->
-  <div style="background:${isDanger ? '#fef2f2' : '#f0fdf9'};border:1px solid ${isDanger ? '#fecaca' : '#a7f3d0'};border-top:none;padding:14px 20px;border-radius:0 0 10px 10px">
+  <!-- Balance -->
+  <div style="background:${isDanger ? '#fff5f5' : '#f0fdf6'};border:1px solid ${isDanger ? '#fecaca' : '#bbf7d0'};border-top:none;padding:16px 20px;border-radius:0 0 14px 14px">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
-        <td style="font-size:12px;color:#555">Déficit résiduel</td>
-        <td style="font-family:monospace;font-weight:700;text-align:right;color:${isDanger ? '#dc2626' : '#059669'}">${toAh(net)} Ah/j</td>
+        <td style="font-size:12px;color:#6a6760;padding-bottom:8px">${t('email.deficitLabel')}</td>
+        <td style="font-family:'Courier New',monospace;font-weight:700;text-align:right;font-size:13px;color:${isDanger ? '#dc2626' : '#16a34a'};padding-bottom:8px">${toAh(net)} Ah/j</td>
       </tr>
       <tr>
-        <td style="font-size:14px;font-weight:700;padding-top:6px">Autonomie estimée</td>
-        <td style="font-family:monospace;font-size:18px;font-weight:700;text-align:right;color:${autColor}">${autStr}</td>
+        <td style="font-size:15px;font-weight:700;color:#1a1915">${t('email.estAutonomy')}</td>
+        <td style="font-family:'Courier New',monospace;font-size:24px;font-weight:700;text-align:right;color:${autColor}">${autStr}</td>
       </tr>
     </table>
   </div>
 
   <!-- CTA -->
-  <div style="text-align:center;padding:24px 0 8px">
-    <a href="https://app.offroadwatt.com" style="background:#c47a18;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:14px;display:inline-block">
-      Modifier dans l'application →
-    </a>
+  <div style="text-align:center;padding:28px 0 10px">
+    <a href="https://app.offroadwatt.com" style="display:inline-block;background:#c47a18;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:700;font-size:14px;letter-spacing:0.3px">${t('email.openApp')}</a>
   </div>
-  <p style="text-align:center;font-size:10px;color:#aaa;margin-top:12px">OffroadWatt · app.offroadwatt.com</p>
 
-</div></body></html>`
+  <!-- Footer -->
+  <p style="text-align:center;font-size:10px;color:#b0ada8;margin:8px 0 0">
+    OffroadWatt · <a href="https://app.offroadwatt.com" style="color:#c47a18;text-decoration:none">app.offroadwatt.com</a>
+  </p>
+
+</div>
+</body>
+</html>`
 }
 
 // ── COMPARE TAB ──────────────────────────────────────────────────────────────
