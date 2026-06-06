@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion OffroadWatt</title>
+</head>
+<body style="margin:0;padding:0;background:#f2f1ef;font-family:Arial,'Helvetica Neue',sans-serif">
+  <div style="max-width:480px;margin:0 auto;padding:32px 16px">
+
+    <!-- Header -->
+    <div style="background:#141817;border-radius:14px 14px 0 0;padding:28px 32px;border:1px solid #253029;border-bottom:none;text-align:center">
+      <div style="font-family:'Courier New',monospace;font-size:24px;font-weight:700;color:#c47a18;letter-spacing:-0.5px">OffroadWatt</div>
+      <div style="font-size:11px;color:#4a6358;margin-top:6px;letter-spacing:0.5px">Calculateur d'autonomie électrique</div>
+    </div>
+
+    <!-- Body -->
+    <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;border-bottom:none;padding:36px 32px">
+
+      <h1 style="margin:0 0 12px;font-size:20px;font-weight:700;color:#1a1915;line-height:1.2">
+        Votre lien de connexion ✓
+      </h1>
+      <p style="margin:0 0 28px;font-size:14px;line-height:1.65;color:#5a5855">
+        Cliquez sur le bouton ci-dessous pour vous connecter à votre espace OffroadWatt et accéder à vos configurations sauvegardées.
+      </p>
+
+      <!-- CTA -->
+      <div style="text-align:center;margin:0 0 28px">
+        <a href="{{ .ConfirmationURL }}"
+           style="display:inline-block;background:#c47a18;color:#ffffff;text-decoration:none;padding:15px 44px;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:0.3px">
+          Se connecter →
+        </a>
+      </div>
+
+      <!-- Validity -->
+      <p style="font-size:12px;color:#a0a09a;text-align:center;margin:0 0 24px">
+        Ce lien est valable <strong style="color:#6a6760">1 heure</strong>.
+      </p>
+
+      <!-- Alt link -->
+      <div style="background:#f8f7f5;border-radius:8px;padding:14px 16px;border:1px solid #eceae6">
+        <p style="margin:0 0 6px;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#a0a09a;font-family:'Courier New',monospace">Lien alternatif</p>
+        <p style="margin:0;font-size:11px;color:#c47a18;word-break:break-all;line-height:1.5">{{ .ConfirmationURL }}</p>
+      </div>
+
+    </div>
+
+    <!-- Security notice -->
+    <div style="background:#fffbf0;border:1px solid #fde68a;border-top:none;padding:14px 20px;border-radius:0 0 14px 14px">
+      <p style="margin:0;font-size:11px;color:#92400e;line-height:1.5">
+        🔒 Si vous n'avez pas demandé ce lien, ignorez cet email. Votre compte reste sécurisé.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <p style="text-align:center;font-size:10px;color:#b0ada8;margin:20px 0 0;line-height:1.5">
+      OffroadWatt ·
+      <a href="https://app.offroadwatt.com" style="color:#c47a18;text-decoration:none">app.offroadwatt.com</a>
+    </p>
+
+  </div>
+</body>
+</html>
