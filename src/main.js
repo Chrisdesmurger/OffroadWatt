@@ -220,6 +220,152 @@ const CATICONS = {
   Eau: 'ti-droplet', Éclairage: 'ti-bulb', Système: 'ti-settings', Tout: 'ti-apps',
 }
 
+// ─── PRESETS PAR TYPE DE VÉHICULE ──────────────────────────────────────────────
+// Jeux d'appareils par défaut adaptés au profil de consommation de chaque véhicule.
+// `batMinAh` = capacité lithium 12V minimale recommandée pour ce profil.
+// `altOn`    = recharge alternateur active par défaut (les caravanes n'en ont pas).
+// Les `id` sont attribués dynamiquement à l'application (voir applyVtypePreset).
+
+const VTYPE_PRESETS = {
+  // Van aménagé — setup léger et nomade : 12V partout, pas de gros 230V.
+  van: {
+    altOn: true, batMinAh: 100,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 40L', icon: 'ti-fridge',         w: 45, h: 24,  cat: 'Cuisine'   },
+      { n: 'Spots LED encastrés ×4',            icon: 'ti-lamp',           w: 12, h: 4,   cat: 'Éclairage' },
+      { n: 'Éclairage LED bande 5m',            icon: 'ti-bulb',           w: 12, h: 4,   cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 30, h: 0.5, cat: 'Eau'       },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65, h: 4,   cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15, h: 3,   cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10, h: 24,  cat: 'Tech'      },
+      { n: 'Ventilateur plafond 12V',           icon: 'ti-wind',           w: 22, h: 6,   cat: 'Confort'   },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,  h: 24,  cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3, h: 24,  cat: 'Système'   },
+    ],
+  },
+  // Camping-car — setup complet et confortable : appareils 230V + chauffage.
+  campervan: {
+    altOn: true, batMinAh: 200,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 75L', icon: 'ti-fridge',         w: 55,  h: 24,   cat: 'Cuisine'   },
+      { n: 'Micro-ondes',                       icon: 'ti-microwave',      w: 900, h: 0.25, cat: 'Cuisine'   },
+      { n: 'Télévision 24" LED',                icon: 'ti-device-tv',      w: 25,  h: 3,    cat: 'Tech'      },
+      { n: 'Plafonnier LED 12V principal',      icon: 'ti-bulb',           w: 12,  h: 5,    cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×6',            icon: 'ti-lamp',           w: 18,  h: 4,    cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 50,  h: 0.5,  cat: 'Eau'       },
+      { n: 'Chauffage diesel 2kW',              icon: 'ti-temperature',    w: 10,  h: 8,    cat: 'Confort',
+        modes: [
+          { label: 'Veille / allumage', watts: 10 },
+          { label: 'Puissance min',     watts: 30 },
+          { label: 'Puissance max',     watts: 80 },
+        ], activeMode: 0 },
+      { n: 'Aérateur de toit 12V',              icon: 'ti-wind',           w: 35,  h: 6,    cat: 'Confort'   },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65,  h: 4,    cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15,  h: 3,    cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10,  h: 24,   cat: 'Tech'      },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,   h: 24,   cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3,  h: 24,   cat: 'Système'   },
+    ],
+  },
+  // Caravane — profil proche du camping-car mais SANS alternateur (pas de moteur).
+  caravan: {
+    altOn: false, batMinAh: 150,
+    apps: [
+      { n: 'Réfrigérateur à absorption 3 voies 90L', icon: 'ti-fridge',     w: 180, h: 24,  cat: 'Cuisine'   },
+      { n: 'Télévision 24" LED',                icon: 'ti-device-tv',      w: 25,  h: 3,    cat: 'Tech'      },
+      { n: 'Plafonnier LED 12V principal',      icon: 'ti-bulb',           w: 12,  h: 5,    cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×4',            icon: 'ti-lamp',           w: 12,  h: 4,    cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 30,  h: 0.5,  cat: 'Eau'       },
+      { n: 'Chauffage gaz + électronique (Truma Combi 4)', icon: 'ti-temperature', w: 15, h: 24, cat: 'Confort',
+        modes: [
+          { label: 'Veille électronique', watts: 3  },
+          { label: 'Ventilateur min',     watts: 8  },
+          { label: 'Ventilateur max',     watts: 25 },
+        ], activeMode: 1 },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15,  h: 3,    cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10,  h: 24,   cat: 'Tech'      },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,   h: 24,   cat: 'Système'   },
+    ],
+  },
+}
+
+// Instancie les appareils d'un preset avec des id uniques (clone profond léger).
+function instantiatePresetApps(vtype) {
+  const preset = VTYPE_PRESETS[vtype]
+  if (!preset) return []
+  const base = Date.now()
+  return preset.apps.map((a, i) => ({
+    id: base + i,
+    n: a.n, icon: a.icon, w: a.w, h: a.h, on: true, cat: a.cat,
+    ...(a.modes ? { modes: a.modes.map(m => ({ ...m })), activeMode: a.activeMode ?? 0 } : {}),
+  }))
+}
+
+// Plus petite batterie du type demandé couvrant la capacité minimale recommandée.
+function recommendedBatForVtype(vtype, type = 'LI') {
+  const minAh = VTYPE_PRESETS[vtype]?.batMinAh || 100
+  const candidates = BATS.filter(b => b.type === type && b.v === 12).sort((a, b) => a.ah - b.ah)
+  return candidates.find(b => b.ah >= minAh) || candidates[candidates.length - 1] || null
+}
+
+// ─── ONBOARDING (#17) ──────────────────────────────────────────────────────────
+// Usages optionnels proposés à l'étape 2 du wizard. Chaque usage déclare un
+// prédicat qui identifie les appareils correspondants dans un preset vtype.
+// Les appareils essentiels (frigo, éclairage, eau, système) sont toujours gardés.
+const USAGES = [
+  { id: 'cooking', icon: 'ti-microwave',     match: (n) => /micro-ondes|plaque|bouilloire|cafetière|café|four/i.test(n) },
+  { id: 'tv',      icon: 'ti-device-tv',     match: (n) => /télévision|tv|box tnt/i.test(n) },
+  { id: 'work',    icon: 'ti-device-laptop', match: (n) => /laptop|routeur|tablette|imprimante/i.test(n) },
+  { id: 'heating', icon: 'ti-temperature',   match: (n) => /chauffage|truma|webasto|eberspächer|autoterm|radiateur/i.test(n) },
+]
+const USAGE_IDS = USAGES.map(u => u.id)
+
+// Budgets batterie proposés à l'étape 3 → (type, multiplicateur de capacité min).
+const WIZARD_BUDGETS = [
+  { id: 'low',  type: 'AGM', mult: 1   },
+  { id: 'mid',  type: 'LI',  mult: 1   },
+  { id: 'high', type: 'LI',  mult: 1.5 },
+]
+
+const ONBOARDED_KEY = 'ow_onboarded'
+
+// Choisit une batterie selon le véhicule et le budget retenu.
+function batForBudget(vtype, budgetId) {
+  const b = WIZARD_BUDGETS.find(x => x.id === budgetId) || WIZARD_BUDGETS[1]
+  const targetAh = (VTYPE_PRESETS[vtype]?.batMinAh || 100) * b.mult
+  const candidates = BATS.filter(x => x.type === b.type && x.v === 12).sort((a, c) => a.ah - c.ah)
+  return candidates.find(x => x.ah >= targetAh) || candidates[candidates.length - 1] || BATS[1]
+}
+
+// Finalise le wizard : applique vtype + usages + budget puis marque l'onboarding fait.
+function finishWizard(w) {
+  const vtype = w.vtype || 'campervan'
+  let apps = instantiatePresetApps(vtype)
+  // Retire les appareils des usages optionnels non sélectionnés
+  const selected = new Set(w.usages || [])
+  apps = apps.filter(a => {
+    const usage = USAGES.find(u => u.match(a.n))
+    return usage ? selected.has(usage.id) : true
+  })
+  const bat = batForBudget(vtype, w.budget)
+  // Solaire : 'have' / 'want' activent les panneaux, 'no' les désactive
+  const solOn = w.solar ? (w.solar !== 'no') : true
+  // Sans panneaux, retirer le régulateur MPPT des consommateurs (cohérent avec le toggle solaire)
+  if (!solOn) apps = apps.filter(a => !/mppt|régulateur/i.test(a.n))
+  try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  set({
+    vtype, apps, solOn,
+    altOn: VTYPE_PRESETS[vtype]?.altOn ?? true,
+    bat, batType: bat.type, dod: DOD[bat.type], batNb: 1,
+    modal: null, tab: 'energy',
+  })
+}
+
+function skipWizard() {
+  try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  set({ modal: null })
+}
+
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
@@ -444,6 +590,25 @@ function captureScenario(slot) {
   set({ scenarios: { ...S.scenarios, [slot]: snap }, tab: 'compare' })
 }
 
+// Applique le preset d'appareils correspondant au type de véhicule.
+// Remplace les appareils, ajuste l'alternateur et remonte la batterie si
+// elle est en dessous du minimum recommandé pour ce profil.
+function applyVtypePreset(vtype) {
+  const preset = VTYPE_PRESETS[vtype]
+  if (!preset) { set({ vtype, modal: null }); return }
+  const apps = instantiatePresetApps(vtype)
+  const update = { vtype, apps, altOn: preset.altOn, modal: null, tab: 'energy' }
+  // Recommander une batterie lithium adaptée si la capacité actuelle est trop faible
+  const rec = recommendedBatForVtype(vtype, S.bat?.type || 'LI')
+  if (rec && (S.bat?.ah || 0) * (S.batNb || 1) < preset.batMinAh) {
+    update.bat = rec
+    update.batType = rec.type
+    update.dod = DOD[rec.type]
+    update.batNb = 1
+  }
+  set(update)
+}
+
 const fmtDays = (d) => isFinite(d) ? (d < 1 ? (d * 24).toFixed(1) + ' h' : d.toFixed(1) + ' j') : '∞'
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
@@ -519,9 +684,9 @@ function buildHeader() {
       <div class="sub">${t('app.tagline')}</div>
     </div>
     <div class="vtypes">
-      ${[['campervan','ti-camper-van','vt.campervan'],['caravan','ti-caravan','vt.caravan'],['van','ti-car','vt.van']].map(([v,ic,lb]) => `
+      ${[['campervan','ti-camper','vt.campervan'],['caravan','ti-caravan','vt.caravan'],['van','ti-car','vt.van']].map(([v,ic,lb]) => `
         <div class="vt${S.vtype === v ? ' on' : ''}" data-vtype="${v}">
-          <i class="${ic}"></i><span>${t(lb)}</span>
+          <i class="ti ${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
       ${langEl}
       ${authEl}
@@ -1243,8 +1408,143 @@ function buildCompareReport(A, B, cA, cB) {
 
 // ── MODAL ────────────────────────────────────────────────────────────────────
 
+function buildWizardModal(m) {
+  const step = m.step || 1
+  const totalSteps = 4
+  const progress = `<div class="wiz-progress">
+    ${[1, 2, 3, 4].map(s => `<div class="wiz-dot${s <= step ? ' on' : ''}"></div>`).join('')}
+  </div>`
+  const skipBtn = `<button id="wiz-skip" class="wiz-skip">${t('wizard.skip')}</button>`
+
+  // ── Étape 1 : type de véhicule ──
+  if (step === 1) {
+    const cards = [['campervan', 'ti-camper'], ['caravan', 'ti-caravan'], ['van', 'ti-car']].map(([v, ic]) => `
+      <div class="wiz-card${m.vtype === v ? ' on' : ''}" data-wiz-vtype="${v}">
+        <i class="ti ${ic}"></i>
+        <span>${t('vt.' + v)}</span>
+      </div>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo wiz" style="max-width:440px">
+        ${progress}
+        <h3>${t('wizard.step1.title')}</h3>
+        <p class="wiz-sub">${t('wizard.step1.desc')}</p>
+        <div class="wiz-cards">${cards}</div>
+        <div class="wiz-nav">
+          ${skipBtn}
+          <button id="wiz-next" class="mo-ok" ${m.vtype ? '' : 'disabled'}>${t('wizard.next')} <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // ── Étape 2 : usages principaux ──
+  if (step === 2) {
+    const sel = new Set(m.usages || USAGE_IDS)
+    const cards = USAGES.map(u => `
+      <div class="wiz-usage${sel.has(u.id) ? ' on' : ''}" data-wiz-usage="${u.id}">
+        <i class="ti ${u.icon}"></i>
+        <span>${t('wizard.usage.' + u.id)}</span>
+        <i class="ti ti-check wiz-check"></i>
+      </div>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo wiz" style="max-width:440px">
+        ${progress}
+        <h3>${t('wizard.step2.title')}</h3>
+        <p class="wiz-sub">${t('wizard.step2.desc')}</p>
+        <div class="wiz-usages">${cards}</div>
+        <div class="wiz-nav">
+          <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
+          <button id="wiz-next" class="mo-ok">${t('wizard.next')} <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // ── Étape 3 : panneaux solaires ──
+  if (step === 3) {
+    const opts = [
+      ['have', 'ti-solar-panel'],
+      ['want', 'ti-solar-panel-2'],
+      ['no',   'ti-sun-off'],
+    ]
+    const cards = opts.map(([id, ic]) => `
+      <div class="wiz-usage${m.solar === id ? ' on' : ''}" data-wiz-solar="${id}">
+        <i class="ti ${ic}"></i>
+        <span>${t('wizard.solar.' + id)}</span>
+        <i class="ti ti-check wiz-check"></i>
+      </div>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo wiz" style="max-width:440px">
+        ${progress}
+        <h3>${t('wizard.step3.title')}</h3>
+        <p class="wiz-sub">${t('wizard.step3.desc')}</p>
+        <div class="wiz-budgets">${cards}</div>
+        <div class="wiz-nav">
+          <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
+          <button id="wiz-next" class="mo-ok" ${m.solar ? '' : 'disabled'}>${t('wizard.next')} <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // ── Étape 4 : budget batterie ──
+  const labels = { low: '< 500 €', mid: '500 – 1500 €', high: '> 1500 €' }
+  const cards = WIZARD_BUDGETS.map(b => {
+    const bat = batForBudget(m.vtype || 'campervan', b.id)
+    const typeLabel = tbattype(b.type)
+    return `
+      <div class="wiz-budget${m.budget === b.id ? ' on' : ''}" data-wiz-budget="${b.id}">
+        <div class="wiz-budget-top">
+          <span class="wiz-budget-type">${typeLabel}</span>
+          <span class="wiz-budget-amt">${labels[b.id]}</span>
+        </div>
+        <div class="wiz-budget-bat">${bat.ah} Ah ${bat.v}V</div>
+      </div>`
+  }).join('')
+  return `
+  <div class="ov" id="modal-overlay">
+    <div class="mo wiz" style="max-width:440px">
+      ${progress}
+      <h3>${t('wizard.step4.title')}</h3>
+      <p class="wiz-sub">${t('wizard.step4.desc')}</p>
+      <div class="wiz-budgets">${cards}</div>
+      <div class="wiz-nav">
+        <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
+        <button id="wiz-finish" class="mo-ok" ${m.budget ? '' : 'disabled'}><i class="ti ti-check" style="font-size:12px"></i> ${t('wizard.finish')}</button>
+      </div>
+    </div>
+  </div>`
+}
+
 function buildModal() {
   const m = S.modal
+
+  if (m.type === 'wizard') return buildWizardModal(m)
+
+  if (m.type === 'vtype-confirm') {
+    const v = m.vtype
+    const preset = VTYPE_PRESETS[v]
+    const icon = { campervan: 'ti-camper', caravan: 'ti-caravan', van: 'ti-car' }[v] || 'ti-camper'
+    const count = preset ? preset.apps.length : 0
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:400px">
+        <h3><i class="ti ${icon}"></i> ${t('vt.' + v)}</h3>
+        <p style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:16px">
+          ${t('modal.vtype.desc', { count, vtype: t('vt.' + v) })}
+        </p>
+        <div class="mo-btns" style="flex-direction:column;gap:8px">
+          <button id="vtype-apply" class="mo-ok" style="width:100%">
+            <i class="ti ti-wand" style="font-size:12px"></i> ${t('modal.vtype.apply')}
+          </button>
+          <button id="vtype-keep" class="mo-cancel" style="width:100%">${t('modal.vtype.keep')}</button>
+        </div>
+      </div>
+    </div>`
+  }
 
   if (m.type === 'auth' || m.type === 'auth-save') {
     return `
@@ -1445,8 +1745,39 @@ function bindEvents() {
     setLang(el.dataset.lang)
     render()
   }))
-  // Vtypes
-  document.querySelectorAll('[data-vtype]').forEach(el => el.addEventListener('click', () => set({ vtype: el.dataset.vtype })))
+  // Vtypes — propose de charger le preset d'appareils du véhicule choisi
+  document.querySelectorAll('[data-vtype]').forEach(el => el.addEventListener('click', () => {
+    const v = el.dataset.vtype
+    if (v === S.vtype) return
+    set({ modal: { type: 'vtype-confirm', vtype: v } })
+  }))
+  // Modal vtype : confirmer le chargement des presets ou changer le type sans toucher aux appareils
+  document.getElementById('vtype-apply')?.addEventListener('click', () => applyVtypePreset(S.modal.vtype))
+  document.getElementById('vtype-keep')?.addEventListener('click', () => set({ vtype: S.modal.vtype, modal: null }))
+
+  // Wizard d'onboarding (#17)
+  document.querySelectorAll('[data-wiz-vtype]').forEach(el => el.addEventListener('click', () =>
+    set({ modal: { ...S.modal, vtype: el.dataset.wizVtype } })))
+  document.querySelectorAll('[data-wiz-usage]').forEach(el => el.addEventListener('click', () => {
+    const cur = new Set(S.modal.usages || USAGE_IDS)
+    const id = el.dataset.wizUsage
+    cur.has(id) ? cur.delete(id) : cur.add(id)
+    set({ modal: { ...S.modal, usages: [...cur] } })
+  }))
+  document.querySelectorAll('[data-wiz-solar]').forEach(el => el.addEventListener('click', () =>
+    set({ modal: { ...S.modal, solar: el.dataset.wizSolar } })))
+  document.querySelectorAll('[data-wiz-budget]').forEach(el => el.addEventListener('click', () =>
+    set({ modal: { ...S.modal, budget: el.dataset.wizBudget } })))
+  document.getElementById('wiz-next')?.addEventListener('click', () => {
+    const m = S.modal
+    // À l'entrée de l'étape 2, pré-cocher tous les usages si rien n'est encore défini
+    const usages = m.usages || USAGE_IDS
+    set({ modal: { ...m, step: (m.step || 1) + 1, usages } })
+  })
+  document.getElementById('wiz-back')?.addEventListener('click', () =>
+    set({ modal: { ...S.modal, step: Math.max(1, (S.modal.step || 1) - 1) } }))
+  document.getElementById('wiz-finish')?.addEventListener('click', () => finishWizard(S.modal))
+  document.getElementById('wiz-skip')?.addEventListener('click', () => skipWizard())
   // Tabs
   document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => set({ tab: el.dataset.tab })))
   // Categories filter
@@ -1523,7 +1854,12 @@ function bindEvents() {
   // Open modals
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
   // Modal overlay close
-  document.getElementById('modal-overlay')?.addEventListener('click', e => { if (e.target.id === 'modal-overlay') set({ modal: null }) })
+  document.getElementById('modal-overlay')?.addEventListener('click', e => {
+    if (e.target.id !== 'modal-overlay') return
+    // Le wizard exige un choix explicite (Passer / Terminer) pour ne pas réapparaître
+    if (S.modal?.type === 'wizard') return
+    set({ modal: null })
+  })
   document.getElementById('close-modal')?.addEventListener('click', () => set({ modal: null }))
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
   // Catalog category filter inside modal
@@ -1612,5 +1948,11 @@ function confirmCustom() {
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
 loadPersistedState()
+// Première visite → wizard d'onboarding (#17)
+try {
+  if (!localStorage.getItem(ONBOARDED_KEY)) {
+    S.modal = { type: 'wizard', step: 1, vtype: S.vtype, usages: USAGE_IDS.slice(), solar: null, budget: null }
+  }
+} catch (_) {}
 render()
 initAuth()
