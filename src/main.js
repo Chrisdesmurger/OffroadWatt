@@ -220,6 +220,94 @@ const CATICONS = {
   Eau: 'ti-droplet', Éclairage: 'ti-bulb', Système: 'ti-settings', Tout: 'ti-apps',
 }
 
+// ─── PRESETS PAR TYPE DE VÉHICULE ──────────────────────────────────────────────
+// Jeux d'appareils par défaut adaptés au profil de consommation de chaque véhicule.
+// `batMinAh` = capacité lithium 12V minimale recommandée pour ce profil.
+// `altOn`    = recharge alternateur active par défaut (les caravanes n'en ont pas).
+// Les `id` sont attribués dynamiquement à l'application (voir applyVtypePreset).
+
+const VTYPE_PRESETS = {
+  // Van aménagé — setup léger et nomade : 12V partout, pas de gros 230V.
+  van: {
+    altOn: true, batMinAh: 100,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 40L', icon: 'ti-fridge',         w: 45, h: 24,  cat: 'Cuisine'   },
+      { n: 'Spots LED encastrés ×4',            icon: 'ti-lamp',           w: 12, h: 4,   cat: 'Éclairage' },
+      { n: 'Éclairage LED bande 5m',            icon: 'ti-bulb',           w: 12, h: 4,   cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 30, h: 0.5, cat: 'Eau'       },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65, h: 4,   cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15, h: 3,   cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10, h: 24,  cat: 'Tech'      },
+      { n: 'Ventilateur plafond 12V',           icon: 'ti-wind',           w: 22, h: 6,   cat: 'Confort'   },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,  h: 24,  cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3, h: 24,  cat: 'Système'   },
+    ],
+  },
+  // Camping-car — setup complet et confortable : appareils 230V + chauffage.
+  campervan: {
+    altOn: true, batMinAh: 200,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 75L', icon: 'ti-fridge',         w: 55,  h: 24,   cat: 'Cuisine'   },
+      { n: 'Micro-ondes',                       icon: 'ti-microwave',      w: 900, h: 0.25, cat: 'Cuisine'   },
+      { n: 'Télévision 24" LED',                icon: 'ti-device-tv',      w: 25,  h: 3,    cat: 'Tech'      },
+      { n: 'Plafonnier LED 12V principal',      icon: 'ti-bulb',           w: 12,  h: 5,    cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×6',            icon: 'ti-lamp',           w: 18,  h: 4,    cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 50,  h: 0.5,  cat: 'Eau'       },
+      { n: 'Chauffage diesel 2kW',              icon: 'ti-temperature',    w: 10,  h: 8,    cat: 'Confort',
+        modes: [
+          { label: 'Veille / allumage', watts: 10 },
+          { label: 'Puissance min',     watts: 30 },
+          { label: 'Puissance max',     watts: 80 },
+        ], activeMode: 0 },
+      { n: 'Aérateur de toit 12V',              icon: 'ti-wind',           w: 35,  h: 6,    cat: 'Confort'   },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65,  h: 4,    cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15,  h: 3,    cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10,  h: 24,   cat: 'Tech'      },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,   h: 24,   cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3,  h: 24,   cat: 'Système'   },
+    ],
+  },
+  // Caravane — profil proche du camping-car mais SANS alternateur (pas de moteur).
+  caravan: {
+    altOn: false, batMinAh: 150,
+    apps: [
+      { n: 'Réfrigérateur à absorption 3 voies 90L', icon: 'ti-fridge',     w: 180, h: 24,  cat: 'Cuisine'   },
+      { n: 'Télévision 24" LED',                icon: 'ti-device-tv',      w: 25,  h: 3,    cat: 'Tech'      },
+      { n: 'Plafonnier LED 12V principal',      icon: 'ti-bulb',           w: 12,  h: 5,    cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×4',            icon: 'ti-lamp',           w: 12,  h: 4,    cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 30,  h: 0.5,  cat: 'Eau'       },
+      { n: 'Chauffage gaz + électronique (Truma Combi 4)', icon: 'ti-temperature', w: 15, h: 24, cat: 'Confort',
+        modes: [
+          { label: 'Veille électronique', watts: 3  },
+          { label: 'Ventilateur min',     watts: 8  },
+          { label: 'Ventilateur max',     watts: 25 },
+        ], activeMode: 1 },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15,  h: 3,    cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10,  h: 24,   cat: 'Tech'      },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,   h: 24,   cat: 'Système'   },
+    ],
+  },
+}
+
+// Instancie les appareils d'un preset avec des id uniques (clone profond léger).
+function instantiatePresetApps(vtype) {
+  const preset = VTYPE_PRESETS[vtype]
+  if (!preset) return []
+  const base = Date.now()
+  return preset.apps.map((a, i) => ({
+    id: base + i,
+    n: a.n, icon: a.icon, w: a.w, h: a.h, on: true, cat: a.cat,
+    ...(a.modes ? { modes: a.modes.map(m => ({ ...m })), activeMode: a.activeMode ?? 0 } : {}),
+  }))
+}
+
+// Plus petite batterie du type demandé couvrant la capacité minimale recommandée.
+function recommendedBatForVtype(vtype, type = 'LI') {
+  const minAh = VTYPE_PRESETS[vtype]?.batMinAh || 100
+  const candidates = BATS.filter(b => b.type === type && b.v === 12).sort((a, b) => a.ah - b.ah)
+  return candidates.find(b => b.ah >= minAh) || candidates[candidates.length - 1] || null
+}
+
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
@@ -442,6 +530,25 @@ function snapshotState(label) {
 function captureScenario(slot) {
   const snap = snapshotState(slot === 'A' ? 'Setup A' : 'Setup B')
   set({ scenarios: { ...S.scenarios, [slot]: snap }, tab: 'compare' })
+}
+
+// Applique le preset d'appareils correspondant au type de véhicule.
+// Remplace les appareils, ajuste l'alternateur et remonte la batterie si
+// elle est en dessous du minimum recommandé pour ce profil.
+function applyVtypePreset(vtype) {
+  const preset = VTYPE_PRESETS[vtype]
+  if (!preset) { set({ vtype, modal: null }); return }
+  const apps = instantiatePresetApps(vtype)
+  const update = { vtype, apps, altOn: preset.altOn, modal: null, tab: 'energy' }
+  // Recommander une batterie lithium adaptée si la capacité actuelle est trop faible
+  const rec = recommendedBatForVtype(vtype, S.bat?.type || 'LI')
+  if (rec && (S.bat?.ah || 0) * (S.batNb || 1) < preset.batMinAh) {
+    update.bat = rec
+    update.batType = rec.type
+    update.dod = DOD[rec.type]
+    update.batNb = 1
+  }
+  set(update)
 }
 
 const fmtDays = (d) => isFinite(d) ? (d < 1 ? (d * 24).toFixed(1) + ' h' : d.toFixed(1) + ' j') : '∞'
@@ -1246,6 +1353,28 @@ function buildCompareReport(A, B, cA, cB) {
 function buildModal() {
   const m = S.modal
 
+  if (m.type === 'vtype-confirm') {
+    const v = m.vtype
+    const preset = VTYPE_PRESETS[v]
+    const icon = { campervan: 'ti-camper-van', caravan: 'ti-caravan', van: 'ti-car' }[v] || 'ti-camper-van'
+    const count = preset ? preset.apps.length : 0
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:400px">
+        <h3><i class="ti ${icon}"></i> ${t('vt.' + v)}</h3>
+        <p style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:16px">
+          ${t('modal.vtype.desc', { count, vtype: t('vt.' + v) })}
+        </p>
+        <div class="mo-btns" style="flex-direction:column;gap:8px">
+          <button id="vtype-apply" class="mo-ok" style="width:100%">
+            <i class="ti ti-wand" style="font-size:12px"></i> ${t('modal.vtype.apply')}
+          </button>
+          <button id="vtype-keep" class="mo-cancel" style="width:100%">${t('modal.vtype.keep')}</button>
+        </div>
+      </div>
+    </div>`
+  }
+
   if (m.type === 'auth' || m.type === 'auth-save') {
     return `
     <div class="ov" id="modal-overlay">
@@ -1445,8 +1574,15 @@ function bindEvents() {
     setLang(el.dataset.lang)
     render()
   }))
-  // Vtypes
-  document.querySelectorAll('[data-vtype]').forEach(el => el.addEventListener('click', () => set({ vtype: el.dataset.vtype })))
+  // Vtypes — propose de charger le preset d'appareils du véhicule choisi
+  document.querySelectorAll('[data-vtype]').forEach(el => el.addEventListener('click', () => {
+    const v = el.dataset.vtype
+    if (v === S.vtype) return
+    set({ modal: { type: 'vtype-confirm', vtype: v } })
+  }))
+  // Modal vtype : confirmer le chargement des presets ou changer le type sans toucher aux appareils
+  document.getElementById('vtype-apply')?.addEventListener('click', () => applyVtypePreset(S.modal.vtype))
+  document.getElementById('vtype-keep')?.addEventListener('click', () => set({ vtype: S.modal.vtype, modal: null }))
   // Tabs
   document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => set({ tab: el.dataset.tab })))
   // Categories filter
