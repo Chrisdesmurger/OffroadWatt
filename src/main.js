@@ -308,6 +308,60 @@ function recommendedBatForVtype(vtype, type = 'LI') {
   return candidates.find(b => b.ah >= minAh) || candidates[candidates.length - 1] || null
 }
 
+// ─── ONBOARDING (#17) ──────────────────────────────────────────────────────────
+// Usages optionnels proposés à l'étape 2 du wizard. Chaque usage déclare un
+// prédicat qui identifie les appareils correspondants dans un preset vtype.
+// Les appareils essentiels (frigo, éclairage, eau, système) sont toujours gardés.
+const USAGES = [
+  { id: 'cooking', icon: 'ti-microwave',     match: (n) => /micro-ondes|plaque|bouilloire|cafetière|café|four/i.test(n) },
+  { id: 'tv',      icon: 'ti-device-tv',     match: (n) => /télévision|tv|box tnt/i.test(n) },
+  { id: 'work',    icon: 'ti-device-laptop', match: (n) => /laptop|routeur|tablette|imprimante/i.test(n) },
+  { id: 'heating', icon: 'ti-temperature',   match: (n) => /chauffage|truma|webasto|eberspächer|autoterm|radiateur/i.test(n) },
+]
+const USAGE_IDS = USAGES.map(u => u.id)
+
+// Budgets batterie proposés à l'étape 3 → (type, multiplicateur de capacité min).
+const WIZARD_BUDGETS = [
+  { id: 'low',  type: 'AGM', mult: 1   },
+  { id: 'mid',  type: 'LI',  mult: 1   },
+  { id: 'high', type: 'LI',  mult: 1.5 },
+]
+
+const ONBOARDED_KEY = 'ow_onboarded'
+
+// Choisit une batterie selon le véhicule et le budget retenu.
+function batForBudget(vtype, budgetId) {
+  const b = WIZARD_BUDGETS.find(x => x.id === budgetId) || WIZARD_BUDGETS[1]
+  const targetAh = (VTYPE_PRESETS[vtype]?.batMinAh || 100) * b.mult
+  const candidates = BATS.filter(x => x.type === b.type && x.v === 12).sort((a, c) => a.ah - c.ah)
+  return candidates.find(x => x.ah >= targetAh) || candidates[candidates.length - 1] || BATS[1]
+}
+
+// Finalise le wizard : applique vtype + usages + budget puis marque l'onboarding fait.
+function finishWizard(w) {
+  const vtype = w.vtype || 'campervan'
+  let apps = instantiatePresetApps(vtype)
+  // Retire les appareils des usages optionnels non sélectionnés
+  const selected = new Set(w.usages || [])
+  apps = apps.filter(a => {
+    const usage = USAGES.find(u => u.match(a.n))
+    return usage ? selected.has(usage.id) : true
+  })
+  const bat = batForBudget(vtype, w.budget)
+  try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  set({
+    vtype, apps,
+    altOn: VTYPE_PRESETS[vtype]?.altOn ?? true,
+    bat, batType: bat.type, dod: DOD[bat.type], batNb: 1,
+    modal: null, tab: 'energy',
+  })
+}
+
+function skipWizard() {
+  try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  set({ modal: null })
+}
+
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
@@ -1350,8 +1404,89 @@ function buildCompareReport(A, B, cA, cB) {
 
 // ── MODAL ────────────────────────────────────────────────────────────────────
 
+function buildWizardModal(m) {
+  const step = m.step || 1
+  const totalSteps = 3
+  const progress = `<div class="wiz-progress">
+    ${[1, 2, 3].map(s => `<div class="wiz-dot${s <= step ? ' on' : ''}"></div>`).join('')}
+  </div>`
+  const skipBtn = `<button id="wiz-skip" class="wiz-skip">${t('wizard.skip')}</button>`
+
+  // ── Étape 1 : type de véhicule ──
+  if (step === 1) {
+    const cards = [['campervan', 'ti-camper-van'], ['caravan', 'ti-caravan'], ['van', 'ti-car']].map(([v, ic]) => `
+      <div class="wiz-card${m.vtype === v ? ' on' : ''}" data-wiz-vtype="${v}">
+        <i class="ti ${ic}"></i>
+        <span>${t('vt.' + v)}</span>
+      </div>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo wiz" style="max-width:440px">
+        ${progress}
+        <h3>${t('wizard.step1.title')}</h3>
+        <p class="wiz-sub">${t('wizard.step1.desc')}</p>
+        <div class="wiz-cards">${cards}</div>
+        <div class="wiz-nav">
+          ${skipBtn}
+          <button id="wiz-next" class="mo-ok" ${m.vtype ? '' : 'disabled'}>${t('wizard.next')} <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // ── Étape 2 : usages principaux ──
+  if (step === 2) {
+    const sel = new Set(m.usages || USAGE_IDS)
+    const cards = USAGES.map(u => `
+      <div class="wiz-usage${sel.has(u.id) ? ' on' : ''}" data-wiz-usage="${u.id}">
+        <i class="ti ${u.icon}"></i>
+        <span>${t('wizard.usage.' + u.id)}</span>
+        <i class="ti ti-check wiz-check"></i>
+      </div>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo wiz" style="max-width:440px">
+        ${progress}
+        <h3>${t('wizard.step2.title')}</h3>
+        <p class="wiz-sub">${t('wizard.step2.desc')}</p>
+        <div class="wiz-usages">${cards}</div>
+        <div class="wiz-nav">
+          <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
+          <button id="wiz-next" class="mo-ok">${t('wizard.next')} <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // ── Étape 3 : budget batterie ──
+  const labels = { low: '< 500 €', mid: '500 – 1500 €', high: '> 1500 €' }
+  const cards = WIZARD_BUDGETS.map(b => {
+    const bat = batForBudget(m.vtype || 'campervan', b.id)
+    return `
+      <div class="wiz-budget${m.budget === b.id ? ' on' : ''}" data-wiz-budget="${b.id}">
+        <div class="wiz-budget-amt">${labels[b.id]}</div>
+        <div class="wiz-budget-bat">${bat.label || (bat.ah + 'Ah ' + bat.type)}</div>
+      </div>`
+  }).join('')
+  return `
+  <div class="ov" id="modal-overlay">
+    <div class="mo wiz" style="max-width:440px">
+      ${progress}
+      <h3>${t('wizard.step3.title')}</h3>
+      <p class="wiz-sub">${t('wizard.step3.desc')}</p>
+      <div class="wiz-budgets">${cards}</div>
+      <div class="wiz-nav">
+        <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
+        <button id="wiz-finish" class="mo-ok" ${m.budget ? '' : 'disabled'}><i class="ti ti-check" style="font-size:12px"></i> ${t('wizard.finish')}</button>
+      </div>
+    </div>
+  </div>`
+}
+
 function buildModal() {
   const m = S.modal
+
+  if (m.type === 'wizard') return buildWizardModal(m)
 
   if (m.type === 'vtype-confirm') {
     const v = m.vtype
@@ -1583,6 +1718,28 @@ function bindEvents() {
   // Modal vtype : confirmer le chargement des presets ou changer le type sans toucher aux appareils
   document.getElementById('vtype-apply')?.addEventListener('click', () => applyVtypePreset(S.modal.vtype))
   document.getElementById('vtype-keep')?.addEventListener('click', () => set({ vtype: S.modal.vtype, modal: null }))
+
+  // Wizard d'onboarding (#17)
+  document.querySelectorAll('[data-wiz-vtype]').forEach(el => el.addEventListener('click', () =>
+    set({ modal: { ...S.modal, vtype: el.dataset.wizVtype } })))
+  document.querySelectorAll('[data-wiz-usage]').forEach(el => el.addEventListener('click', () => {
+    const cur = new Set(S.modal.usages || USAGE_IDS)
+    const id = el.dataset.wizUsage
+    cur.has(id) ? cur.delete(id) : cur.add(id)
+    set({ modal: { ...S.modal, usages: [...cur] } })
+  }))
+  document.querySelectorAll('[data-wiz-budget]').forEach(el => el.addEventListener('click', () =>
+    set({ modal: { ...S.modal, budget: el.dataset.wizBudget } })))
+  document.getElementById('wiz-next')?.addEventListener('click', () => {
+    const m = S.modal
+    // À l'entrée de l'étape 2, pré-cocher tous les usages si rien n'est encore défini
+    const usages = m.usages || USAGE_IDS
+    set({ modal: { ...m, step: (m.step || 1) + 1, usages } })
+  })
+  document.getElementById('wiz-back')?.addEventListener('click', () =>
+    set({ modal: { ...S.modal, step: Math.max(1, (S.modal.step || 1) - 1) } }))
+  document.getElementById('wiz-finish')?.addEventListener('click', () => finishWizard(S.modal))
+  document.getElementById('wiz-skip')?.addEventListener('click', () => skipWizard())
   // Tabs
   document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => set({ tab: el.dataset.tab })))
   // Categories filter
@@ -1659,7 +1816,12 @@ function bindEvents() {
   // Open modals
   document.getElementById('open-custom')?.addEventListener('click', () => set({ modal: { type: 'custom' } }))
   // Modal overlay close
-  document.getElementById('modal-overlay')?.addEventListener('click', e => { if (e.target.id === 'modal-overlay') set({ modal: null }) })
+  document.getElementById('modal-overlay')?.addEventListener('click', e => {
+    if (e.target.id !== 'modal-overlay') return
+    // Le wizard exige un choix explicite (Passer / Terminer) pour ne pas réapparaître
+    if (S.modal?.type === 'wizard') return
+    set({ modal: null })
+  })
   document.getElementById('close-modal')?.addEventListener('click', () => set({ modal: null }))
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
   // Catalog category filter inside modal
@@ -1748,5 +1910,11 @@ function confirmCustom() {
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
 loadPersistedState()
+// Première visite → wizard d'onboarding (#17)
+try {
+  if (!localStorage.getItem(ONBOARDED_KEY)) {
+    S.modal = { type: 'wizard', step: 1, vtype: S.vtype, usages: USAGE_IDS.slice(), budget: null }
+  }
+} catch (_) {}
 render()
 initAuth()
