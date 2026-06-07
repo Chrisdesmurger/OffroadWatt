@@ -686,7 +686,7 @@ function buildHeader() {
     <div class="vtypes">
       ${[['campervan','ti-camper','vt.campervan'],['caravan','ti-caravan','vt.caravan'],['van','ti-car','vt.van']].map(([v,ic,lb]) => `
         <div class="vt${S.vtype === v ? ' on' : ''}" data-vtype="${v}">
-          <i class="${ic}"></i><span>${t(lb)}</span>
+          <i class="ti ${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
       ${langEl}
       ${authEl}
@@ -1494,10 +1494,14 @@ function buildWizardModal(m) {
   const labels = { low: '< 500 €', mid: '500 – 1500 €', high: '> 1500 €' }
   const cards = WIZARD_BUDGETS.map(b => {
     const bat = batForBudget(m.vtype || 'campervan', b.id)
+    const typeLabel = tbattype(b.type)
     return `
       <div class="wiz-budget${m.budget === b.id ? ' on' : ''}" data-wiz-budget="${b.id}">
-        <div class="wiz-budget-amt">${labels[b.id]}</div>
-        <div class="wiz-budget-bat">${bat.label || (bat.ah + 'Ah ' + bat.type)}</div>
+        <div class="wiz-budget-top">
+          <span class="wiz-budget-type">${typeLabel}</span>
+          <span class="wiz-budget-amt">${labels[b.id]}</span>
+        </div>
+        <div class="wiz-budget-bat">${bat.ah} Ah ${bat.v}V</div>
       </div>`
   }).join('')
   return `
