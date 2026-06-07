@@ -348,9 +348,13 @@ function finishWizard(w) {
     return usage ? selected.has(usage.id) : true
   })
   const bat = batForBudget(vtype, w.budget)
+  // Solaire : 'have' / 'want' activent les panneaux, 'no' les désactive
+  const solOn = w.solar ? (w.solar !== 'no') : true
+  // Sans panneaux, retirer le régulateur MPPT des consommateurs (cohérent avec le toggle solaire)
+  if (!solOn) apps = apps.filter(a => !/mppt|régulateur/i.test(a.n))
   try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
   set({
-    vtype, apps,
+    vtype, apps, solOn,
     altOn: VTYPE_PRESETS[vtype]?.altOn ?? true,
     bat, batType: bat.type, dod: DOD[bat.type], batNb: 1,
     modal: null, tab: 'energy',
@@ -680,7 +684,7 @@ function buildHeader() {
       <div class="sub">${t('app.tagline')}</div>
     </div>
     <div class="vtypes">
-      ${[['campervan','ti-camper-van','vt.campervan'],['caravan','ti-caravan','vt.caravan'],['van','ti-car','vt.van']].map(([v,ic,lb]) => `
+      ${[['campervan','ti-camper','vt.campervan'],['caravan','ti-caravan','vt.caravan'],['van','ti-car','vt.van']].map(([v,ic,lb]) => `
         <div class="vt${S.vtype === v ? ' on' : ''}" data-vtype="${v}">
           <i class="${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
@@ -1406,15 +1410,15 @@ function buildCompareReport(A, B, cA, cB) {
 
 function buildWizardModal(m) {
   const step = m.step || 1
-  const totalSteps = 3
+  const totalSteps = 4
   const progress = `<div class="wiz-progress">
-    ${[1, 2, 3].map(s => `<div class="wiz-dot${s <= step ? ' on' : ''}"></div>`).join('')}
+    ${[1, 2, 3, 4].map(s => `<div class="wiz-dot${s <= step ? ' on' : ''}"></div>`).join('')}
   </div>`
   const skipBtn = `<button id="wiz-skip" class="wiz-skip">${t('wizard.skip')}</button>`
 
   // ── Étape 1 : type de véhicule ──
   if (step === 1) {
-    const cards = [['campervan', 'ti-camper-van'], ['caravan', 'ti-caravan'], ['van', 'ti-car']].map(([v, ic]) => `
+    const cards = [['campervan', 'ti-camper'], ['caravan', 'ti-caravan'], ['van', 'ti-car']].map(([v, ic]) => `
       <div class="wiz-card${m.vtype === v ? ' on' : ''}" data-wiz-vtype="${v}">
         <i class="ti ${ic}"></i>
         <span>${t('vt.' + v)}</span>
@@ -1458,7 +1462,35 @@ function buildWizardModal(m) {
     </div>`
   }
 
-  // ── Étape 3 : budget batterie ──
+  // ── Étape 3 : panneaux solaires ──
+  if (step === 3) {
+    const opts = [
+      ['have', 'ti-solar-panel'],
+      ['want', 'ti-solar-panel-2'],
+      ['no',   'ti-sun-off'],
+    ]
+    const cards = opts.map(([id, ic]) => `
+      <div class="wiz-usage${m.solar === id ? ' on' : ''}" data-wiz-solar="${id}">
+        <i class="ti ${ic}"></i>
+        <span>${t('wizard.solar.' + id)}</span>
+        <i class="ti ti-check wiz-check"></i>
+      </div>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo wiz" style="max-width:440px">
+        ${progress}
+        <h3>${t('wizard.step3.title')}</h3>
+        <p class="wiz-sub">${t('wizard.step3.desc')}</p>
+        <div class="wiz-budgets">${cards}</div>
+        <div class="wiz-nav">
+          <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
+          <button id="wiz-next" class="mo-ok" ${m.solar ? '' : 'disabled'}>${t('wizard.next')} <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // ── Étape 4 : budget batterie ──
   const labels = { low: '< 500 €', mid: '500 – 1500 €', high: '> 1500 €' }
   const cards = WIZARD_BUDGETS.map(b => {
     const bat = batForBudget(m.vtype || 'campervan', b.id)
@@ -1472,8 +1504,8 @@ function buildWizardModal(m) {
   <div class="ov" id="modal-overlay">
     <div class="mo wiz" style="max-width:440px">
       ${progress}
-      <h3>${t('wizard.step3.title')}</h3>
-      <p class="wiz-sub">${t('wizard.step3.desc')}</p>
+      <h3>${t('wizard.step4.title')}</h3>
+      <p class="wiz-sub">${t('wizard.step4.desc')}</p>
       <div class="wiz-budgets">${cards}</div>
       <div class="wiz-nav">
         <button id="wiz-back" class="mo-cancel"><i class="ti ti-arrow-left" style="font-size:12px"></i> ${t('wizard.back')}</button>
@@ -1491,7 +1523,7 @@ function buildModal() {
   if (m.type === 'vtype-confirm') {
     const v = m.vtype
     const preset = VTYPE_PRESETS[v]
-    const icon = { campervan: 'ti-camper-van', caravan: 'ti-caravan', van: 'ti-car' }[v] || 'ti-camper-van'
+    const icon = { campervan: 'ti-camper', caravan: 'ti-caravan', van: 'ti-car' }[v] || 'ti-camper'
     const count = preset ? preset.apps.length : 0
     return `
     <div class="ov" id="modal-overlay">
@@ -1728,6 +1760,8 @@ function bindEvents() {
     cur.has(id) ? cur.delete(id) : cur.add(id)
     set({ modal: { ...S.modal, usages: [...cur] } })
   }))
+  document.querySelectorAll('[data-wiz-solar]').forEach(el => el.addEventListener('click', () =>
+    set({ modal: { ...S.modal, solar: el.dataset.wizSolar } })))
   document.querySelectorAll('[data-wiz-budget]').forEach(el => el.addEventListener('click', () =>
     set({ modal: { ...S.modal, budget: el.dataset.wizBudget } })))
   document.getElementById('wiz-next')?.addEventListener('click', () => {
@@ -1913,7 +1947,7 @@ loadPersistedState()
 // Première visite → wizard d'onboarding (#17)
 try {
   if (!localStorage.getItem(ONBOARDED_KEY)) {
-    S.modal = { type: 'wizard', step: 1, vtype: S.vtype, usages: USAGE_IDS.slice(), budget: null }
+    S.modal = { type: 'wizard', step: 1, vtype: S.vtype, usages: USAGE_IDS.slice(), solar: null, budget: null }
   }
 } catch (_) {}
 render()
