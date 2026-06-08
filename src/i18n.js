@@ -203,6 +203,10 @@ const DICT = {
     'modal.summary.sentBody': 'Check your inbox at {email}',
     'modal.summary.emailSubject': 'My OffroadWatt configuration',
     'export.email': 'Email my summary',
+    'share.config': 'Share this configuration',
+    'share.copied': 'Link copied to clipboard!',
+    'share.failed': 'Could not copy the link',
+    'share.loaded': 'Shared configuration loaded',
     // email body
     'email.autonomyLabel': 'Autonomy',
     'email.consumptionLabel': 'Ah/day',
@@ -514,6 +518,10 @@ const DICT = {
     'modal.summary.sentBody': 'Revise su correo en {email}',
     'modal.summary.emailSubject': 'Mi configuración OffroadWatt',
     'export.email': 'Enviar resumen por correo',
+    'share.config': 'Compartir esta configuración',
+    'share.copied': '¡Enlace copiado al portapapeles!',
+    'share.failed': 'No se pudo copiar el enlace',
+    'share.loaded': 'Configuración compartida cargada',
     // email body
     'email.autonomyLabel': 'Autonomía',
     'email.consumptionLabel': 'Ah/día',
@@ -817,6 +825,10 @@ const DICT = {
     'modal.summary.sentBody': 'Vérifiez votre boîte mail à {email}',
     'modal.summary.emailSubject': 'Ma configuration OffroadWatt',
     'export.email': 'Recevoir par email',
+    'share.config': 'Partager cette configuration',
+    'share.copied': 'Lien copié dans le presse-papier !',
+    'share.failed': 'Impossible de copier le lien',
+    'share.loaded': 'Configuration partagée chargée',
     // email body
     'email.autonomyLabel': 'Autonomie',
     'email.consumptionLabel': 'Ah/jour',

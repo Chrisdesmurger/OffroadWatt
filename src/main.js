@@ -543,6 +543,115 @@ function loadPersistedState() {
   } catch (_) {}
 }
 
+// ─── PARTAGE PAR URL (#13) ───────────────────────────────────────────────────
+
+// Sérialise la configuration courante (même forme que le snapshot persisté)
+function shareSnapshot() {
+  return {
+    vtype: S.vtype,
+    apps: S.apps,
+    bat: { ah: S.bat.ah, v: S.bat.v },
+    batNb: S.batNb,
+    dod: S.dod,
+    batType: S.batType,
+    solOn: S.solOn,
+    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+    hookupCost: S.hookupCost,
+  }
+}
+
+// Encode le state en base64 (UTF-8 sûr via encodeURIComponent)
+function encodeState(snap = shareSnapshot()) {
+  try { return btoa(encodeURIComponent(JSON.stringify(snap))) } catch (_) { return '' }
+}
+
+// Décode un paramètre base64 vers un objet de configuration partiel
+function decodeState(param) {
+  try { return JSON.parse(decodeURIComponent(atob(param))) } catch (_) { return null }
+}
+
+// Applique une configuration décodée sur le state (même logique que loadPersistedState)
+function applyDecodedState(p) {
+  if (!p || typeof p !== 'object') return false
+  const bat = BATS.find(b => b.ah === p.bat?.ah && b.v === p.bat?.v) || S.bat
+  Object.assign(S, {
+    vtype: p.vtype || S.vtype,
+    apps: Array.isArray(p.apps) && p.apps.length ? p.apps : S.apps,
+    bat,
+    batNb: p.batNb ?? S.batNb,
+    dod: p.dod ?? S.dod,
+    batType: p.batType ?? (bat ? bat.type : S.batType),
+    solOn: p.solOn ?? S.solOn,
+    solW: p.solW ?? S.solW,
+    solNb: p.solNb ?? S.solNb,
+    solEff: p.solEff ?? S.solEff,
+    sunIdx: p.sunIdx ?? S.sunIdx,
+    customSunH: p.customSunH ?? S.customSunH,
+    altOn: p.altOn ?? S.altOn,
+    altAmps: p.altAmps ?? S.altAmps,
+    altHours: p.altHours ?? S.altHours,
+    hookupCost: p.hookupCost ?? S.hookupCost,
+  })
+  return true
+}
+
+// Au boot, charge une config depuis ?c= — priorité sur localStorage
+function loadStateFromURL() {
+  try {
+    const param = new URLSearchParams(window.location.search).get('c')
+    if (!param) return false
+    if (!applyDecodedState(decodeState(param))) return false
+    persistState()
+    // Nettoie l'URL pour ne pas re-partager un lien obsolète au refresh
+    window.history.replaceState({}, '', window.location.pathname)
+    return true
+  } catch (_) { return false }
+}
+
+// Toast éphémère réutilisable (auto-disparait)
+function showToast(msg) {
+  let el = document.getElementById('ow-toast')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'ow-toast'
+    el.className = 'ow-toast'
+    document.body.appendChild(el)
+  }
+  el.textContent = msg
+  // force reflow pour rejouer la transition si déjà visible
+  void el.offsetWidth
+  el.classList.add('show')
+  clearTimeout(showToast._t)
+  showToast._t = setTimeout(() => el.classList.remove('show'), 2400)
+}
+
+// Copie le lien de partage dans le presse-papier + toast de confirmation
+async function shareConfig() {
+  const url = `${window.location.origin}${window.location.pathname}?c=${encodeState()}`
+  const fallbackCopy = () => {
+    const tmp = document.createElement('textarea')
+    tmp.value = url
+    tmp.style.position = 'fixed'; tmp.style.opacity = '0'
+    document.body.appendChild(tmp)
+    tmp.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(tmp)
+    return ok
+  }
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url)
+    } else if (!fallbackCopy()) {
+      throw new Error('copy failed')
+    }
+    showToast(t('share.copied'))
+  } catch (_) {
+    try { fallbackCopy(); showToast(t('share.copied')) }
+    catch (_) { showToast(t('share.failed')) }
+  }
+}
+
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
 const set = (u) => { Object.assign(S, u); persistState(); render() }
@@ -1002,6 +1111,10 @@ function buildEnergyTab() {
 
       <button class="pdf-btn" id="export-pdf">
         <i class="ti ti-mail-forward"></i> ${t('export.email')}
+      </button>
+
+      <button class="share-btn" id="share-config-btn">
+        <i class="ti ti-link"></i> ${t('share.config')}
       </button>
 
       <div class="capture-row">
@@ -1884,6 +1997,8 @@ function bindEvents() {
   const openSummaryModal = () => set({ modal: { type: 'email-summary' } })
   document.getElementById('export-pdf')?.addEventListener('click', openSummaryModal)
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
+  // Partage de configuration via URL (#13)
+  document.getElementById('share-config-btn')?.addEventListener('click', shareConfig)
   // Email summary modal — send
   document.getElementById('summary-send')?.addEventListener('click', async () => {
     const email = document.getElementById('summary-email')?.value?.trim()
@@ -1948,11 +2063,14 @@ function confirmCustom() {
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
 loadPersistedState()
-// Première visite → wizard d'onboarding (#17)
+// Une config partagée (?c=) a priorité sur le localStorage et saute le wizard (#13)
+const sharedLoaded = loadStateFromURL()
+// Première visite → wizard d'onboarding (#17) — sauf si on arrive via un lien partagé
 try {
-  if (!localStorage.getItem(ONBOARDED_KEY)) {
+  if (!sharedLoaded && !localStorage.getItem(ONBOARDED_KEY)) {
     S.modal = { type: 'wizard', step: 1, vtype: S.vtype, usages: USAGE_IDS.slice(), solar: null, budget: null }
   }
 } catch (_) {}
 render()
+if (sharedLoaded) showToast(t('share.loaded'))
 initAuth()
