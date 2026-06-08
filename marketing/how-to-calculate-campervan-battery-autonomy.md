@@ -56,7 +56,11 @@ Generated PNGs are committed; the editable Canva designs are linked below (perma
 
 | Asset | File | Size | Canva edit link |
 |-------|------|------|-----------------|
-| Blog hero / og:image | `landing/blog/assets/battery-autonomy-hero.png` | 1280×720 | https://www.canva.com/d/WuMW9YU_u_H8Olf |
+| Blog hero / og:image | `landing/blog/assets/battery-autonomy-hero.png` | 1280×720 | https://www.canva.com/d/jQ6_0qbQuYdoLh2 |
+
+> ⚠️ **Blog hero fix:** the headline + OffroadWatt wordmark are correct, but the AI rendered the
+> small subtitle as gibberish ("6 THE BATTERY PLAN WITHY"). Open the Canva edit link, fix that one
+> text line (e.g. "Master your campervan's energy"), re-export at 1280×720, and replace the PNG.
 | Instagram | `marketing/social/instagram-battery-autonomy.png` | 1080×1350 | https://www.canva.com/d/pBaflTD-V9UUuJc |
 | Facebook | `marketing/social/facebook-battery-autonomy.png` | 1080×1080 | https://www.canva.com/d/QbvGwh-IIqI3hp6 |
 
