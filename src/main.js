@@ -831,6 +831,11 @@ function buildHeader() {
         <span class="auth-lbl">${t('auth.signin')}</span>
       </button>`
 
+  const shareEl = `<button class="hdr-share-btn" id="share-header-btn" title="${t('share.config')}">
+    <i class="ti ti-share" style="font-size:14px"></i>
+    <span class="hdr-share-lbl">${t('share.headerBtn')}</span>
+  </button>`
+
   const langEl = `<div class="lang-switch">
     ${LANGS.map(l => `<button class="lang-opt${getLang() === l.id ? ' on' : ''}" data-lang="${l.id}" title="${l.name}">${l.label}</button>`).join('')}
   </div>`
@@ -846,6 +851,7 @@ function buildHeader() {
         <div class="vt${S.vtype === v ? ' on' : ''}" data-vtype="${v}">
           <i class="ti ${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
+      ${shareEl}
       ${langEl}
       ${authEl}
     </div>
@@ -2082,6 +2088,7 @@ function bindEvents() {
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
   // Partage de configuration — ouvre la fenêtre de partage (#13)
   document.getElementById('share-config-btn')?.addEventListener('click', openShareModal)
+  document.getElementById('share-header-btn')?.addEventListener('click', openShareModal)
   document.getElementById('share-copy')?.addEventListener('click', async () => {
     const ok = await copyText(S.modal?.url || '')
     showToast(ok ? t('share.copied') : t('share.failed'))
