@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OffroadWatt Blog — Campervan electrical guides</title>
+<meta name="description" content="Practical guides on battery autonomy, solar power and electrical consumption for campervans, motorhomes and vans. By the OffroadWatt team.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://www.offroadwatt.com/blog">
+<link rel="alternate" hreflang="en" href="https://www.offroadwatt.com/blog">
+<link rel="alternate" hreflang="x-default" href="https://www.offroadwatt.com/blog">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OffroadWatt Blog — Campervan electrical guides">
+<meta property="og:description" content="Practical guides on battery autonomy, solar power and electrical consumption for campervans, motorhomes and vans.">
+<meta property="og:url" content="https://www.offroadwatt.com/blog">
+<meta property="og:image" content="https://www.offroadwatt.com/og-image-en.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.offroadwatt.com/og-image-en.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "OffroadWatt Blog",
+  "description": "Practical guides on battery autonomy, solar power and electrical consumption for campervans, motorhomes and vans.",
+  "url": "https://www.offroadwatt.com/blog",
+  "publisher": { "@type": "Organization", "name": "OffroadWatt", "logo": { "@type": "ImageObject", "url": "https://www.offroadwatt.com/og-image.png" } }
+}
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link" data-i18n="nav.blog">Blog</a>
+    <a href="/#features" class="nav-link" data-i18n="nav.features">Features</a>
+    <div class="lang-sel">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="es">ES</button>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> <span data-i18n="nav.cta">Try free</span></a>
+  </div>
+</nav>
+
+<header class="hub-head">
+  <span class="eyebrow" style="justify-content:center"><i class="ti ti-news"></i> <span data-i18n="hub.badge">The OffroadWatt blog</span></span>
+  <h1 data-i18n="hub.title">Power your journey with confidence</h1>
+  <p data-i18n="hub.sub">Practical guides on battery autonomy, solar and electrical consumption for campervans, motorhomes and vans.</p>
+</header>
+
+<main class="posts" id="posts"></main>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/" data-i18n="foot.home">Home</a> · <a href="/blog">Blog</a> · <a href="https://app.offroadwatt.com" target="_blank" data-i18n="foot.app">Open the app</a></p>
+  <p style="margin-top:10px" data-i18n="foot.copy">© 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.</p>
+</footer>
+
+<script>
+const DICT = {
+  en: {
+    'nav.blog':'Blog','nav.features':'Features','nav.cta':'Try free',
+    'hub.badge':'The OffroadWatt blog','hub.title':'Power your journey with confidence',
+    'hub.sub':'Practical guides on battery autonomy, solar and electrical consumption for campervans, motorhomes and vans.',
+    'foot.home':'Home','foot.app':'Open the app','foot.copy':'© 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.'
+  },
+  fr: {
+    'nav.blog':'Blog','nav.features':'Fonctionnalités','nav.cta':'Essayer',
+    'hub.badge':'Le blog OffroadWatt','hub.title':'Voyagez l’esprit tranquille',
+    'hub.sub':'Des guides pratiques sur l’autonomie batterie, le solaire et la consommation électrique en camping-car, van et fourgon.',
+    'foot.home':'Accueil','foot.app':'Ouvrir l’app','foot.copy':'© 2026 OffroadWatt. Le calculateur d’autonomie électrique pour camping-car, caravane et van.'
+  },
+  es: {
+    'nav.blog':'Blog','nav.features':'Características','nav.cta':'Probar',
+    'hub.badge':'El blog de OffroadWatt','hub.title':'Viaja con total confianza',
+    'hub.sub':'Guías prácticas sobre autonomía de batería, solar y consumo eléctrico en autocaravana, furgoneta y camper.',
+    'foot.home':'Inicio','foot.app':'Abrir la app','foot.copy':'© 2026 OffroadWatt. La calculadora de autonomía eléctrica para autocaravanas, caravanas y furgonetas.'
+  }
+};
+
+// One entry per article, with per-language metadata + URL.
+const POSTS = [
+  {
+    img: { en:'/og-image-en.png', fr:'/og-image.png', es:'/og-image-es.png' },
+    tag: { en:'Battery & energy', fr:'Batterie & énergie', es:'Batería & energía' },
+    date: { en:'June 8, 2026', fr:'8 juin 2026', es:'8 de junio de 2026' },
+    title: {
+      en:'How to calculate your campervan battery autonomy',
+      fr:'Calculer l’autonomie batterie de son camping-car',
+      es:'Calcular la autonomía de batería de tu autocaravana'
+    },
+    excerpt: {
+      en:'The exact 4-step formula to size your battery, solar and alternator — with a worked example.',
+      fr:'La formule exacte en 4 étapes pour dimensionner batterie, solaire et alternateur — exemple chiffré inclus.',
+      es:'La fórmula exacta en 4 pasos para dimensionar batería, solar y alternador — con ejemplo práctico.'
+    },
+    url: {
+      en:'/blog/how-to-calculate-campervan-battery-autonomy',
+      fr:'/blog/fr/calculer-autonomie-batterie-camping-car',
+      es:'/blog/es/calcular-autonomia-bateria-autocaravana'
+    }
+  }
+];
+
+let _lang = localStorage.getItem('ow_land_lang') || (navigator.language||'en').slice(0,2).toLowerCase();
+if(!['fr','en','es'].includes(_lang)) _lang = 'en';
+const t = k => (DICT[_lang]&&DICT[_lang][k]) || DICT.en[k] || k;
+
+function render(){
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang===_lang));
+  document.documentElement.lang = _lang;
+  document.getElementById('posts').innerHTML = POSTS.map(p => `
+    <a class="post-card" href="${p.url[_lang]}">
+      <img src="${p.img[_lang]}" alt="${p.title[_lang]}" loading="lazy" width="1200" height="630">
+      <div class="post-body">
+        <span class="post-tag">${p.tag[_lang]}</span>
+        <h2>${p.title[_lang]}</h2>
+        <p>${p.excerpt[_lang]}</p>
+        <div class="post-date">${p.date[_lang]}</div>
+      </div>
+    </a>`).join('');
+}
+
+document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => {
+  _lang = b.dataset.lang; localStorage.setItem('ow_land_lang', _lang); render();
+}));
+render();
+</script>
+</body>
+</html>
