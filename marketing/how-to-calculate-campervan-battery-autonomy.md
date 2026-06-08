@@ -44,15 +44,24 @@ Run `node scripts/seo-audit.mjs` to re-verify. Every article passes:
 
 ---
 
-## 3. Social-media assets (Canva)
+## 3. Brand & visual assets (Canva)
 
-Generated PNGs are committed under `marketing/social/` and the editable Canva designs are linked
-below (permanent — re-export anytime).
+All visuals follow **`marketing/BRAND.md`** — the single source of truth (palette, fonts,
+wordmark, motif, per-platform sizes) derived from the vitrine + app, so every image is
+coherent across platforms. No OffroadWatt Canva brand kit exists yet (only unrelated kits on
+the account), so the brand spec is embedded in each generation prompt; create one in Canva and
+the pipeline will use its `brand_kit_id` automatically.
 
-| Channel | File | Size | Canva edit link |
-|---------|------|------|-----------------|
+Generated PNGs are committed; the editable Canva designs are linked below (permanent — re-export anytime).
+
+| Asset | File | Size | Canva edit link |
+|-------|------|------|-----------------|
+| Blog hero / og:image | `landing/blog/assets/battery-autonomy-hero.png` | 1280×720 | https://www.canva.com/d/WuMW9YU_u_H8Olf |
 | Instagram | `marketing/social/instagram-battery-autonomy.png` | 1080×1350 | https://www.canva.com/d/pBaflTD-V9UUuJc |
 | Facebook | `marketing/social/facebook-battery-autonomy.png` | 1080×1080 | https://www.canva.com/d/QbvGwh-IIqI3hp6 |
+
+The blog hero is wired into the EN article (`hero-img`, `og:image`, `twitter:image`, JSON-LD `image`)
+and the blog hub card.
 
 > ⚠️ **Before posting:** the Instagram image footer shows Canva's placeholder `reallygreatsite.com`.
 > Open the Canva edit link and replace it with `app.offroadwatt.com` (or remove it), then re-export.
