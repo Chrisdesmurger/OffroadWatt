@@ -375,6 +375,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>
     <a href="#pricing" class="nav-link" data-i18n="nav.pricing">Tarifs</a>
     <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
+    <a href="/blog" class="nav-link" data-i18n="nav.blog">Blog</a>
     <div class="lang-sel">
       <button class="lang-btn" data-lang="fr">FR</button>
       <button class="lang-btn" data-lang="en">EN</button>
@@ -811,6 +812,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       <div class="footer-col">
         <h4 data-i18n="footer.h2">Liens</h4>
         <ul class="footer-links">
+          <li><a href="/blog" data-i18n="footer.blog">Blog</a></li>
           <li><a href="https://github.com/Chrisdesmurger/OffroadWatt" target="_blank">GitHub</a></li>
           <li><a href="#" data-i18n="footer.privacy">Confidentialité</a></li>
           <li><a href="#" data-i18n="footer.terms">Conditions</a></li>
@@ -838,7 +840,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY)
 // ── i18n ────────────────────────────────────────────────────
 const DICT = {
 fr:{
-'nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.pricing':'Tarifs','nav.faq':'FAQ','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
+'nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.pricing':'Tarifs','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
 'hero.badge':'Calculateur d\'autonomie électrique',
 'hero.t1':'Planifiez votre','hero.t2':'autonomie électrique','hero.t3':'partez l\'esprit léger.',
 'hero.sub':'Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires et trouvez la batterie idéale pour votre camping-car, caravane ou van.',
@@ -894,11 +896,11 @@ fr:{
 'faq.a6':'Oui, c\'est la recharge alternateur (ou B2B). Un alternateur délivre en général <strong>20 à 40 A dédiés</strong> aux batteries secondaires. Sur 2h de route à 30A : 30 × 2 × 0,7 (rendement) = <strong>42 Ah récupérés</strong>. C\'est un complément utile mais insuffisant pour remplacer le solaire sur de longues périodes stationnaires.',
 'footer.desc':'Le calculateur d\'autonomie électrique pour camping-car, caravane et van. Planifiez. Optimisez. Voyagez.',
 'footer.h1':'Application','footer.open':'Ouvrir l\'app','footer.feat':'Fonctionnalités','footer.price':'Tarifs','footer.signup':'S\'inscrire',
-'footer.h2':'Liens','footer.privacy':'Confidentialité','footer.terms':'Conditions',
+'footer.h2':'Liens','footer.blog':'Blog','footer.privacy':'Confidentialité','footer.terms':'Conditions',
 'footer.copy':'© 2025 OffroadWatt. Tous droits réservés.',
 },
 en:{
-'nav.features':'Features','nav.hiw':'How it works','nav.pricing':'Pricing','nav.faq':'FAQ','nav.login':'Sign in','nav.cta':'Try for free',
+'nav.features':'Features','nav.hiw':'How it works','nav.pricing':'Pricing','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Sign in','nav.cta':'Try for free',
 'hero.badge':'Electrical autonomy calculator',
 'hero.t1':'Plan your','hero.t2':'electrical autonomy','hero.t3':'travel worry-free.',
 'hero.sub':'Calculate your consumption in real time, size your solar panels and find the ideal battery for your motorhome, caravan or van.',
@@ -954,11 +956,11 @@ en:{
 'faq.a6':'Yes, this is called alternator charging (B2B charger). A typical alternator delivers <strong>20 to 40A dedicated</strong> to the secondary batteries. 2 hours driving at 30A: 30 × 2 × 0.7 (efficiency) = <strong>42 Ah recovered</strong>. It\'s a useful supplement but not a replacement for solar during long stationary periods.',
 'footer.desc':'The electrical autonomy calculator for motorhomes, caravans and vans. Plan. Optimize. Travel.',
 'footer.h1':'App','footer.open':'Open app','footer.feat':'Features','footer.price':'Pricing','footer.signup':'Sign up',
-'footer.h2':'Links','footer.privacy':'Privacy','footer.terms':'Terms',
+'footer.h2':'Links','footer.blog':'Blog','footer.privacy':'Privacy','footer.terms':'Terms',
 'footer.copy':'© 2025 OffroadWatt. All rights reserved.',
 },
 es:{
-'nav.features':'Características','nav.hiw':'Cómo funciona','nav.pricing':'Precios','nav.faq':'FAQ','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
+'nav.features':'Características','nav.hiw':'Cómo funciona','nav.pricing':'Precios','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
 'hero.badge':'Calculadora de autonomía eléctrica',
 'hero.t1':'Planifica tu','hero.t2':'autonomía eléctrica','hero.t3':'viaja sin preocupaciones.',
 'hero.sub':'Calcula tu consumo en tiempo real, dimensiona tus paneles solares y encuentra la batería ideal para tu autocaravana, caravana o furgoneta.',
@@ -1014,7 +1016,7 @@ es:{
 'faq.a6':'Sí, se llama carga por alternador (cargador B2B). Un alternador entrega generalmente <strong>20 a 40 A dedicados</strong> a las baterías secundarias. 2 horas de conducción a 30A: 30 × 2 × 0,7 (rendimiento) = <strong>42 Ah recuperados</strong>. Es un complemento útil, pero insuficiente para reemplazar el solar en períodos estacionarios largos.',
 'footer.desc':'La calculadora de autonomía eléctrica para autocaravanas, caravanas y furgonetas. Planifica. Optimiza. Viaja.',
 'footer.h1':'Aplicación','footer.open':'Abrir app','footer.feat':'Características','footer.price':'Precios','footer.signup':'Registrarse',
-'footer.h2':'Enlaces','footer.privacy':'Privacidad','footer.terms':'Términos',
+'footer.h2':'Enlaces','footer.blog':'Blog','footer.privacy':'Privacidad','footer.terms':'Términos',
 'footer.copy':'© 2025 OffroadWatt. Todos los derechos reservados.',
 }
 }

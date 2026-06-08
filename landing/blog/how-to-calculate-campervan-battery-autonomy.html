@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Calculate Your Campervan Battery Autonomy (2026 Guide)</title>
+<meta name="description" content="Learn how to calculate the battery autonomy of your campervan, motorhome or van in 4 simple steps. Real formulas, a worked example and a free calculator.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="OffroadWatt">
+<meta name="keywords" content="campervan battery autonomy, calculate battery capacity, motorhome electrical consumption, van life battery, leisure battery sizing, solar autonomy">
+<link rel="canonical" href="https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy">
+
+<link rel="alternate" hreflang="en" href="https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy">
+<link rel="alternate" hreflang="fr" href="https://www.offroadwatt.com/blog/fr/calculer-autonomie-batterie-camping-car">
+<link rel="alternate" hreflang="es" href="https://www.offroadwatt.com/blog/es/calcular-autonomia-bateria-autocaravana">
+<link rel="alternate" hreflang="x-default" href="https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to Calculate Your Campervan Battery Autonomy (2026 Guide)">
+<meta property="og:description" content="Calculate the battery autonomy of your campervan, motorhome or van in 4 simple steps. Real formulas, a worked example and a free calculator.">
+<meta property="og:url" content="https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy">
+<meta property="og:image" content="https://www.offroadwatt.com/blog/assets/battery-autonomy-hero.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-06-08">
+<meta property="article:modified_time" content="2026-06-08">
+<meta property="article:section" content="Guides">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to Calculate Your Campervan Battery Autonomy (2026 Guide)">
+<meta name="twitter:description" content="Calculate your campervan battery autonomy in 4 simple steps — formulas, example and a free calculator.">
+<meta name="twitter:image" content="https://www.offroadwatt.com/blog/assets/battery-autonomy-hero.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to Calculate Your Campervan Battery Autonomy (2026 Guide)",
+  "description": "Learn how to calculate the battery autonomy of your campervan, motorhome or van in 4 simple steps, with real formulas, a worked example and a free calculator.",
+  "image": "https://www.offroadwatt.com/blog/assets/battery-autonomy-hero.png",
+  "author": { "@type": "Organization", "name": "OffroadWatt", "url": "https://www.offroadwatt.com" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "logo": { "@type": "ImageObject", "url": "https://www.offroadwatt.com/og-image.png" }
+  },
+  "datePublished": "2026-06-08",
+  "dateModified": "2026-06-08",
+  "inLanguage": "en",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.offroadwatt.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.offroadwatt.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Calculate campervan battery autonomy", "item": "https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How do I calculate my campervan's daily electrical consumption?", "acceptedAnswer": { "@type": "Answer", "text": "Multiply each appliance's power (W) by its daily run time (h) to get watt-hours, then divide by your battery voltage (12V) to get amp-hours. Add every appliance to get total Ah per day." } },
+    { "@type": "Question", "name": "How many days of autonomy can a 100Ah lithium battery give?", "acceptedAnswer": { "@type": "Answer", "text": "A 100Ah LiFePO4 battery delivers about 80Ah usable (80% depth of discharge). If you consume 40Ah per day, that is roughly 2 days without any recharge, or indefinitely with enough solar." } },
+    { "@type": "Question", "name": "Does solar power increase battery autonomy?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Solar production is subtracted from your daily consumption. If solar covers your full daily draw, your battery autonomy becomes effectively unlimited in good weather." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Features</a>
+    <div class="lang-sel">
+      <a href="/blog/how-to-calculate-campervan-battery-autonomy" class="lang-btn on">EN</a>
+      <a href="/blog/fr/calculer-autonomie-batterie-camping-car" class="lang-btn">FR</a>
+      <a href="/blog/es/calcular-autonomia-bateria-autocaravana" class="lang-btn">ES</a>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Try free</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>Battery autonomy</span>
+  </nav>
+
+  <article>
+    <span class="eyebrow"><i class="ti ti-battery-charging"></i> Battery &amp; energy guide</span>
+    <h1>How to Calculate Your Campervan Battery Autonomy</h1>
+    <div class="article-meta">
+      <span>By OffroadWatt</span><span class="dot"></span>
+      <time datetime="2026-06-08">June 8, 2026</time><span class="dot"></span>
+      <span>8 min read</span>
+    </div>
+
+    <p class="lede">Running out of power two nights into a trip is the fastest way to ruin van life. The good news: battery autonomy is simple maths once you know the four numbers that matter. This guide walks you through the exact formula — then shows how to size your battery, solar and alternator with confidence.</p>
+
+    <img class="hero-img" src="/blog/assets/battery-autonomy-hero.png" alt="OffroadWatt guide — how to calculate campervan battery autonomy" width="1280" height="720" loading="eager">
+
+    <div class="toc">
+      <div class="toc-title">In this guide</div>
+      <ol>
+        <li><a href="#consumption">Calculate your daily consumption</a></li>
+        <li><a href="#usable">Find your usable battery capacity</a></li>
+        <li><a href="#recharge">Add solar &amp; alternator recharge</a></li>
+        <li><a href="#autonomy">Compute your real autonomy</a></li>
+        <li><a href="#battery-types">AGM vs GEL vs Lithium</a></li>
+        <li><a href="#mistakes">Common sizing mistakes</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="consumption">1. Calculate your daily consumption</h2>
+    <p>Everything starts with how much energy you draw in 24 hours. For each appliance, multiply its power in watts by the number of hours you use it per day. That gives you watt-hours (Wh). Add them all up, then convert to amp-hours (Ah) — the unit batteries are sold in.</p>
+    <div class="formula">Wh/day = Power (W) × Hours per day (h)<br>Ah/day = Wh/day ÷ Battery voltage (12V)</div>
+    <p>Here is a typical two-person campervan:</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Appliance</th><th>Power</th><th>Hours/day</th><th>Wh/day</th></tr></thead>
+        <tbody>
+          <tr><td>Compressor fridge</td><td>45 W</td><td>10 h*</td><td>450</td></tr>
+          <tr><td>LED lighting</td><td>15 W</td><td>4 h</td><td>60</td></tr>
+          <tr><td>Water pump</td><td>50 W</td><td>0.5 h</td><td>25</td></tr>
+          <tr><td>Phone / laptop charging</td><td>60 W</td><td>3 h</td><td>180</td></tr>
+          <tr><td>Roof fan</td><td>10 W</td><td>8 h</td><td>80</td></tr>
+          <tr><td><strong>Total</strong></td><td></td><td></td><td><strong>795 Wh</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>*A fridge cycles on and off, so it runs roughly 10 effective hours over 24h. That total of <strong>795 Wh ÷ 12V ≈ 66 Ah per day</strong>.</p>
+    <div class="callout"><i class="ti ti-bulb"></i> <strong>Tip:</strong> the fridge is almost always the biggest single draw. Optimise it first — good insulation and parking in the shade can cut its consumption by 20–30%.</div>
+
+    <h2 id="usable">2. Find your usable battery capacity</h2>
+    <p>A battery's nameplate capacity is not what you can actually use. Each chemistry has a safe <strong>depth of discharge (DoD)</strong> — go below it and you damage the cells. Multiply nominal capacity by the DoD to get usable amp-hours.</p>
+    <div class="formula">Usable Ah = Nominal Ah × Depth of Discharge</div>
+    <ul>
+      <li><strong>AGM / GEL:</strong> 50% DoD → a 100Ah battery gives 50Ah usable.</li>
+      <li><strong>Lithium (LiFePO4):</strong> 80–90% DoD → a 100Ah battery gives 80–90Ah usable.</li>
+    </ul>
+    <p>This is why a 100Ah lithium battery realistically replaces a 160–180Ah lead-acid bank — at a third of the weight.</p>
+
+    <h2 id="recharge">3. Add solar &amp; alternator recharge</h2>
+    <p>Autonomy is not just the battery — it is the balance between what you take out and what you put back. Two sources usually refill the bank.</p>
+    <h3>Solar</h3>
+    <p>A solar panel's daily yield depends on your latitude and season. A practical rule: multiply total watts-peak by the average peak-sun-hours for your region, then apply ~75% for real-world losses (MPPT, heat, angle).</p>
+    <div class="formula">Solar Ah/day = (Wp × peak-sun-hours × 0.75) ÷ 12V</div>
+    <p>Example: 300Wp in Southern Europe (≈5 sun-hours) ≈ (300 × 5 × 0.75) ÷ 12 ≈ <strong>94 Ah/day</strong>. In Northern Europe in winter, expect a third of that.</p>
+    <h3>Alternator</h3>
+    <p>When you drive, a DC-DC (B2B) charger tops up the leisure battery. Multiply its dedicated amperage by driving hours and apply ~70% efficiency.</p>
+    <div class="formula">Alternator Ah/day = Amps × Driving hours × 0.7</div>
+    <p>Example: a 30A charger over 2h of driving ≈ 30 × 2 × 0.7 ≈ <strong>42 Ah/day</strong>.</p>
+
+    <h2 id="autonomy">4. Compute your real autonomy</h2>
+    <p>Now subtract your daily recharge from your daily consumption to get the <strong>net deficit</strong> the battery must cover. Then divide usable capacity by that deficit.</p>
+    <div class="formula">Net deficit = Consumption − Solar − Alternator<br>Autonomy (days) = Usable Ah ÷ Net deficit</div>
+    <p>Using our example — 66 Ah consumed, 94 Ah of summer solar — the battery actually <em>gains</em> charge during the day. Autonomy is effectively unlimited in good weather. On a cloudy day with no driving and only 20 Ah of solar, the deficit is 46 Ah/day; a 100Ah lithium battery (80Ah usable) then lasts about <strong>1.7 days</strong> before needing a recharge.</p>
+    <div class="callout"><i class="ti ti-calculator"></i> Doing this for ten appliances by hand is tedious. <a href="https://app.offroadwatt.com">OffroadWatt runs the full calculation live</a> — 33+ preset appliances, 34 battery models and 41 geographic sun zones, all in Ah.</div>
+
+    <h2 id="battery-types">AGM vs GEL vs Lithium: which to size for?</h2>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Usable DoD</th><th>Cycles</th><th>Weight</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td>AGM</td><td>50%</td><td>~500</td><td>Heavy</td><td>Budget, occasional use</td></tr>
+          <tr><td>GEL</td><td>50%</td><td>~700</td><td>Heavy</td><td>Hot climates</td></tr>
+          <tr><td>Lithium (LiFePO4)</td><td>80–90%</td><td>2000+</td><td>Light</td><td>Full-time van life</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>For full-time travel, lithium wins on usable capacity, lifespan and weight — and its higher upfront cost is usually lower per cycle over ten years.</p>
+
+    <h2 id="mistakes">Common sizing mistakes</h2>
+    <ul>
+      <li><strong>Using nameplate capacity instead of usable Ah.</strong> Always apply the DoD.</li>
+      <li><strong>Ignoring the fridge duty cycle.</strong> It does not run 24h flat-out — but it does run all night.</li>
+      <li><strong>Sizing solar for summer only.</strong> Winter yield can be 60–70% lower; size for your worst realistic month.</li>
+      <li><strong>Forgetting inverter losses.</strong> 230V appliances through an inverter add ~10–15% overhead.</li>
+    </ul>
+
+    <div class="cta-box">
+      <h3>Get your exact numbers in 3 minutes</h3>
+      <p>Stop guessing. Enter your appliances, battery, solar and region — OffroadWatt shows your real autonomy in days and recommends the right battery.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Open the free calculator</a>
+    </div>
+
+    <section class="faq">
+      <h2 id="faq">Frequently asked questions</h2>
+      <div class="faq-item"><h3>How do I calculate my campervan's daily electrical consumption?</h3><p>Multiply each appliance's power (W) by its daily run time (h) to get watt-hours, then divide by your battery voltage (12V) to get amp-hours. Add every appliance to get total Ah per day.</p></div>
+      <div class="faq-item"><h3>How many days of autonomy can a 100Ah lithium battery give?</h3><p>A 100Ah LiFePO4 battery delivers about 80Ah usable (80% DoD). If you consume 40Ah per day, that is roughly 2 days without any recharge — or indefinitely with enough solar.</p></div>
+      <div class="faq-item"><h3>Does solar power increase battery autonomy?</h3><p>Yes. Solar production is subtracted from your daily consumption. If solar covers your full daily draw, your battery autonomy becomes effectively unlimited in good weather.</p></div>
+    </section>
+
+    <div class="share">
+      <span>Share</span>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="https://twitter.com/intent/tweet?url=https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy&text=How%20to%20calculate%20your%20campervan%20battery%20autonomy" target="_blank" rel="noopener" aria-label="Share on X"><i class="ti ti-brand-x"></i></a>
+      <a href="https://api.whatsapp.com/send?text=How%20to%20calculate%20your%20campervan%20battery%20autonomy%20https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Home</a> · <a href="/blog">Blog</a> · <a href="https://app.offroadwatt.com" target="_blank">Open the app</a></p>
+  <p style="margin-top:10px">© 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.</p>
+</footer>
+
+</body>
+</html>
