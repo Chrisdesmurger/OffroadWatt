@@ -543,6 +543,164 @@ function loadPersistedState() {
   } catch (_) {}
 }
 
+// ─── PARTAGE PAR URL (#13) ───────────────────────────────────────────────────
+
+// Sérialise la configuration courante (même forme que le snapshot persisté)
+function shareSnapshot() {
+  return {
+    vtype: S.vtype,
+    apps: S.apps,
+    bat: { ah: S.bat.ah, v: S.bat.v },
+    batNb: S.batNb,
+    dod: S.dod,
+    batType: S.batType,
+    solOn: S.solOn,
+    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+    hookupCost: S.hookupCost,
+  }
+}
+
+// Encode le state en base64 (UTF-8 sûr via encodeURIComponent)
+function encodeState(snap = shareSnapshot()) {
+  try { return btoa(encodeURIComponent(JSON.stringify(snap))) } catch (_) { return '' }
+}
+
+// Décode un paramètre base64 vers un objet de configuration partiel
+function decodeState(param) {
+  try { return JSON.parse(decodeURIComponent(atob(param))) } catch (_) { return null }
+}
+
+// Applique une configuration décodée sur le state (même logique que loadPersistedState)
+function applyDecodedState(p) {
+  if (!p || typeof p !== 'object') return false
+  const bat = BATS.find(b => b.ah === p.bat?.ah && b.v === p.bat?.v) || S.bat
+  Object.assign(S, {
+    vtype: p.vtype || S.vtype,
+    apps: Array.isArray(p.apps) && p.apps.length ? p.apps : S.apps,
+    bat,
+    batNb: p.batNb ?? S.batNb,
+    dod: p.dod ?? S.dod,
+    batType: p.batType ?? (bat ? bat.type : S.batType),
+    solOn: p.solOn ?? S.solOn,
+    solW: p.solW ?? S.solW,
+    solNb: p.solNb ?? S.solNb,
+    solEff: p.solEff ?? S.solEff,
+    sunIdx: p.sunIdx ?? S.sunIdx,
+    customSunH: p.customSunH ?? S.customSunH,
+    altOn: p.altOn ?? S.altOn,
+    altAmps: p.altAmps ?? S.altAmps,
+    altHours: p.altHours ?? S.altHours,
+    hookupCost: p.hookupCost ?? S.hookupCost,
+  })
+  return true
+}
+
+// Au boot, charge une config depuis ?c= — priorité sur localStorage
+function loadStateFromURL() {
+  try {
+    const param = new URLSearchParams(window.location.search).get('c')
+    if (!param) return false
+    if (!applyDecodedState(decodeState(param))) return false
+    persistState()
+    // Nettoie l'URL pour ne pas re-partager un lien obsolète au refresh
+    window.history.replaceState({}, '', window.location.pathname)
+    return true
+  } catch (_) { return false }
+}
+
+// Toast éphémère réutilisable (auto-disparait)
+function showToast(msg) {
+  let el = document.getElementById('ow-toast')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'ow-toast'
+    el.className = 'ow-toast'
+    document.body.appendChild(el)
+  }
+  el.textContent = msg
+  // force reflow pour rejouer la transition si déjà visible
+  void el.offsetWidth
+  el.classList.add('show')
+  clearTimeout(showToast._t)
+  showToast._t = setTimeout(() => el.classList.remove('show'), 2400)
+}
+
+// Copie un texte dans le presse-papier (avec fallback execCommand)
+async function copyText(text) {
+  try {
+    if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); return true }
+  } catch (_) {}
+  try {
+    const tmp = document.createElement('textarea')
+    tmp.value = text
+    tmp.style.position = 'fixed'; tmp.style.opacity = '0'
+    document.body.appendChild(tmp)
+    tmp.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(tmp)
+    return ok
+  } catch (_) { return false }
+}
+
+// Lien long auto-suffisant (base64) — secours si la création du lien court échoue
+function longShareUrl() {
+  return `${window.location.origin}${window.location.pathname}?c=${encodeState()}`
+}
+
+// Génère un code court aléatoire sans caractères ambigus
+function genShareCode(len = 7) {
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789'
+  let s = ''
+  try {
+    const arr = new Uint32Array(len)
+    crypto.getRandomValues(arr)
+    for (let i = 0; i < len; i++) s += chars[arr[i] % chars.length]
+  } catch (_) {
+    for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return s
+}
+
+// Stocke la config dans Supabase et renvoie un lien court ?s=code
+async function createShortLink() {
+  const snap = shareSnapshot()
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const code = genShareCode()
+    const { error } = await supabase.from('shared_configs').insert({ code, state: snap })
+    if (!error) return `${window.location.origin}${window.location.pathname}?s=${code}`
+    // 23505 = collision de clé primaire → on régénère un code
+    if (error.code !== '23505') throw error
+  }
+  throw new Error('short link: too many collisions')
+}
+
+// Ouvre la fenêtre de partage et génère le lien court en arrière-plan
+async function openShareModal() {
+  set({ modal: { type: 'share', loading: true } })
+  let url
+  try { url = await createShortLink() }
+  catch (_) { url = longShareUrl() }
+  // L'utilisateur a peut-être fermé la modale entre-temps
+  if (S.modal?.type !== 'share') return
+  set({ modal: { type: 'share', loading: false, url } })
+}
+
+// Au boot, charge une config depuis un lien court ?s=code (asynchrone)
+async function loadShortLink() {
+  try {
+    const code = new URLSearchParams(window.location.search).get('s')
+    if (!code) return
+    const { data, error } = await supabase.from('shared_configs').select('state').eq('code', code).single()
+    if (error || !data?.state) return
+    if (!applyDecodedState(data.state)) return
+    persistState()
+    window.history.replaceState({}, '', window.location.pathname)
+    render()
+    showToast(t('share.loaded'))
+  } catch (_) {}
+}
+
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
 const set = (u) => { Object.assign(S, u); persistState(); render() }
@@ -673,6 +831,11 @@ function buildHeader() {
         <span class="auth-lbl">${t('auth.signin')}</span>
       </button>`
 
+  const shareEl = `<button class="hdr-share-btn" id="share-header-btn" title="${t('share.config')}">
+    <i class="ti ti-share" style="font-size:14px"></i>
+    <span class="hdr-share-lbl">${t('share.headerBtn')}</span>
+  </button>`
+
   const langEl = `<div class="lang-switch">
     ${LANGS.map(l => `<button class="lang-opt${getLang() === l.id ? ' on' : ''}" data-lang="${l.id}" title="${l.name}">${l.label}</button>`).join('')}
   </div>`
@@ -688,6 +851,7 @@ function buildHeader() {
         <div class="vt${S.vtype === v ? ' on' : ''}" data-vtype="${v}">
           <i class="ti ${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
+      ${shareEl}
       ${langEl}
       ${authEl}
     </div>
@@ -1002,6 +1166,10 @@ function buildEnergyTab() {
 
       <button class="pdf-btn" id="export-pdf">
         <i class="ti ti-mail-forward"></i> ${t('export.email')}
+      </button>
+
+      <button class="share-btn" id="share-config-btn">
+        <i class="ti ti-link"></i> ${t('share.config')}
       </button>
 
       <div class="capture-row">
@@ -1524,6 +1692,40 @@ function buildModal() {
 
   if (m.type === 'wizard') return buildWizardModal(m)
 
+  if (m.type === 'share') {
+    const url = m.url || ''
+    const u = encodeURIComponent(url)
+    const txt = encodeURIComponent(t('share.text'))
+    const subject = encodeURIComponent(t('share.emailSubject'))
+    const socials = url ? `
+      <div class="share-socials">
+        <a class="share-soc" href="https://wa.me/?text=${txt}%20${u}" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp"></i>WhatsApp</a>
+        <a class="share-soc" href="https://www.facebook.com/sharer/sharer.php?u=${u}" target="_blank" rel="noopener"><i class="ti ti-brand-facebook"></i>Facebook</a>
+        <a class="share-soc" href="https://twitter.com/intent/tweet?text=${txt}&url=${u}" target="_blank" rel="noopener"><i class="ti ti-brand-x"></i>X</a>
+        <a class="share-soc" href="https://t.me/share/url?url=${u}&text=${txt}" target="_blank" rel="noopener"><i class="ti ti-brand-telegram"></i>Telegram</a>
+        <a class="share-soc" href="mailto:?subject=${subject}&body=${txt}%20${u}"><i class="ti ti-mail"></i>${t('share.viaEmail')}</a>
+      </div>` : ''
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:420px">
+        <h3><i class="ti ti-share"></i> ${t('share.modalTitle')}</h3>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:12px">${t('share.modalDesc')}</p>
+        ${m.loading
+          ? `<div style="text-align:center;padding:18px;color:var(--t3);font-size:12px">
+              <i class="ti ti-loader-2" style="font-size:18px;animation:spin 1s linear infinite"></i>
+              <div style="margin-top:8px">${t('share.generating')}</div>
+            </div>`
+          : `<div class="share-url-row">
+              <input id="share-url" type="text" readonly value="${url}" onclick="this.select()">
+              <button class="share-copy-btn" id="share-copy"><i class="ti ti-copy" style="font-size:13px"></i> ${t('share.copyBtn')}</button>
+            </div>
+            ${socials}
+            ${navigator.share ? `<button class="mo-ok" id="share-native" style="width:100%;margin-top:12px"><i class="ti ti-share" style="font-size:12px"></i> ${t('share.native')}</button>` : ''}`}
+        <div class="mo-btns" style="margin-top:12px"><button id="close-modal" class="mo-cancel" style="flex:1">${t('btn.close')}</button></div>
+      </div>
+    </div>`
+  }
+
   if (m.type === 'vtype-confirm') {
     const v = m.vtype
     const preset = VTYPE_PRESETS[v]
@@ -1884,6 +2086,16 @@ function bindEvents() {
   const openSummaryModal = () => set({ modal: { type: 'email-summary' } })
   document.getElementById('export-pdf')?.addEventListener('click', openSummaryModal)
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
+  // Partage de configuration — ouvre la fenêtre de partage (#13)
+  document.getElementById('share-config-btn')?.addEventListener('click', openShareModal)
+  document.getElementById('share-header-btn')?.addEventListener('click', openShareModal)
+  document.getElementById('share-copy')?.addEventListener('click', async () => {
+    const ok = await copyText(S.modal?.url || '')
+    showToast(ok ? t('share.copied') : t('share.failed'))
+  })
+  document.getElementById('share-native')?.addEventListener('click', async () => {
+    try { await navigator.share({ title: t('share.modalTitle'), text: t('share.text'), url: S.modal?.url }) } catch (_) {}
+  })
   // Email summary modal — send
   document.getElementById('summary-send')?.addEventListener('click', async () => {
     const email = document.getElementById('summary-email')?.value?.trim()
@@ -1948,11 +2160,16 @@ function confirmCustom() {
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
 loadPersistedState()
-// Première visite → wizard d'onboarding (#17)
+// Une config partagée (?c= base64 ou ?s= lien court) a priorité sur le localStorage (#13)
+const sharedLoaded = loadStateFromURL()
+const hasShortParam = new URLSearchParams(window.location.search).has('s')
+// Première visite → wizard d'onboarding (#17) — sauf si on arrive via un lien partagé
 try {
-  if (!localStorage.getItem(ONBOARDED_KEY)) {
+  if (!sharedLoaded && !hasShortParam && !localStorage.getItem(ONBOARDED_KEY)) {
     S.modal = { type: 'wizard', step: 1, vtype: S.vtype, usages: USAGE_IDS.slice(), solar: null, budget: null }
   }
 } catch (_) {}
 render()
+if (sharedLoaded) showToast(t('share.loaded'))
+if (hasShortParam) loadShortLink()  // chargement asynchrone depuis Supabase
 initAuth()
