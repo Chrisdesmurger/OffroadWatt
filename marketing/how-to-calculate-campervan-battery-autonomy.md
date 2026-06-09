@@ -12,10 +12,10 @@ deployed with the site).
 
 | Lang | Primary keyword | URL |
 |------|-----------------|-----|
-| 🇬🇧 EN | *calculate campervan battery autonomy* | https://www.offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy |
-| 🇫🇷 FR | *calculer autonomie batterie camping-car* | https://www.offroadwatt.com/blog/fr/calculer-autonomie-batterie-camping-car |
-| 🇪🇸 ES | *calcular autonomía batería autocaravana* | https://www.offroadwatt.com/blog/es/calcular-autonomia-bateria-autocaravana |
-| Hub | — | https://www.offroadwatt.com/blog |
+| 🇬🇧 EN | *calculate campervan battery autonomy* | https://offroadwatt.com/blog/how-to-calculate-campervan-battery-autonomy |
+| 🇫🇷 FR | *calculer autonomie batterie camping-car* | https://offroadwatt.com/blog/fr/calculer-autonomie-batterie-camping-car |
+| 🇪🇸 ES | *calcular autonomía batería autocaravana* | https://offroadwatt.com/blog/es/calcular-autonomia-bateria-autocaravana |
+| Hub | — | https://offroadwatt.com/blog |
 
 Each page links to the other two via `hreflang` + the in-nav language switcher. EN is `x-default`.
 
@@ -37,7 +37,7 @@ Run `node scripts/seo-audit.mjs` to re-verify. Every article passes:
 ### Post-deploy verification (do once Vercel has deployed `landing/`)
 1. Confirm each URL returns **200** (was 404 before this PR).
 2. **Google indexing is NOT instant** — a brand-new URL takes days to appear. To accelerate:
-   - Submit `https://www.offroadwatt.com/sitemap.xml` in **Google Search Console**.
+   - Submit `https://offroadwatt.com/sitemap.xml` in **Google Search Console**.
    - Use **URL Inspection → Request indexing** for each of the 3 URLs.
    - A few days later, `site:offroadwatt.com calculate campervan battery autonomy` confirms indexing.
 3. Validate rich results: https://search.google.com/test/rich-results (Article + FAQ should show).
