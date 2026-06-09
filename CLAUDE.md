@@ -438,3 +438,51 @@ npm run preview   # prévisualiser le build
 ### Long terme
 - [ ] **PWA** — installable mobile (vite-plugin-pwa)
 - [ ] **Monitoring BLE** — intégration Victron Connect
+
+---
+
+## 14. Routine blog SEO — règles du pipeline
+
+La routine de publication d'un article est déclenchée manuellement sur Claude Desktop. Elle suit ces étapes dans l'ordre :
+
+### Étape 1 — Rédaction de l'article (EN + traductions FR/ES)
+- Choisir le prochain sujet **non coché** dans `marketing/TOPICS.md`.
+- Créer 3 fichiers HTML dans `landing/blog/` (EN), `landing/blog/fr/` (FR), `landing/blog/es/` (ES).
+- Pattern exact : balises SEO, canonical, 4 hreflang (incl. x-default), OG/Twitter, JSON-LD Article + BreadcrumbList + FAQPage.
+- **⚠️ Pas d'image `<img class="hero-img">` dans le corps de l'article.** L'image hero est réservée à :
+  - `og:image` / `twitter:image` dans le `<head>`
+  - La card du hub `landing/blog/index.html`
+  - Le rapport print PDF
+  - Les assets sociaux (Instagram, Facebook)
+  - Elle ne doit **PAS** apparaître dans le `<article>` de la page vitrine.
+- Ajouter l'article au hub (`POSTS` dans `landing/blog/index.html`) et au `sitemap.xml`.
+- Cocher le sujet dans `marketing/TOPICS.md`.
+
+### Étape 2 — Audit SEO
+- Lancer `node scripts/seo-audit.mjs` et boucler « corriger → relancer » jusqu'à **ALL GREEN**.
+- L'audit est le seul gate SEO disponible ici (Google Search Console nécessite des URL en ligne).
+
+### Étape 3 — Génération des visuels Canva
+Toujours utiliser le brand kit OffroadWatt (`kAHL9oO58mY`, enregistré dans `marketing/BRAND.canva.json`).
+
+1. Générer **4 candidats** pour chaque asset (`hero`, `instagram_post`, `facebook_post`) via `generate-design`.
+2. **⚠️ Avant de choisir : envoyer les vignettes des candidats sur Slack** et demander à l'utilisateur lequel il préfère pour chaque format. Attendre sa réponse avant de continuer.
+   - Message Slack type : « 🎨 *[Nom article]* — Voici les 4 candidats hero. Lequel préfères-tu ? (1/2/3/4) » + liens des vignettes Canva.
+   - Répéter pour Instagram puis Facebook.
+3. Convertir le candidat choisi en design éditabl via `create-design-from-candidate`.
+4. Déplacer dans le dossier Canva de l'article (`create-folder` + `move-item-to-folder`).
+5. Exporter en PNG aux dimensions exactes (`hero` 1280×720, `instagram` 1080×1350, `facebook` 1080×1080).
+6. Télécharger et committer les PNG dans le repo (`landing/blog/assets/` et `marketing/social/`).
+
+### Étape 4 — Copy sociale (prêt à copier-coller)
+- Rédiger les textes Instagram + Facebook en EN/FR/ES avec les URLs finales et les hashtags.
+- Tout consigner dans `marketing/<slug-article>.md`.
+
+### Étape 5 — Google Drive (si connecteur actif)
+- Créer un dossier Drive « OffroadWatt — [Titre article] ».
+- Uploader les 3 PNG (hero, Instagram, Facebook) dans ce dossier.
+- Partager le lien Drive dans le récap marketing.
+
+### Étape 6 — Commit & PR
+- Committer tous les fichiers (HTML, PNG, sitemap, hub, TOPICS.md, récap marketing).
+- Pousser sur `claude/optimistic-gates-xfglfc` et ouvrir/mettre à jour la PR.
