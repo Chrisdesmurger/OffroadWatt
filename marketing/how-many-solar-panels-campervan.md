@@ -58,13 +58,16 @@ are linked below (permanent — re-export anytime).
 
 | Asset | File | Size | Canva edit link |
 |-------|------|------|-----------------|
-| Blog hero / og:image | `landing/blog/assets/solar-panels-hero.png` | 1280×720 | https://www.canva.com/d/OPyxyXgArq0pFRY |
+| Blog hero / og:image (EN) | `landing/blog/assets/solar-panels-hero.png` | 1280×720 | https://www.canva.com/d/OPyxyXgArq0pFRY |
+| Blog hero / og:image (FR) | `landing/blog/assets/solar-panels-hero-fr.png` | 1280×720 | https://www.canva.com/d/vTDeIj0gfkc-ZAd |
+| Blog hero / og:image (ES) | `landing/blog/assets/solar-panels-hero-es.png` | 1280×720 | https://www.canva.com/d/uJKumdxKtK_t92s |
 | Instagram | `marketing/social/instagram-solar-panels.png` | 1080×1350 | https://www.canva.com/d/sgB3L4TGEFmxzQX |
 | Facebook | `marketing/social/facebook-solar-panels.png` | 1080×1080 | https://www.canva.com/d/IUAQoq0SBsT8_xW |
 
-The blog hero is wired into all three articles (`hero-img`, `og:image`, `twitter:image`, JSON-LD `image`)
-and the blog hub card. All three visuals are on-brand (dark charcoal, van at dusk, correct headline) and
-show the real `app.offroadwatt.com` URL — no Canva placeholder URLs this time.
+Each language has its **own localized hero** (headline translated EN/FR/ES), wired into its article
+(`hero-img`, `og:image`, `twitter:image`, JSON-LD `image`) and into the matching blog hub card. All
+visuals are on-brand (dark charcoal, van at dusk, correct localized headline) and show the real
+`app.offroadwatt.com` URL — no Canva placeholder URLs.
 
 > ℹ️ **Optional polish:** the brand kit rendered the hero/IG accent panels in OffroadWatt green rather
 > than amber. If you want amber as the hero accent (per BRAND.md), open the edit links and recolor the
