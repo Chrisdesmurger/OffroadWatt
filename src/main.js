@@ -420,6 +420,26 @@ async function signOut() {
   set({ user: null, userConfigs: [] })
 }
 
+// ─── STRIPE PRO (#9) ───────────────────────────────────────────────────────────
+
+// Redirige l'utilisateur vers Stripe Checkout pour l'abonnement Pro (4,99€/mois).
+async function upgradeToPro() {
+  if (!S.user) { set({ modal: { type: 'auth' } }); return }
+  set({ upgradeLoading: true })
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: S.user.id, email: S.user.email, origin: window.location.origin }),
+    })
+    const data = await res.json()
+    if (!res.ok || !data.url) throw new Error(data.error || 'Checkout error')
+    window.location.href = data.url
+  } catch (err) {
+    set({ upgradeLoading: false, modal: { type: 'upgrade', error: err.message } })
+  }
+}
+
 async function saveCurrentConfig(name) {
   if (!S.user) { set({ modal: { type: 'auth' } }); return }
   set({ saveLoading: true })
@@ -486,7 +506,7 @@ let S = {
   solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
-  user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false,
+  user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false, upgradeLoading: false,
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
@@ -836,6 +856,14 @@ function buildHeader() {
     <span class="hdr-share-lbl">${t('share.headerBtn')}</span>
   </button>`
 
+  // Bouton « Passer Pro » — visible uniquement pour les utilisateurs free connectés.
+  const proEl = (S.user && S.user.plan === 'free')
+    ? `<button class="hdr-pro-btn" id="open-upgrade" title="${t('pro.cta')}">
+        <i class="ti ti-sparkles" style="font-size:14px"></i>
+        <span class="hdr-pro-lbl">${t('pro.cta')}</span>
+      </button>`
+    : ''
+
   const langEl = `<div class="lang-switch">
     ${LANGS.map(l => `<button class="lang-opt${getLang() === l.id ? ' on' : ''}" data-lang="${l.id}" title="${l.name}">${l.label}</button>`).join('')}
   </div>`
@@ -852,6 +880,7 @@ function buildHeader() {
           <i class="ti ${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
       ${shareEl}
+      ${proEl}
       ${langEl}
       ${authEl}
     </div>
@@ -1786,6 +1815,28 @@ function buildModal() {
     </div>`
   }
 
+  if (m.type === 'upgrade') {
+    const perks = ['pro.perk.configs', 'pro.perk.ai', 'pro.perk.support'].map(k =>
+      `<li><i class="ti ti-check" style="font-size:13px;color:var(--pu)"></i> ${t(k)}</li>`).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:380px">
+        <h3><i class="ti ti-sparkles"></i> ${t('pro.title')}</h3>
+        <div class="pro-price">4,99€<span>${t('pro.perMonth')}</span></div>
+        <p style="font-size:11px;color:var(--t2);margin:4px 0 12px">${t('pro.desc')}</p>
+        <ul class="pro-perks">${perks}</ul>
+        ${m.error ? `<p style="font-size:11px;color:var(--rd);margin-top:10px;text-align:center">${m.error}</p>` : ''}
+        <button id="upgrade-checkout" class="pro-checkout-btn" ${S.upgradeLoading ? 'disabled' : ''}>
+          ${S.upgradeLoading
+            ? `<i class="ti ti-loader-2" style="font-size:12px;animation:spin 1s linear infinite"></i> ${t('pro.redirecting')}`
+            : `<i class="ti ti-credit-card" style="font-size:12px"></i> ${t('pro.subscribe')}`}
+        </button>
+        <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:8px">${t('pro.securedByStripe')}</p>
+        <div class="mo-btns" style="margin-top:8px"><button id="close-modal" class="mo-cancel" style="flex:1">${t('btn.cancel')}</button></div>
+      </div>
+    </div>`
+  }
+
   if (m.type === 'email-summary') {
     if (m.sent) {
       return `
@@ -1854,8 +1905,9 @@ function buildModal() {
             <i class="ti ti-logout"></i> ${t('modal.configs.signout')}
           </button>
         </div>
-        ${isFree ? `<div style="font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">
-          Plan gratuit — 1 configuration sauvegardée
+        ${isFree ? `<div class="configs-upgrade">
+          <span><i class="ti ti-info-circle"></i> ${t('modal.configs.freeLimit')}</span>
+          <button class="configs-upgrade-btn" id="open-upgrade"><i class="ti ti-sparkles" style="font-size:11px"></i> ${t('pro.cta')}</button>
         </div>` : ''}
         ${S.userConfigs.length === 0
           ? `<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">
@@ -2129,6 +2181,10 @@ function bindEvents() {
   })
   document.getElementById('auth-signout')?.addEventListener('click', () => signOut())
 
+  // Stripe Pro (#9)
+  document.getElementById('open-upgrade')?.addEventListener('click', () => set({ modal: { type: 'upgrade' } }))
+  document.getElementById('upgrade-checkout')?.addEventListener('click', () => upgradeToPro())
+
   // Save config
   document.getElementById('save-config-btn')?.addEventListener('click', () => {
     if (!S.user) { set({ modal: { type: 'auth' } }); return }
@@ -2173,3 +2229,25 @@ render()
 if (sharedLoaded) showToast(t('share.loaded'))
 if (hasShortParam) loadShortLink()  // chargement asynchrone depuis Supabase
 initAuth()
+handleCheckoutReturn()  // retour de Stripe Checkout (#9)
+
+// Affiche un toast au retour de Stripe et nettoie l'URL. Le plan est mis à jour par le
+// webhook côté serveur ; on rafraîchit le profil quelques instants après le retour « success ».
+function handleCheckoutReturn() {
+  const params = new URLSearchParams(window.location.search)
+  const checkout = params.get('checkout')
+  if (!checkout) return
+  params.delete('checkout')
+  const qs = params.toString()
+  window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : ''))
+  if (checkout === 'success') {
+    showToast(t('pro.checkoutSuccess'))
+    // Laisse le temps au webhook de mettre à jour profiles.plan, puis recharge le profil.
+    ;[1500, 4000].forEach(ms => setTimeout(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) onSignIn(user)
+    }, ms))
+  } else if (checkout === 'cancel') {
+    showToast(t('pro.checkoutCancel'))
+  }
+}
