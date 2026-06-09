@@ -127,6 +127,8 @@ const DICT = {
     'market.raw': 'raw',
     'market.usable': 'usable',
     'market.autonomy': 'autonomy',
+    'market.buy': 'Buy',
+    'market.affiliateDisclosure': 'Affiliate links — OffroadWatt may earn a commission on qualifying purchases, at no extra cost to you.',
 
     // Save / export / capture
     'save.myConfig': 'Save my config',
@@ -458,6 +460,8 @@ const DICT = {
     'market.raw': 'bruto',
     'market.usable': 'utilizable',
     'market.autonomy': 'autonomía',
+    'market.buy': 'Comprar',
+    'market.affiliateDisclosure': 'Enlaces de afiliado — OffroadWatt puede recibir una comisión por compras válidas, sin coste adicional para ti.',
 
     'save.myConfig': 'Guardar mi config',
     'save.accountRequired': 'Guardar (requiere cuenta)',
@@ -774,6 +778,8 @@ const DICT = {
     'market.raw': 'brut',
     'market.usable': 'utilisable',
     'market.autonomy': 'autonomie',
+    'market.buy': 'Acheter',
+    'market.affiliateDisclosure': 'Liens affiliés — OffroadWatt peut percevoir une commission sur les achats éligibles, sans surcoût pour vous.',
 
     'save.myConfig': 'Sauvegarder ma config',
     'save.accountRequired': 'Sauvegarder (compte requis)',

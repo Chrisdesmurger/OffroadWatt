@@ -17,10 +17,10 @@ const BATS = [
   { ah: 60,  v: 12, label: '60 Ah 12V',  type: 'AGM', eur: 90   },
   { ah: 70,  v: 12, label: '70 Ah 12V',  type: 'AGM', eur: 110  },
   { ah: 80,  v: 12, label: '80 Ah 12V',  type: 'AGM', eur: 130  },
-  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM', eur: 160  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'AGM', eur: 160, buy_url: 'https://www.amazon.fr/s?k=batterie+AGM+100Ah+12V+camping-car' },
   { ah: 105, v: 12, label: '105 Ah 12V', type: 'AGM', eur: 175  },
   { ah: 110, v: 12, label: '110 Ah 12V', type: 'AGM', eur: 185  },
-  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM', eur: 210  },
+  { ah: 120, v: 12, label: '120 Ah 12V', type: 'AGM', eur: 210, buy_url: 'https://www.amazon.fr/s?k=batterie+AGM+120Ah+12V+camping-car' },
   { ah: 130, v: 12, label: '130 Ah 12V', type: 'AGM', eur: 240  },
   { ah: 140, v: 12, label: '140 Ah 12V', type: 'AGM', eur: 260  },
   { ah: 180, v: 12, label: '180 Ah 12V', type: 'AGM', eur: 340  },
@@ -34,10 +34,10 @@ const BATS = [
   { ah: 250, v: 12, label: '250 Ah 12V', type: 'GEL', eur: 480  },
   // Lithium 12V — batteries LiFePO4 du marché
   { ah: 50,  v: 12, label: '50 Ah 12V',  type: 'LI',  eur: 250  },
-  { ah: 100, v: 12, label: '100 Ah 12V', type: 'LI',  eur: 380  },
+  { ah: 100, v: 12, label: '100 Ah 12V', type: 'LI',  eur: 380, buy_url: 'https://www.amazon.fr/s?k=batterie+lithium+lifepo4+100Ah+12V' },
   { ah: 120, v: 12, label: '120 Ah 12V', type: 'LI',  eur: 450  },
   { ah: 150, v: 12, label: '150 Ah 12V', type: 'LI',  eur: 520  },
-  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI',  eur: 650  },
+  { ah: 200, v: 12, label: '200 Ah 12V', type: 'LI',  eur: 650, buy_url: 'https://www.amazon.fr/s?k=batterie+lithium+lifepo4+200Ah+12V' },
   { ah: 280, v: 12, label: '280 Ah 12V', type: 'LI',  eur: 850  },
   { ah: 300, v: 12, label: '300 Ah 12V', type: 'LI',  eur: 900  },
   { ah: 400, v: 12, label: '400 Ah 12V', type: 'LI',  eur: 1150 },
@@ -55,6 +55,24 @@ const BATS = [
 // Coûts indicatifs marché européen pour le calcul système
 const PANEL_EUR_PER_WC = 1.2  // panneau + fixation
 const ALT_EUR_PER_A    = 8    // chargeur DC-DC (B2B) selon ampérage
+
+// ─── AFFILIATION (#10) ──────────────────────────────────────────────────────
+// Tag Amazon Partenaires (Associates). Surchargeable via la variable d'env
+// VITE_AMAZON_TAG au build ; fallback sur le tag par défaut OffroadWatt.
+const AMAZON_TAG = (import.meta.env && import.meta.env.VITE_AMAZON_TAG) || 'offroadwatt-21'
+
+// Construit une URL d'achat affiliée Amazon FR pour une batterie.
+// Utilise `b.buy_url` si défini (produit ciblé), sinon une recherche générée
+// à partir du type et de la capacité. Le tag affilié est toujours ajouté.
+function batBuyUrl(b) {
+  let url = b.buy_url
+  if (!url) {
+    const term = ({ AGM: 'batterie AGM', GEL: 'batterie gel', LI: 'batterie lithium lifepo4' }[b.type] || 'batterie')
+      + ` ${b.ah}Ah ${b.v}V camping-car`
+    url = 'https://www.amazon.fr/s?k=' + encodeURIComponent(term)
+  }
+  return url + (url.includes('?') ? '&' : '?') + 'tag=' + encodeURIComponent(AMAZON_TAG)
+}
 
 // Types de batteries pour le filtre (ordre d'affichage)
 const BAT_TYPES = [
@@ -1150,13 +1168,17 @@ function buildEnergyTab() {
                 <div class="ri-c">${b.ah}Ah ${b.v}V${isCur ? `<span class="btag">${t('market.selected')}</span>` : ''}</div>
                 <div class="ri-s">${tbattype(b.type)} · ${t('market.raw')} ${b.ah} Ah · ${t('market.usable')} ${Math.round(b.ah * DOD[b.type])} Ah</div>
               </div>
-              <div>
+              <div class="ri-right">
                 <div class="ri-d">${isFinite(d) && d < 999 ? d.toFixed(1) + ' j' : '∞'}</div>
                 <div class="ri-n">${t('market.autonomy')}</div>
+                <a class="buy-btn" href="${batBuyUrl(b)}" target="_blank" rel="nofollow sponsored noopener" data-affiliate="bat-${b.ah}-${b.v}">
+                  <i class="ti ti-shopping-cart" style="font-size:11px"></i>${t('market.buy')}
+                </a>
               </div>
             </div>`
           }).join('')}
         </div>
+        <div class="affiliate-note"><i class="ti ti-info-circle" style="font-size:10px"></i>${t('market.affiliateDisclosure')}</div>
       </div>
 
       <button class="save-cfg-btn" id="save-config-btn">
