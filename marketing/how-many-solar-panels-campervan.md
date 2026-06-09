@@ -11,10 +11,10 @@ Generated, audited, translated into 3 languages and prepared for social media by
 
 | Lang | Primary keyword | URL |
 |------|-----------------|-----|
-| 🇬🇧 EN | *how many solar panels campervan* | https://www.offroadwatt.com/blog/how-many-solar-panels-campervan |
-| 🇫🇷 FR | *combien de panneaux solaires camping-car* | https://www.offroadwatt.com/blog/fr/combien-panneaux-solaires-camping-car |
-| 🇪🇸 ES | *cuántos paneles solares autocaravana* | https://www.offroadwatt.com/blog/es/cuantos-paneles-solares-autocaravana |
-| Hub | — | https://www.offroadwatt.com/blog |
+| 🇬🇧 EN | *how many solar panels campervan* | https://offroadwatt.com/blog/how-many-solar-panels-campervan |
+| 🇫🇷 FR | *combien de panneaux solaires camping-car* | https://offroadwatt.com/blog/fr/combien-panneaux-solaires-camping-car |
+| 🇪🇸 ES | *cuántos paneles solares autocaravana* | https://offroadwatt.com/blog/es/cuantos-paneles-solares-autocaravana |
+| Hub | — | https://offroadwatt.com/blog |
 
 Each page links to the other two via `hreflang` + the in-nav language switcher. EN is `x-default`.
 The article internally cross-links to the first guide (*calculate battery autonomy*) for topical authority.
@@ -43,7 +43,7 @@ article answers the exact question, embeds the real formula and funnels to the f
 ### Post-deploy verification (do once Vercel has deployed `landing/`)
 1. Confirm each of the 3 URLs returns **200** (they 404 until this PR is merged + deployed).
 2. **Google indexing is NOT instant** — a brand-new URL takes days to appear. To accelerate:
-   - Submit `https://www.offroadwatt.com/sitemap.xml` in **Google Search Console**.
+   - Submit `https://offroadwatt.com/sitemap.xml` in **Google Search Console**.
    - Use **URL Inspection → Request indexing** for each of the 3 URLs.
    - A few days later, `site:offroadwatt.com how many solar panels campervan` confirms indexing.
 3. Validate rich results: https://search.google.com/test/rich-results (Article + FAQ should show).
@@ -88,11 +88,11 @@ visuals are on-brand (dark charcoal, van at dusk, correct localized headline) an
 `#vanlife #autocaravana #furgoneta #placasolar #campervan #autonomia #lifepo4 #furgoneташ`
 
 ### Facebook (link post → blog article)
-**EN:** How many solar panels does your campervan really need? ☀️ Most people guess "200W" — and it's wrong as often as it's right. This guide gives you the real wattage formula (consumption → peak-sun-hours → panels), a sizing table by use case, the battery-to-solar ratio, and a free calculator that does it for you. 👉 https://www.offroadwatt.com/blog/how-many-solar-panels-campervan
+**EN:** How many solar panels does your campervan really need? ☀️ Most people guess "200W" — and it's wrong as often as it's right. This guide gives you the real wattage formula (consumption → peak-sun-hours → panels), a sizing table by use case, the battery-to-solar ratio, and a free calculator that does it for you. 👉 https://offroadwatt.com/blog/how-many-solar-panels-campervan
 
-**FR:** Combien de panneaux solaires pour ton camping-car ? ☀️ La plupart des gens disent « 200 W » — et se trompent une fois sur deux. Ce guide donne la vraie formule (conso → heures de plein soleil → panneaux), un tableau par usage, le ratio batterie/solaire et un calculateur gratuit. 👉 https://www.offroadwatt.com/blog/fr/combien-panneaux-solaires-camping-car
+**FR:** Combien de panneaux solaires pour ton camping-car ? ☀️ La plupart des gens disent « 200 W » — et se trompent une fois sur deux. Ce guide donne la vraie formule (conso → heures de plein soleil → panneaux), un tableau par usage, le ratio batterie/solaire et un calculateur gratuit. 👉 https://offroadwatt.com/blog/fr/combien-panneaux-solaires-camping-car
 
-**ES:** ¿Cuántos paneles solares necesita tu autocaravana? ☀️ La mayoría dice «200 W» — y se equivoca la mitad de las veces. Esta guía te da la fórmula real (consumo → horas de sol pico → paneles), una tabla por uso, el ratio batería/solar y una calculadora gratis. 👉 https://www.offroadwatt.com/blog/es/cuantos-paneles-solares-autocaravana
+**ES:** ¿Cuántos paneles solares necesita tu autocaravana? ☀️ La mayoría dice «200 W» — y se equivoca la mitad de las veces. Esta guía te da la fórmula real (consumo → horas de sol pico → paneles), una tabla por uso, el ratio batería/solar y una calculadora gratis. 👉 https://offroadwatt.com/blog/es/cuantos-paneles-solares-autocaravana
 
 ---
 

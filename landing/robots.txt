@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.offroadwatt.com/sitemap.xml
+Sitemap: https://offroadwatt.com/sitemap.xml
