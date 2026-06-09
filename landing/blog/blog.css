@@ -107,7 +107,7 @@ footer a:hover{color:var(--amber)}
 .posts{max-width:980px;margin:0 auto;padding:40px 24px 90px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
 .post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;text-decoration:none;color:var(--t1);display:flex;flex-direction:column;transition:all .3s}
 .post-card:hover{border-color:var(--amber);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
-.post-card img{width:100%;aspect-ratio:16/9;object-fit:cover;border-bottom:1px solid var(--border)}
+.post-card img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-bottom:1px solid var(--border)}
 .post-body{padding:22px}
 .post-tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--teal);margin-bottom:10px;display:block}
 .post-card h2{font-size:19px;font-weight:600;line-height:1.3;margin-bottom:10px}
