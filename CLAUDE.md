@@ -364,6 +364,18 @@ Un `<div class="print-report">` caché contient le rapport complet :
 
 **Variables d'environnement requises :**
 - `ANTHROPIC_KEY` — clé Anthropic server-side
+- `RESEND_API_KEY` — envoi des emails de récapitulatif
+- `STRIPE_SECRET_KEY` — clé secrète Stripe (Pro, issue #9)
+- `STRIPE_PRICE_ID` — id du prix récurrent du produit « OffroadWatt Pro » (4,99€/mois)
+- `STRIPE_WEBHOOK_SECRET` — secret de signature de l'endpoint webhook Stripe
+- `SUPABASE_URL` — URL du projet Supabase (utilisé par le webhook Stripe)
+- `SUPABASE_SERVICE_ROLE_KEY` — clé service_role (server-side, le webhook met à jour `profiles.plan`)
+
+### Stripe Pro (`api/create-checkout.js` + `api/stripe-webhook.js`)
+- `create-checkout` : crée une session Stripe Checkout (mode subscription) et renvoie `url`. Le front (`upgradeToPro()`) redirige l'utilisateur.
+- `stripe-webhook` : vérifie la signature (Web Crypto HMAC-SHA256) puis met à jour `profiles.plan` (`pro`/`free`) via la clé service_role. Mappe l'abonnement à l'utilisateur via `client_reference_id` (id Supabase) et la colonne `profiles.stripe_customer_id`.
+- Migration SQL : `supabase/stripe.sql` (ajoute `stripe_customer_id`). À exécuter dans le SQL Editor Supabase.
+- Setup manuel : créer le produit/prix Stripe, renseigner les env vars Vercel, et déclarer l'endpoint webhook `https://app.offroadwatt.com/api/stripe-webhook` (events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`).
 
 ---
 
@@ -400,6 +412,7 @@ npm run preview   # prévisualiser le build
 - [x] **Rate limit IA** — 5 recherches/jour pour free (localStorage), illimité pour Pro
 - [x] **Persistance localStorage** — state complet survit au refresh (`ow_state_v1`)
 - [x] **Build Vite** — déployable sur Vercel
+- [x] **Stripe Pro** — bouton « Passer Pro », modal, Checkout + webhook, MAJ `profiles.plan` (issue #9, setup Stripe manuel restant)
 
 ---
 
