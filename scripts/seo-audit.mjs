@@ -70,10 +70,12 @@ function audit(file) {
   check(/"BreadcrumbList"/.test(types), 'BreadcrumbList JSON-LD present', 'missing BreadcrumbList JSON-LD');
   check(/"FAQPage"/.test(types), 'FAQPage JSON-LD present', 'missing FAQPage JSON-LD');
 
-  // Every <img> needs a non-empty alt.
+  // Every in-body <img> needs a non-empty alt. The hero now lives only on the
+  // blog hub + as og:image (enforced by the Open Graph check above), so an
+  // article body with zero <img> is valid as long as nothing lacks alt text.
   const imgs = html.match(/<img\b[^>]*>/gi) || [];
   const noAlt = imgs.filter(t => !/\balt=["'][^"']+["']/.test(t)).length;
-  check(imgs.length > 0 && noAlt === 0, `all images have alt text (${imgs.length})`, `${noAlt} image(s) missing alt text`);
+  check(noAlt === 0, `images have alt text (${imgs.length} in-body)`, `${noAlt} image(s) missing alt text`);
 
   // Internal link to the app (conversion path).
   check(/app\.offroadwatt\.com|offroad-watt\.vercel\.app/.test(html), 'internal link to the app present', 'no internal link to the app (conversion path)');
