@@ -1,0 +1,8 @@
+{
+  "brand_kit_id": "kAHL9oO58mY",
+  "brand_kit_name": "OffroadWatt",
+  "brand_templates": [
+    { "id": "EAHL9nh2AZU", "title": "Affiche Dark Tech OffroadWatt" }
+  ],
+  "note": "Single source of truth for the Canva brand kit id used by the seo-article pipeline. Always pass brand_kit_id to generate-design so visuals stay on-brand (palette/fonts/wordmark per marketing/BRAND.md)."
+}
