@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Wire a DC-DC (B2B) Alternator Charger in a Van</title>
+<meta name="description" content="Step-by-step guide to wiring a DC-DC battery-to-battery charger in a campervan. Covers sizing, cable gauge, fusing, wiring diagram and common mistakes to avoid.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="OffroadWatt">
+<meta name="keywords" content="DC-DC charger van, B2B charger wiring, alternator charger campervan, battery to battery charger, DC-DC charger installation, van electrical system, Victron Orion, Renogy DCC">
+<link rel="canonical" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van">
+
+<link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van">
+<link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van">
+<link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/como-instalar-cargador-alternador-dc-dc-b2b-furgoneta">
+<link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to Wire a DC-DC (B2B) Alternator Charger in a Van">
+<meta property="og:description" content="Step-by-step wiring guide for a DC-DC alternator charger in a campervan — sizing, cable gauge, fusing and common mistakes.">
+<meta property="og:url" content="https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van">
+<meta property="og:image" content="https://offroadwatt.com/blog/assets/dc-dc-b2b-charger-hero.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-06-10">
+<meta property="article:modified_time" content="2026-06-10">
+<meta property="article:section" content="Guides">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to Wire a DC-DC (B2B) Alternator Charger in a Van">
+<meta name="twitter:description" content="Step-by-step DC-DC charger wiring guide for campervans — sizing, fusing and mistakes to avoid.">
+<meta name="twitter:image" content="https://offroadwatt.com/blog/assets/dc-dc-b2b-charger-hero.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to Wire a DC-DC (B2B) Alternator Charger in a Van",
+  "description": "Step-by-step guide to wiring a DC-DC battery-to-battery charger in a campervan. Covers sizing, cable gauge, fusing, wiring diagram and common mistakes to avoid.",
+  "image": "https://offroadwatt.com/blog/assets/dc-dc-b2b-charger-hero.png",
+  "author": { "@type": "Organization", "name": "OffroadWatt", "url": "https://offroadwatt.com" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "logo": { "@type": "ImageObject", "url": "https://offroadwatt.com/og-image.png" }
+  },
+  "datePublished": "2026-06-10",
+  "dateModified": "2026-06-10",
+  "inLanguage": "en",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://offroadwatt.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://offroadwatt.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "How to wire a DC-DC B2B charger", "item": "https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What size DC-DC charger do I need for my campervan?", "acceptedAnswer": { "@type": "Answer", "text": "For most campervans with a 100 to 200 Ah lithium battery, a 20 to 30A DC-DC charger is ideal. It charges the leisure battery in 4 to 6 hours of driving without overloading the alternator. If your alternator is under 90A, stay at 20A. Larger battery banks (300 Ah or more) benefit from a 40 to 50A unit." } },
+    { "@type": "Question", "name": "Can I charge a lithium battery directly from the alternator without a DC-DC charger?", "acceptedAnswer": { "@type": "Answer", "text": "Not safely in most cases. Modern smart alternators vary their output voltage to save fuel, which gives an inconsistent charge that can damage lithium cells or trigger BMS shutdowns. A DC-DC charger regulates the voltage to exactly what the battery needs and protects both the alternator and the battery." } },
+    { "@type": "Question", "name": "What cable gauge do I need between the alternator and the DC-DC charger?", "acceptedAnswer": { "@type": "Answer", "text": "For a 20A charger with a cable run under 3 metres, 6 mm squared cable is sufficient. For 30A or longer runs up to 5 metres, use 10 mm squared. For 40 to 50A units, go to 16 mm squared. Always match the fuse rating to the cable capacity, not the charger rating." } },
+    { "@type": "Question", "name": "Where should I mount the DC-DC charger in the van?", "acceptedAnswer": { "@type": "Answer", "text": "Mount it in a ventilated area away from heat sources. DC-DC chargers generate heat under load and most derate their output above 40 degrees Celsius. Under a seat, in a garage area, or on a bulkhead near the battery are common spots. Keep it accessible for maintenance and away from water ingress." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Features</a>
+    <div class="lang-sel">
+      <a href="/blog/how-to-wire-dc-dc-b2b-alternator-charger-van" class="lang-btn on">EN</a>
+      <a href="/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van" class="lang-btn">FR</a>
+      <a href="/blog/es/como-instalar-cargador-alternador-dc-dc-b2b-furgoneta" class="lang-btn">ES</a>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Try free</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>DC-DC B2B alternator charger</span>
+  </nav>
+
+  <article>
+    <span class="eyebrow"><i class="ti ti-plug-connected"></i> Alternator charging guide</span>
+    <h1>How to Wire a DC-DC (B2B) Alternator Charger in a Van</h1>
+    <div class="article-meta">
+      <span>By OffroadWatt</span><span class="dot"></span>
+      <time datetime="2026-06-10">June 10, 2026</time><span class="dot"></span>
+      <span>12 min read</span>
+    </div>
+
+    <p class="lede">Solar panels are great when the sun is out, but driving is the fastest way to fill a leisure battery. A DC-DC (battery-to-battery) charger takes raw alternator output and converts it into a clean, multi-stage charge tailored to your battery chemistry. Wiring one correctly is straightforward if you get three things right: sizing, cable gauge and fusing. This guide walks you through every step — from choosing the right unit to the final connection — so you can charge while you drive with confidence.</p>
+
+    <div class="toc">
+      <div class="toc-title">In this guide</div>
+      <ol>
+        <li><a href="#why">Why you need a DC-DC charger</a></li>
+        <li><a href="#how">How a DC-DC charger works</a></li>
+        <li><a href="#sizing">Sizing: which amperage to choose</a></li>
+        <li><a href="#parts">Parts and tools you need</a></li>
+        <li><a href="#wiring">Step-by-step wiring</a></li>
+        <li><a href="#cable">Cable gauge and fuse sizing table</a></li>
+        <li><a href="#mistakes">Common mistakes to avoid</a></li>
+        <li><a href="#models">Popular DC-DC chargers compared</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="why">1. Why you need a DC-DC charger</h2>
+    <p>Fifteen years ago, a simple split-charge relay was enough: the alternator pushed 14.4V into both batteries and everything worked. Modern vehicles have changed the game in two ways:</p>
+    <ul>
+      <li><strong>Smart alternators</strong> — Euro 6 engines use variable-voltage alternators that drop to 12.8V or lower when the starter battery is full, saving fuel. That voltage is far too low to charge a leisure battery, especially lithium.</li>
+      <li><strong>Lithium batteries</strong> — LiFePO4 cells need a precise charge profile (14.2 to 14.6V absorption, then constant voltage) that a raw alternator cannot provide. Overcharging or undercharging damages the cells and can trigger a BMS shutdown.</li>
+    </ul>
+    <p>A DC-DC charger solves both problems. It boosts low alternator voltage to the correct level and delivers a proper multi-stage charge — bulk, absorption, float — regardless of what the alternator is doing. Think of it as a translator between your engine and your leisure battery.</p>
+
+    <h2 id="how">2. How a DC-DC charger works</h2>
+    <p>A DC-DC charger is a voltage converter with a built-in charge controller. It sits between the starter battery (input) and the leisure battery (output), and it does three things:</p>
+    <ul>
+      <li><strong>Boosts or bucks voltage</strong> — if the alternator output is 12.8V, the charger boosts it to 14.4V. If it spikes to 15V, it bucks it down. The output is always the voltage your battery chemistry demands.</li>
+      <li><strong>Limits current</strong> — a 30A charger draws no more than 30A, protecting both the alternator and the cabling from overload.</li>
+      <li><strong>Runs a charge profile</strong> — bulk (max current until target voltage), absorption (hold voltage, taper current), float (maintenance). Exactly like a quality mains charger, but powered by the engine.</li>
+    </ul>
+    <p>Most modern units also have a solar MPPT input, letting you combine alternator and solar charging in one box — useful for simplifying the system and saving space.</p>
+
+    <h2 id="sizing">3. Sizing: which amperage to choose</h2>
+    <p>The right size depends on three factors: your battery capacity, your typical driving time, and your alternator's spare capacity.</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Battery bank</th><th>Typical daily deficit</th><th>Recommended DC-DC size</th><th>Time to recover (driving)</th></tr></thead>
+        <tbody>
+          <tr><td>100 Ah LiFePO4</td><td>40 to 60 Ah</td><td><strong>20A</strong></td><td>2 to 3 hours</td></tr>
+          <tr><td>200 Ah LiFePO4</td><td>80 to 120 Ah</td><td><strong>30A</strong></td><td>3 to 4 hours</td></tr>
+          <tr><td>300+ Ah LiFePO4</td><td>120 to 200 Ah</td><td><strong>40 to 50A</strong></td><td>3 to 5 hours</td></tr>
+          <tr><td>100 Ah AGM</td><td>25 to 40 Ah</td><td><strong>20A</strong></td><td>1.5 to 2 hours</td></tr>
+          <tr><td>200 Ah AGM</td><td>50 to 80 Ah</td><td><strong>20 to 30A</strong></td><td>2 to 4 hours</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><i class="ti ti-bulb"></i> <strong>Rule of thumb:</strong> a DC-DC charger rated at 10 to 15% of your battery capacity in amps is a safe sweet spot. A 200 Ah bank pairs well with a 20 to 30A charger.</div>
+    <p><strong>Watch your alternator.</strong> Most passenger vehicle alternators are rated 90 to 150A, but they also power the engine ECU, headlights, AC, and the starter battery. A 30A DC-DC charger draws roughly 35 to 40A from the alternator side (due to conversion losses). If your alternator is small (under 90A), stay at 20A to avoid overloading it, especially in hot weather when the alternator already derates.</p>
+
+    <h2 id="parts">4. Parts and tools you need</h2>
+    <p>Before you start, gather everything so the install goes smoothly:</p>
+    <ul>
+      <li><strong>DC-DC charger</strong> — Victron Orion-Tr Smart, Renogy DCC series, Sterling B2B, or Redarc BCDC are the most popular. Choose one with a battery profile matching your chemistry (AGM, GEL, LiFePO4).</li>
+      <li><strong>Positive cable</strong> — red, sized for the charger amperage and cable run length (see the table below). Use flexible multi-strand tinned copper for vibration resistance.</li>
+      <li><strong>Negative cable</strong> — black, same gauge as the positive. Many installs share a chassis ground, but a dedicated return cable is safer and required by some charger manufacturers.</li>
+      <li><strong>Fuses</strong> — one on the starter battery side (as close to the battery as possible), one on the leisure battery side. Use ANL or MIDI fuses for 30A and above.</li>
+      <li><strong>Fuse holders</strong> — inline ANL/MIDI holders rated for the fuse size. Bolt-down style is more reliable than blade holders for high current.</li>
+      <li><strong>Battery terminal lugs</strong> — crimped (not soldered) ring terminals sized for the cable and battery post.</li>
+      <li><strong>Ignition sense wire</strong> — thin 1 mm squared wire from a switched 12V source (fuse box ACC/IGN circuit) to the charger's D+ or ignition input. This tells the charger the engine is running.</li>
+      <li><strong>Cable grommet</strong> — rubber grommet where the cable passes through the bulkhead between engine bay and cabin, to prevent chafing.</li>
+      <li><strong>Tools</strong> — hydraulic or ratchet crimp tool, wire stripper, heat shrink, multimeter, drill, cable ties, split loom for protection.</li>
+    </ul>
+
+    <h2 id="wiring">5. Step-by-step wiring</h2>
+    <p>The wiring follows one simple path: <strong>starter battery &rarr; fuse &rarr; DC-DC charger input &rarr; DC-DC charger output &rarr; fuse &rarr; leisure battery</strong>. Here is the detailed sequence:</p>
+
+    <h3>Step 1: Disconnect both batteries</h3>
+    <p>Remove the negative terminal from the starter battery and the leisure battery. This is non-negotiable — you are about to work with high-current cables that can weld a wrench to a terminal if shorted.</p>
+
+    <h3>Step 2: Mount the DC-DC charger</h3>
+    <p>Choose a ventilated location — under a seat, on a bulkhead, or in the garage area. The charger generates heat under load (a 30A unit dissipates roughly 30 to 50W of heat). Leave at least 50 mm clearance on all sides for airflow. Mount it vertically if the manufacturer recommends it for convection cooling.</p>
+
+    <h3>Step 3: Run the positive cable from the starter battery</h3>
+    <p>Route a positive cable from the starter battery positive terminal through the bulkhead to the charger's input positive terminal. Install a fuse within 300 mm of the starter battery — this protects the entire cable run in case of a short. Use a rubber grommet and split loom where the cable passes through metal panels.</p>
+
+    <h3>Step 4: Connect the negative (input side)</h3>
+    <p>Run a negative cable from the charger's input negative terminal to the starter battery negative terminal, or to a solid chassis ground point that connects directly to the starter battery negative. A dedicated cable back to the battery is the cleanest approach and avoids ground loops.</p>
+
+    <h3>Step 5: Connect the output to the leisure battery</h3>
+    <p>Run a positive cable from the charger's output positive terminal to the leisure battery positive terminal. Install a fuse within 300 mm of the leisure battery. Connect the charger's output negative terminal to the leisure battery negative terminal (or its bus bar).</p>
+
+    <h3>Step 6: Wire the ignition sense</h3>
+    <p>Connect a thin wire (1 mm squared) from a 12V source that is only live when the ignition is on (ACC or IGN circuit in the fuse box) to the charger's D+ or ignition input. This prevents the charger from draining the starter battery when the engine is off. Some chargers detect voltage rise automatically and do not need this wire — check your manual.</p>
+
+    <h3>Step 7: Set the battery profile</h3>
+    <p>Before reconnecting, set the charger's DIP switches or app settings to your battery chemistry: AGM, GEL, or LiFePO4. Getting this wrong means the wrong charge voltage — which damages the battery over time.</p>
+
+    <h3>Step 8: Reconnect and test</h3>
+    <p>Reconnect the negative terminals on both batteries. Start the engine. The charger should detect alternator voltage and begin charging within a few seconds. Check with a multimeter that the output voltage matches the expected charge profile (14.2 to 14.6V for lithium, 14.4 to 14.8V for AGM).</p>
+
+    <div class="callout"><i class="ti ti-alert-triangle"></i> <strong>Safety:</strong> never work on high-current DC wiring with the batteries connected. A short circuit on a 200 Ah battery can deliver thousands of amps instantly — enough to cause burns, fire or an explosion. Always disconnect, always fuse.</div>
+
+    <h2 id="cable">6. Cable gauge and fuse sizing table</h2>
+    <p>Undersized cable is the number one cause of poor charging performance and heat buildup. Use this table to select the right gauge based on charger rating and cable run length (one-way distance from battery to charger).</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Charger rating</th><th>Cable run under 3 m</th><th>Cable run 3 to 5 m</th><th>Cable run 5 to 7 m</th><th>Fuse size</th></tr></thead>
+        <tbody>
+          <tr><td><strong>20A</strong></td><td>6 mm&sup2;</td><td>10 mm&sup2;</td><td>16 mm&sup2;</td><td>30A</td></tr>
+          <tr><td><strong>30A</strong></td><td>10 mm&sup2;</td><td>16 mm&sup2;</td><td>25 mm&sup2;</td><td>40A</td></tr>
+          <tr><td><strong>40A</strong></td><td>16 mm&sup2;</td><td>25 mm&sup2;</td><td>35 mm&sup2;</td><td>50A</td></tr>
+          <tr><td><strong>50A</strong></td><td>25 mm&sup2;</td><td>35 mm&sup2;</td><td>50 mm&sup2;</td><td>60A</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Fuse sizing rule:</strong> the fuse protects the cable, not the charger. Size it to the cable's continuous current rating, which should be above the charger's maximum draw. A 30A charger on 10 mm&sup2; cable gets a 40A fuse — enough headroom to avoid nuisance trips, but low enough to protect the cable before it overheats.</p>
+
+    <h2 id="mistakes">7. Common mistakes to avoid</h2>
+    <ul>
+      <li><strong>No fuse at the starter battery.</strong> The cable run from engine bay to cabin is the most vulnerable to chafing and shorts. Without a fuse within 300 mm of the starter battery, a short anywhere on that cable draws unlimited current from the starter battery — fire risk.</li>
+      <li><strong>Undersized cable.</strong> A 4 mm&sup2; cable on a 30A charger over a 4-metre run drops so much voltage that the charger cannot boost properly. The result: slow charging and hot cables. Always use the table above.</li>
+      <li><strong>Wrong battery profile.</strong> Setting AGM mode when you have lithium means the charger tops out at 14.8V and floats high — stressing lithium cells. Setting lithium mode on AGM undercharges. Double-check your DIP switches or app settings.</li>
+      <li><strong>No ignition sense wire.</strong> Without it, the charger may run 24/7 and slowly drain the starter battery overnight. Even chargers with auto-detect can sometimes misjudge — wiring the D+ input is cheap insurance.</li>
+      <li><strong>Poor grounding.</strong> A high-resistance ground connection (corroded chassis bolt, thin wire) causes voltage drop on the return path, reducing effective charge current and potentially confusing the charger's voltage sensing. Use a proper cable and clean the contact point to bare metal.</li>
+      <li><strong>Mounting in a sealed box.</strong> DC-DC chargers derate (reduce output) above 40 degrees Celsius. Putting one in an unventilated enclosure means it throttles back on hot days — exactly when you need it most.</li>
+    </ul>
+
+    <h2 id="models">8. Popular DC-DC chargers compared</h2>
+    <p>Here are the most-installed units in the van life community, with key specs to help you shortlist.</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Model</th><th>Rating</th><th>Profiles</th><th>Solar input</th><th>Street price</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Victron Orion-Tr Smart 12/12-30</strong></td><td>30A</td><td>AGM, GEL, LiFePO4, custom</td><td>No (separate MPPT)</td><td>180 to 220 EUR</td></tr>
+          <tr><td><strong>Renogy DCC50S</strong></td><td>50A</td><td>AGM, GEL, LiFePO4</td><td>Yes (25A MPPT built-in)</td><td>200 to 260 EUR</td></tr>
+          <tr><td><strong>Sterling BB1260</strong></td><td>60A</td><td>AGM, GEL, LiFePO4</td><td>No</td><td>280 to 350 EUR</td></tr>
+          <tr><td><strong>Redarc BCDC1225D</strong></td><td>25A</td><td>AGM, GEL, LiFePO4, Calcium</td><td>Yes (solar input)</td><td>350 to 420 EUR</td></tr>
+          <tr><td><strong>Votronic VCC 1212-30</strong></td><td>30A</td><td>AGM, GEL, LiFePO4</td><td>No</td><td>250 to 300 EUR</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>If you already have a separate solar MPPT controller, a dedicated DC-DC like the Victron Orion or Votronic VCC is the cleanest setup. If you want to combine both functions in one unit, the Renogy DCC50S or Redarc BCDC are solid all-in-one choices.</p>
+    <div class="callout"><i class="ti ti-calculator"></i> <strong>See the real impact on your autonomy.</strong> <a href="https://app.offroadwatt.com">OffroadWatt lets you set your alternator amperage and daily driving hours</a>, then shows exactly how many Ah your DC-DC charger adds per day — alongside solar and battery capacity. Try it free.</div>
+
+    <div class="cta-box">
+      <h3>Calculate your alternator charging contribution</h3>
+      <p>Enter your DC-DC charger amperage and daily driving time — OffroadWatt shows how it combines with solar to cover your daily consumption.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Open the free calculator</a>
+    </div>
+
+    <section class="faq">
+      <h2 id="faq">Frequently asked questions</h2>
+      <div class="faq-item"><h3>What size DC-DC charger do I need for my campervan?</h3><p>For most campervans with a 100 to 200 Ah lithium battery, a 20 to 30A DC-DC charger is ideal. It charges the leisure battery in 4 to 6 hours of driving without overloading the alternator. If your alternator is under 90A, stay at 20A. Larger battery banks (300 Ah or more) benefit from a 40 to 50A unit.</p></div>
+      <div class="faq-item"><h3>Can I charge a lithium battery directly from the alternator?</h3><p>Not safely in most cases. Modern smart alternators vary their output voltage to save fuel, which gives an inconsistent charge that can damage lithium cells or trigger BMS shutdowns. A DC-DC charger regulates the voltage to exactly what the battery needs and protects both the alternator and the battery.</p></div>
+      <div class="faq-item"><h3>What cable gauge do I need between the alternator and the DC-DC charger?</h3><p>For a 20A charger with a cable run under 3 metres, 6 mm squared cable is sufficient. For 30A or longer runs up to 5 metres, use 10 mm squared. For 40 to 50A units, go to 16 mm squared or above. Always match the fuse rating to the cable capacity, not the charger rating.</p></div>
+      <div class="faq-item"><h3>Where should I mount the DC-DC charger in the van?</h3><p>Mount it in a ventilated area away from heat sources. DC-DC chargers generate heat under load and most derate their output above 40 degrees Celsius. Under a seat, in a garage area, or on a bulkhead near the battery are common spots. Keep it accessible for maintenance and away from water ingress.</p></div>
+    </section>
+
+    <div class="share">
+      <span>Share</span>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="https://twitter.com/intent/tweet?url=https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van&text=How%20to%20wire%20a%20DC-DC%20alternator%20charger%20in%20a%20van" target="_blank" rel="noopener" aria-label="Share on X"><i class="ti ti-brand-x"></i></a>
+      <a href="https://api.whatsapp.com/send?text=How%20to%20wire%20a%20DC-DC%20alternator%20charger%20in%20a%20van%20https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Home</a> · <a href="/blog">Blog</a> · <a href="https://app.offroadwatt.com" target="_blank">Open the app</a></p>
+  <p style="margin-top:10px">© 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.</p>
+</footer>
+
+</body>
+</html>

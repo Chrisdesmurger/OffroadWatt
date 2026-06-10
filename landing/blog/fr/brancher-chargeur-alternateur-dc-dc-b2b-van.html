@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brancher un chargeur DC-DC (B2B) alternateur dans un van</title>
+<meta name="description" content="Guide pas a pas pour brancher un chargeur DC-DC batterie a batterie dans un van ou camping-car. Dimensionnement, section de cable, fusibles et erreurs a eviter.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="OffroadWatt">
+<meta name="keywords" content="chargeur DC-DC van, booster B2B camping-car, chargeur alternateur fourgon, batterie a batterie, installation DC-DC, Victron Orion, Renogy DCC, schema branchement">
+<link rel="canonical" href="https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van">
+
+<link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van">
+<link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van">
+<link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/como-instalar-cargador-alternador-dc-dc-b2b-furgoneta">
+<link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-b2b-alternator-charger-van">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Brancher un chargeur DC-DC (B2B) alternateur dans un van">
+<meta property="og:description" content="Guide complet de branchement d'un chargeur DC-DC dans un van — dimensionnement, section de cable, fusibles et erreurs courantes.">
+<meta property="og:url" content="https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van">
+<meta property="og:image" content="https://offroadwatt.com/blog/assets/dc-dc-b2b-charger-hero-fr.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:locale" content="fr_FR">
+<meta property="article:published_time" content="2026-06-10">
+<meta property="article:modified_time" content="2026-06-10">
+<meta property="article:section" content="Guides">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brancher un chargeur DC-DC (B2B) alternateur dans un van">
+<meta name="twitter:description" content="Guide de branchement DC-DC pour van — dimensionnement, fusibles et erreurs a eviter.">
+<meta name="twitter:image" content="https://offroadwatt.com/blog/assets/dc-dc-b2b-charger-hero-fr.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Brancher un chargeur DC-DC (B2B) alternateur dans un van",
+  "description": "Guide pas a pas pour brancher un chargeur DC-DC batterie a batterie dans un van ou camping-car. Dimensionnement, section de cable, fusibles et erreurs a eviter.",
+  "image": "https://offroadwatt.com/blog/assets/dc-dc-b2b-charger-hero-fr.png",
+  "author": { "@type": "Organization", "name": "OffroadWatt", "url": "https://offroadwatt.com" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "logo": { "@type": "ImageObject", "url": "https://offroadwatt.com/og-image.png" }
+  },
+  "datePublished": "2026-06-10",
+  "dateModified": "2026-06-10",
+  "inLanguage": "fr",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://offroadwatt.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://offroadwatt.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Chargeur DC-DC B2B alternateur", "item": "https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Quelle puissance de chargeur DC-DC pour mon van ?", "acceptedAnswer": { "@type": "Answer", "text": "Pour la plupart des vans avec une batterie lithium de 100 a 200 Ah, un chargeur DC-DC de 20 a 30A est ideal. Il recharge la batterie auxiliaire en 4 a 6 heures de conduite sans surcharger l'alternateur. Si votre alternateur fait moins de 90A, restez a 20A. Les bancs de 300 Ah et plus profitent d'un modele 40 a 50A." } },
+    { "@type": "Question", "name": "Peut-on charger une batterie lithium directement depuis l'alternateur ?", "acceptedAnswer": { "@type": "Answer", "text": "Pas de facon sure dans la plupart des cas. Les alternateurs modernes intelligents font varier leur tension pour economiser du carburant, ce qui donne une charge irreguliere pouvant endommager les cellules lithium ou declencher la coupure du BMS. Un chargeur DC-DC regule la tension exactement selon les besoins de la batterie." } },
+    { "@type": "Question", "name": "Quelle section de cable entre l'alternateur et le chargeur DC-DC ?", "acceptedAnswer": { "@type": "Answer", "text": "Pour un chargeur de 20A avec un parcours de cable de moins de 3 metres, du 6 mm carres suffit. Pour 30A ou des parcours jusqu'a 5 metres, utilisez du 10 mm carres. Pour les modeles 40 a 50A, passez a 16 mm carres. Dimensionnez toujours le fusible selon la capacite du cable, pas l'intensite du chargeur." } },
+    { "@type": "Question", "name": "Ou monter le chargeur DC-DC dans le van ?", "acceptedAnswer": { "@type": "Answer", "text": "Dans un endroit ventile, a l'abri des sources de chaleur. Les chargeurs DC-DC degagent de la chaleur en charge et la plupart reduisent leur puissance au-dessus de 40 degres. Sous un siege, dans le garage ou sur une cloison pres de la batterie sont des emplacements courants. Gardez-le accessible pour l'entretien." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Fonctionnalites</a>
+    <div class="lang-sel">
+      <a href="/blog/how-to-wire-dc-dc-b2b-alternator-charger-van" class="lang-btn">EN</a>
+      <a href="/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van" class="lang-btn on">FR</a>
+      <a href="/blog/es/como-instalar-cargador-alternador-dc-dc-b2b-furgoneta" class="lang-btn">ES</a>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Essayer</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="breadcrumb" aria-label="Fil d'Ariane">
+    <a href="/">Accueil</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>Chargeur DC-DC B2B</span>
+  </nav>
+
+  <article>
+    <span class="eyebrow"><i class="ti ti-plug-connected"></i> Guide recharge alternateur</span>
+    <h1>Comment brancher un chargeur DC-DC (B2B) alternateur dans un van</h1>
+    <div class="article-meta">
+      <span>Par OffroadWatt</span><span class="dot"></span>
+      <time datetime="2026-06-10">10 juin 2026</time><span class="dot"></span>
+      <span>12 min de lecture</span>
+    </div>
+
+    <p class="lede">Les panneaux solaires sont parfaits quand le soleil brille, mais la conduite reste le moyen le plus rapide de remplir une batterie auxiliaire. Un chargeur DC-DC (batterie a batterie) prend la tension brute de l'alternateur et la convertit en une charge multi-etapes adaptee a votre chimie de batterie. Le brancher correctement est simple si vous maitrisez trois points : le dimensionnement, la section de cable et le fusible. Ce guide vous accompagne de A a Z — du choix du bon modele jusqu'au dernier branchement.</p>
+
+    <div class="toc">
+      <div class="toc-title">Au programme</div>
+      <ol>
+        <li><a href="#pourquoi">Pourquoi un chargeur DC-DC est indispensable</a></li>
+        <li><a href="#fonctionnement">Comment fonctionne un chargeur DC-DC</a></li>
+        <li><a href="#dimensionnement">Dimensionnement : quel amperage choisir</a></li>
+        <li><a href="#materiel">Materiel et outils necessaires</a></li>
+        <li><a href="#branchement">Branchement etape par etape</a></li>
+        <li><a href="#cable">Tableau section de cable et fusibles</a></li>
+        <li><a href="#erreurs">Erreurs courantes a eviter</a></li>
+        <li><a href="#modeles">Comparatif des chargeurs DC-DC populaires</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="pourquoi">1. Pourquoi un chargeur DC-DC est indispensable</h2>
+    <p>Il y a quinze ans, un simple relais de couplage suffisait : l'alternateur envoyait 14,4V dans les deux batteries et tout fonctionnait. Les vehicules modernes ont change la donne sur deux points :</p>
+    <ul>
+      <li><strong>Alternateurs intelligents</strong> — les moteurs Euro 6 utilisent des alternateurs a tension variable qui descendent a 12,8V ou moins quand la batterie de demarrage est pleine, pour economiser du carburant. Cette tension est beaucoup trop basse pour charger une batterie auxiliaire, surtout en lithium.</li>
+      <li><strong>Batteries lithium</strong> — les cellules LiFePO4 exigent un profil de charge precis (14,2 a 14,6V en absorption, puis tension constante) qu'un alternateur brut ne peut pas fournir. Surcharger ou sous-charger endommage les cellules et peut declencher la coupure du BMS.</li>
+    </ul>
+    <p>Un chargeur DC-DC resout les deux problemes. Il rehausse la tension basse de l'alternateur au niveau correct et delivre une charge multi-etapes — bulk, absorption, floating — quelle que soit la tension de l'alternateur. C'est un traducteur entre votre moteur et votre batterie auxiliaire.</p>
+
+    <h2 id="fonctionnement">2. Comment fonctionne un chargeur DC-DC</h2>
+    <p>Un chargeur DC-DC est un convertisseur de tension avec un regulateur de charge integre. Il se place entre la batterie de demarrage (entree) et la batterie auxiliaire (sortie), et remplit trois fonctions :</p>
+    <ul>
+      <li><strong>Rehausse ou abaisse la tension</strong> — si l'alternateur sort 12,8V, le chargeur la monte a 14,4V. S'il pointe a 15V, il la redescend. La sortie correspond toujours a la tension que votre chimie de batterie exige.</li>
+      <li><strong>Limite le courant</strong> — un chargeur 30A ne tire jamais plus de 30A, protégeant a la fois l'alternateur et le cablage.</li>
+      <li><strong>Execute un profil de charge</strong> — bulk (courant max jusqu'a la tension cible), absorption (tension maintenue, courant degressif), floating (maintien). Exactement comme un bon chargeur secteur, mais alimente par le moteur.</li>
+    </ul>
+    <p>La plupart des modeles modernes integrent aussi une entree solaire MPPT, ce qui permet de combiner recharge alternateur et solaire dans un seul boitier — pratique pour simplifier l'installation et gagner de la place.</p>
+
+    <h2 id="dimensionnement">3. Dimensionnement : quel amperage choisir</h2>
+    <p>La bonne taille depend de trois facteurs : la capacite de votre batterie, votre temps de conduite habituel et la reserve de puissance de votre alternateur.</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Banque de batteries</th><th>Deficit quotidien typique</th><th>DC-DC recommande</th><th>Temps de recuperation</th></tr></thead>
+        <tbody>
+          <tr><td>100 Ah LiFePO4</td><td>40 a 60 Ah</td><td><strong>20A</strong></td><td>2 a 3 heures</td></tr>
+          <tr><td>200 Ah LiFePO4</td><td>80 a 120 Ah</td><td><strong>30A</strong></td><td>3 a 4 heures</td></tr>
+          <tr><td>300+ Ah LiFePO4</td><td>120 a 200 Ah</td><td><strong>40 a 50A</strong></td><td>3 a 5 heures</td></tr>
+          <tr><td>100 Ah AGM</td><td>25 a 40 Ah</td><td><strong>20A</strong></td><td>1,5 a 2 heures</td></tr>
+          <tr><td>200 Ah AGM</td><td>50 a 80 Ah</td><td><strong>20 a 30A</strong></td><td>2 a 4 heures</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><i class="ti ti-bulb"></i> <strong>Regle pratique :</strong> un chargeur DC-DC de 10 a 15 % de la capacite de votre batterie (en amperes) est un bon compromis. Un banc de 200 Ah se marie bien avec un chargeur 20 a 30A.</div>
+    <p><strong>Attention a votre alternateur.</strong> La plupart des alternateurs de vehicules de tourisme font entre 90 et 150A, mais ils alimentent aussi le calculateur moteur, les phares, la climatisation et la batterie de demarrage. Un chargeur DC-DC de 30A tire environ 35 a 40A cote alternateur (pertes de conversion incluses). Si votre alternateur fait moins de 90A, restez a 20A pour eviter la surcharge, surtout par temps chaud.</p>
+
+    <h2 id="materiel">4. Materiel et outils necessaires</h2>
+    <p>Avant de commencer, reunissez tout le materiel pour que l'installation se deroule sans accroc :</p>
+    <ul>
+      <li><strong>Chargeur DC-DC</strong> — Victron Orion-Tr Smart, Renogy DCC, Sterling B2B ou Redarc BCDC sont les plus repandus. Choisissez un modele avec un profil correspondant a votre chimie (AGM, GEL, LiFePO4).</li>
+      <li><strong>Cable positif</strong> — rouge, dimensionne selon l'amperage du chargeur et la longueur du parcours (voir tableau ci-dessous). Utilisez du cuivre multibrins souple etame pour la resistance aux vibrations.</li>
+      <li><strong>Cable negatif</strong> — noir, meme section que le positif. Beaucoup d'installations utilisent une masse au chassis, mais un cable de retour dedie est plus sur et exige par certains fabricants.</li>
+      <li><strong>Fusibles</strong> — un cote batterie de demarrage (au plus pres de la batterie), un cote batterie auxiliaire. Utilisez des fusibles ANL ou MIDI pour 30A et au-dessus.</li>
+      <li><strong>Porte-fusibles</strong> — supports ANL/MIDI en ligne, dimensionnes pour le calibre. Le type a boulons est plus fiable que les porte-lames pour les forts courants.</li>
+      <li><strong>Cosses de batterie</strong> — cosses a oeil serties (pas soudees), dimensionnees pour le cable et la borne.</li>
+      <li><strong>Fil de signal d'allumage</strong> — un fin cable de 1 mm carres depuis une source 12V coupee au contact (circuit ACC/IGN dans la boite a fusibles) vers l'entree D+ du chargeur.</li>
+      <li><strong>Passe-cloison</strong> — passe-cable en caoutchouc la ou le cable traverse la tole entre compartiment moteur et habitacle, pour eviter le frottement.</li>
+      <li><strong>Outils</strong> — pince a sertir hydraulique ou a cliquet, denude-fil, gaine thermo, multimetre, perceuse, colliers de serrage, gaine fendue de protection.</li>
+    </ul>
+
+    <h2 id="branchement">5. Branchement etape par etape</h2>
+    <p>Le cablage suit un chemin simple : <strong>batterie de demarrage &rarr; fusible &rarr; entree DC-DC &rarr; sortie DC-DC &rarr; fusible &rarr; batterie auxiliaire</strong>. Voici le detail :</p>
+
+    <h3>Etape 1 : Debrancher les deux batteries</h3>
+    <p>Retirez la cosse negative de la batterie de demarrage et de la batterie auxiliaire. C'est non negociable — vous allez manipuler des cables haute intensite capables de souder une cle a molette sur une borne en cas de court-circuit.</p>
+
+    <h3>Etape 2 : Fixer le chargeur DC-DC</h3>
+    <p>Choisissez un emplacement ventile — sous un siege, sur une cloison ou dans le garage. Le chargeur degage de la chaleur en charge (un modele 30A dissipe environ 30 a 50W). Laissez au moins 50 mm de degagement sur chaque face pour la circulation d'air.</p>
+
+    <h3>Etape 3 : Tirer le cable positif depuis la batterie de demarrage</h3>
+    <p>Faites passer un cable positif de la borne + de la batterie de demarrage a travers la cloison jusqu'a l'entree + du chargeur. Installez un fusible a moins de 300 mm de la batterie de demarrage — il protege tout le parcours de cable en cas de court-circuit. Utilisez un passe-cable en caoutchouc et une gaine fendue aux passages metalliques.</p>
+
+    <h3>Etape 4 : Brancher le negatif (cote entree)</h3>
+    <p>Reliez la borne negative d'entree du chargeur a la borne negative de la batterie de demarrage ou a un point de masse chassis solidement connecte a cette borne. Un cable dedie de retour a la batterie est la solution la plus propre et evite les boucles de masse.</p>
+
+    <h3>Etape 5 : Brancher la sortie vers la batterie auxiliaire</h3>
+    <p>Tirez un cable positif de la sortie + du chargeur vers la borne + de la batterie auxiliaire. Installez un fusible a moins de 300 mm de la batterie auxiliaire. Connectez la sortie negative du chargeur a la borne negative de la batterie auxiliaire (ou a son bus bar).</p>
+
+    <h3>Etape 6 : Cabler le signal d'allumage</h3>
+    <p>Branchez un fil fin (1 mm carres) depuis une source 12V active uniquement contact mis (circuit ACC ou IGN dans la boite a fusibles) vers l'entree D+ ou ignition du chargeur. Cela empeche le chargeur de vider la batterie de demarrage moteur arrete. Certains chargeurs detectent automatiquement la montee en tension et n'ont pas besoin de ce fil — verifiez votre manuel.</p>
+
+    <h3>Etape 7 : Regler le profil de batterie</h3>
+    <p>Avant de rebrancher, reglez les micro-interrupteurs (DIP switches) ou l'application du chargeur sur votre chimie : AGM, GEL ou LiFePO4. Un mauvais reglage signifie une mauvaise tension de charge — ce qui endommage la batterie a terme.</p>
+
+    <h3>Etape 8 : Rebrancher et tester</h3>
+    <p>Rebranchez les cosses negatives des deux batteries. Demarrez le moteur. Le chargeur doit detecter la tension de l'alternateur et commencer a charger en quelques secondes. Verifiez au multimetre que la tension de sortie correspond au profil attendu (14,2 a 14,6V pour le lithium, 14,4 a 14,8V pour l'AGM).</p>
+
+    <div class="callout"><i class="ti ti-alert-triangle"></i> <strong>Securite :</strong> ne travaillez jamais sur un cablage DC haute intensite avec les batteries branchees. Un court-circuit sur une batterie de 200 Ah peut delivrer des milliers d'amperes instantanement — assez pour provoquer brulures, incendie ou explosion. Toujours debrancher, toujours fusionner.</div>
+
+    <h2 id="cable">6. Tableau section de cable et fusibles</h2>
+    <p>Un cable sous-dimensionne est la premiere cause de mauvaises performances de charge et d'echauffement. Utilisez ce tableau pour choisir la bonne section selon l'amperage du chargeur et la longueur du parcours de cable (distance aller de la batterie au chargeur).</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Amperage chargeur</th><th>Parcours &lt; 3 m</th><th>Parcours 3 a 5 m</th><th>Parcours 5 a 7 m</th><th>Fusible</th></tr></thead>
+        <tbody>
+          <tr><td><strong>20A</strong></td><td>6 mm&sup2;</td><td>10 mm&sup2;</td><td>16 mm&sup2;</td><td>30A</td></tr>
+          <tr><td><strong>30A</strong></td><td>10 mm&sup2;</td><td>16 mm&sup2;</td><td>25 mm&sup2;</td><td>40A</td></tr>
+          <tr><td><strong>40A</strong></td><td>16 mm&sup2;</td><td>25 mm&sup2;</td><td>35 mm&sup2;</td><td>50A</td></tr>
+          <tr><td><strong>50A</strong></td><td>25 mm&sup2;</td><td>35 mm&sup2;</td><td>50 mm&sup2;</td><td>60A</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Regle de dimensionnement du fusible :</strong> le fusible protege le cable, pas le chargeur. Dimensionnez-le selon l'intensite continue admissible du cable, qui doit etre superieure au courant max du chargeur. Un chargeur 30A sur du 10 mm carres prend un fusible 40A — assez de marge pour eviter les declenchements intempestifs, mais assez bas pour proteger le cable avant surchauffe.</p>
+
+    <h2 id="erreurs">7. Erreurs courantes a eviter</h2>
+    <ul>
+      <li><strong>Pas de fusible a la batterie de demarrage.</strong> Le parcours de cable du compartiment moteur a l'habitacle est le plus expose au frottement et aux courts-circuits. Sans fusible a moins de 300 mm de la batterie, un court-circuit n'importe ou sur ce cable tire un courant illimite — risque d'incendie.</li>
+      <li><strong>Cable sous-dimensionne.</strong> Du 4 mm carres sur un chargeur 30A avec 4 metres de cable provoque une chute de tension telle que le chargeur ne peut plus rehausser correctement. Resultat : charge lente et cables chauds. Utilisez toujours le tableau ci-dessus.</li>
+      <li><strong>Mauvais profil de batterie.</strong> Regler le mode AGM quand vous avez du lithium signifie que le chargeur monte a 14,8V et maintient un floating eleve — stress pour les cellules lithium. Regler lithium sur de l'AGM sous-charge. Verifiez vos DIP switches ou reglages app.</li>
+      <li><strong>Pas de fil d'allumage.</strong> Sans lui, le chargeur peut fonctionner 24h/24 et vider lentement la batterie de demarrage pendant la nuit. Meme les chargeurs avec auto-detection peuvent se tromper — le fil D+ est une assurance peu couteuse.</li>
+      <li><strong>Masse defaillante.</strong> Une connexion de masse a haute resistance (boulon chassis corrode, fil trop fin) provoque une chute de tension sur le circuit retour, reduisant le courant de charge effectif. Utilisez un cable de bonne section et nettoyez le point de contact jusqu'au metal nu.</li>
+      <li><strong>Montage en boite fermee.</strong> Les chargeurs DC-DC reduisent leur puissance au-dessus de 40 degres. Les enfermer dans un coffre non ventile signifie qu'ils brident par temps chaud — exactement quand vous en avez le plus besoin.</li>
+    </ul>
+
+    <h2 id="modeles">8. Comparatif des chargeurs DC-DC populaires</h2>
+    <p>Voici les modeles les plus installes dans la communaute van life, avec les specs cles pour faire votre choix.</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Modele</th><th>Amperage</th><th>Profils</th><th>Entree solaire</th><th>Prix moyen</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Victron Orion-Tr Smart 12/12-30</strong></td><td>30A</td><td>AGM, GEL, LiFePO4, custom</td><td>Non (MPPT separe)</td><td>180 a 220 EUR</td></tr>
+          <tr><td><strong>Renogy DCC50S</strong></td><td>50A</td><td>AGM, GEL, LiFePO4</td><td>Oui (MPPT 25A integre)</td><td>200 a 260 EUR</td></tr>
+          <tr><td><strong>Sterling BB1260</strong></td><td>60A</td><td>AGM, GEL, LiFePO4</td><td>Non</td><td>280 a 350 EUR</td></tr>
+          <tr><td><strong>Redarc BCDC1225D</strong></td><td>25A</td><td>AGM, GEL, LiFePO4, Calcium</td><td>Oui (entree solaire)</td><td>350 a 420 EUR</td></tr>
+          <tr><td><strong>Votronic VCC 1212-30</strong></td><td>30A</td><td>AGM, GEL, LiFePO4</td><td>Non</td><td>250 a 300 EUR</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Si vous avez deja un regulateur solaire MPPT separe, un DC-DC dedie comme le Victron Orion ou le Votronic VCC donne l'installation la plus propre. Si vous voulez combiner les deux fonctions dans un seul boitier, le Renogy DCC50S ou le Redarc BCDC sont de bons choix tout-en-un.</p>
+    <div class="callout"><i class="ti ti-calculator"></i> <strong>Voyez l'impact reel sur votre autonomie.</strong> <a href="https://app.offroadwatt.com">OffroadWatt vous permet de regler l'amperage de votre alternateur et vos heures de conduite quotidiennes</a>, puis affiche exactement combien d'Ah votre chargeur DC-DC apporte par jour — en plus du solaire et de la capacite batterie. Essayez gratuitement.</div>
+
+    <div class="cta-box">
+      <h3>Calculez la contribution de votre recharge alternateur</h3>
+      <p>Entrez l'amperage de votre chargeur DC-DC et votre temps de conduite quotidien — OffroadWatt montre comment il se combine avec le solaire pour couvrir votre consommation.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Ouvrir le calculateur gratuit</a>
+    </div>
+
+    <section class="faq">
+      <h2 id="faq">Questions frequentes</h2>
+      <div class="faq-item"><h3>Quelle puissance de chargeur DC-DC pour mon van ?</h3><p>Pour la plupart des vans avec une batterie lithium de 100 a 200 Ah, un chargeur DC-DC de 20 a 30A est ideal. Il recharge la batterie auxiliaire en 4 a 6 heures de conduite sans surcharger l'alternateur. Si votre alternateur fait moins de 90A, restez a 20A. Les bancs de 300 Ah et plus profitent d'un modele 40 a 50A.</p></div>
+      <div class="faq-item"><h3>Peut-on charger une batterie lithium directement depuis l'alternateur ?</h3><p>Pas de facon sure dans la plupart des cas. Les alternateurs modernes intelligents font varier leur tension pour economiser du carburant, ce qui donne une charge irreguliere pouvant endommager les cellules lithium ou declencher la coupure du BMS. Un chargeur DC-DC regule la tension exactement selon les besoins de la batterie.</p></div>
+      <div class="faq-item"><h3>Quelle section de cable entre l'alternateur et le chargeur DC-DC ?</h3><p>Pour un chargeur de 20A avec un parcours de cable de moins de 3 metres, du 6 mm carres suffit. Pour 30A ou des parcours jusqu'a 5 metres, utilisez du 10 mm carres. Pour les modeles 40 a 50A, passez a 16 mm carres. Dimensionnez toujours le fusible selon la capacite du cable.</p></div>
+      <div class="faq-item"><h3>Ou monter le chargeur DC-DC dans le van ?</h3><p>Dans un endroit ventile, a l'abri des sources de chaleur. Les chargeurs DC-DC degagent de la chaleur en charge et la plupart reduisent leur puissance au-dessus de 40 degres. Sous un siege, dans le garage ou sur une cloison pres de la batterie sont des emplacements courants. Gardez-le accessible pour l'entretien et a l'abri de l'eau.</p></div>
+    </section>
+
+    <div class="share">
+      <span>Partager</span>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van" target="_blank" rel="noopener" aria-label="Partager sur Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="https://twitter.com/intent/tweet?url=https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van&text=Comment%20brancher%20un%20chargeur%20DC-DC%20dans%20un%20van" target="_blank" rel="noopener" aria-label="Partager sur X"><i class="ti ti-brand-x"></i></a>
+      <a href="https://api.whatsapp.com/send?text=Comment%20brancher%20un%20chargeur%20DC-DC%20dans%20un%20van%20https://offroadwatt.com/blog/fr/brancher-chargeur-alternateur-dc-dc-b2b-van" target="_blank" rel="noopener" aria-label="Partager sur WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Accueil</a> · <a href="/blog">Blog</a> · <a href="https://app.offroadwatt.com" target="_blank">Ouvrir l'app</a></p>
+  <p style="margin-top:10px">© 2026 OffroadWatt. Le calculateur d'autonomie electrique pour camping-car, caravane et van.</p>
+</footer>
+
+</body>
+</html>
