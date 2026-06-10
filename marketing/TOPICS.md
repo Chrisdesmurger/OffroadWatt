@@ -9,7 +9,7 @@ Keep topics distinct from everything already shipped.
 - [x] How many solar panels do you need for a campervan? *(EN/FR/ES — 2026-06-08)*
 
 ## Backlog (high-intent, ranked)
-- [ ] AGM vs GEL vs Lithium: which leisure battery for a campervan?
+- [x] AGM vs GEL vs Lithium: which leisure battery for a campervan? *(EN/FR/ES — 2026-06-10)*
 - [ ] How to wire a DC-DC (B2B) alternator charger in a van
 - [ ] What size inverter do I need for my campervan?
 - [ ] MPPT vs PWM solar controller for camper vans
