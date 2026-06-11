@@ -256,6 +256,41 @@ section{padding:100px 24px}
 .ai-dot:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
 
+/* ── PRICING ─────────────────────────────────────────── */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:780px;margin:0 auto}
+@media(max-width:600px){.pricing-grid{grid-template-columns:1fr}}
+.pricing-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:32px;
+}
+.pricing-card.featured{
+  border-color:var(--amber);background:rgba(240,160,48,.07);
+  position:relative;overflow:hidden;
+}
+.pricing-card.featured::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,160,48,.18),transparent 70%);
+}
+.pricing-badge{
+  display:inline-block;background:var(--amber);color:#090b0a;
+  font-family:var(--mono);font-size:9px;text-transform:uppercase;
+  letter-spacing:1px;padding:4px 10px;border-radius:100px;
+  margin-bottom:14px;font-weight:700;
+}
+.pricing-name{font-size:22px;font-weight:700;margin-bottom:6px}
+.pricing-price{font-family:var(--mono);font-size:40px;font-weight:700;margin-bottom:4px}
+.pricing-price span{font-size:16px;font-weight:400;color:var(--t2)}
+.pricing-desc{font-size:13px;color:var(--t2);margin-bottom:24px;line-height:1.5}
+.pricing-feats{list-style:none;margin-bottom:28px}
+.pricing-feats li{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;
+}
+.pricing-feats li:last-child{border:none}
+.pricing-feats li i{color:var(--green);flex-shrink:0;font-size:16px}
+.pricing-feats li.off{color:var(--t3)}
+.pricing-feats li.off i{color:var(--t3)}
 
 /* ── SIGNUP ──────────────────────────────────────────── */
 .signup-section{background:var(--bg2);position:relative;overflow:hidden}
@@ -337,8 +372,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
   <a href="#" class="logo">Offroad<em>Watt</em></a>
   <div class="nav-links">
     <a href="#features" class="nav-link" data-i18n="nav.features">Fonctionnalités</a>
-    <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>
-    <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
+    <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>    <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
     <a href="/blog" class="nav-link" data-i18n="nav.blog">Blog</a>
     <div class="lang-sel">
       <button class="lang-btn" data-lang="fr">FR</button>
@@ -658,7 +692,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     </div>
   </div>
 </section>
-
 
 <!-- ── SIGNUP ─────────────────────────────────────────────── -->
 <section class="signup-section" id="signup">
