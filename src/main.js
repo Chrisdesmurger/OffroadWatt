@@ -1159,11 +1159,6 @@ function buildModal() {
     <div class="ov" id="modal-overlay">
       <div class="mo" style="max-width:380px">
         <h3><i class="ti ti-device-floppy"></i> ${t('modal.save.title')}</h3>
-        ${isFree && S.userConfigs.length >= 1
-          ? `<div style="font-size:11px;color:var(--am);background:rgba(240,160,48,.07);border:1px solid var(--am3);border-radius:var(--r);padding:7px 10px;margin-bottom:10px">
-              <i class="ti ti-info-circle"></i> ${t('modal.save.freeWarning')}
-             </div>`
-          : ''}
         <input id="save-name" type="text" placeholder="${t('modal.save.namePlaceholder')}" value="${defaultName}"
           style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
         <div class="mo-btns">
@@ -1184,14 +1179,10 @@ function buildModal() {
         <h3><i class="ti ti-bookmark"></i> ${t('modal.configs.title')}</h3>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="font-size:11px;color:var(--t3)">${S.user?.email}</span>
-          <span class="plan-pill ${isFree ? 'free' : 'pro'}">${isFree ? t('modal.configs.free') : t('modal.configs.pro')}</span>
           <button id="auth-signout" style="margin-left:auto;font-size:10px;background:none;border:1px solid var(--b1);color:var(--t3);border-radius:var(--r);padding:3px 8px;cursor:pointer">
             <i class="ti ti-logout"></i> ${t('modal.configs.signout')}
           </button>
         </div>
-        ${isFree ? `<div style="font-size:11px;color:var(--t2);background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">
-          Plan gratuit — 1 configuration sauvegardée
-        </div>` : ''}
         ${S.userConfigs.length === 0
           ? `<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">
               ${t('modal.configs.empty')}
