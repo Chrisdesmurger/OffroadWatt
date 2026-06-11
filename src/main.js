@@ -953,6 +953,119 @@ function buildAppsCard() {
   </div>`
 }
 
+const CAT_COLORS = {
+  Cuisine: '#f0a030', Confort: '#2dd4bf', Tech: '#a78bfa',
+  Eau: '#38bdf8', Éclairage: '#fbbf24', Système: '#f87171',
+}
+
+function buildDonutChart(breakdown) {
+  if (!breakdown.length) return `<div class="card"><div class="ct te"><i class="ti ti-chart-donut-3"></i>${t('chart.donut.title')}</div><div style="font-size:12px;color:var(--t3);padding:10px 0;text-align:center">${t('chart.donut.noAppliance')}</div></div>`
+
+  const byCat = {}
+  breakdown.forEach(a => {
+    const cat = a.cat || 'Système'
+    byCat[cat] = (byCat[cat] || 0) + a.wh
+  })
+  const total = Object.values(byCat).reduce((s, v) => s + v, 0)
+  if (total <= 0) return ''
+  const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1])
+
+  const cx = 60, cy = 60, r = 50, ir = 30
+  let angle = -Math.PI / 2
+  const paths = []
+  entries.forEach(([cat, wh]) => {
+    const frac = wh / total
+    const sweep = frac * Math.PI * 2
+    const x1o = cx + r * Math.cos(angle), y1o = cy + r * Math.sin(angle)
+    const x1i = cx + ir * Math.cos(angle), y1i = cy + ir * Math.sin(angle)
+    const endAngle = angle + sweep
+    const x2o = cx + r * Math.cos(endAngle), y2o = cy + r * Math.sin(endAngle)
+    const x2i = cx + ir * Math.cos(endAngle), y2i = cy + ir * Math.sin(endAngle)
+    const large = sweep > Math.PI ? 1 : 0
+    const color = CAT_COLORS[cat] || '#5a7068'
+    paths.push(`<path d="M${x1o},${y1o} A${r},${r} 0 ${large} 1 ${x2o},${y2o} L${x2i},${y2i} A${ir},${ir} 0 ${large} 0 ${x1i},${y1i} Z" fill="${color}" opacity="0.85"/>`)
+    angle = endAngle
+  })
+
+  const legend = entries.map(([cat, wh]) => {
+    const color = CAT_COLORS[cat] || '#5a7068'
+    const pct = Math.round(wh / total * 100)
+    return `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${color}"></div>${tcat(cat)} <span class="donut-legend-val">${toAh(wh)} Ah (${pct}%)</span></div>`
+  }).join('')
+
+  return `<div class="card">
+    <div class="ct te"><i class="ti ti-chart-donut-3"></i>${t('chart.donut.title')}</div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 120 120" width="140" height="140" aria-label="${t('chart.donut.title')}">${paths.join('')}
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="var(--t1)" font-family="var(--mono)" font-size="11" font-weight="700">${toAh(total)}</text>
+        <text x="${cx}" y="${cy + 8}" text-anchor="middle" fill="var(--t3)" font-size="6.5">${t('unit.ahday')}</text>
+      </svg>
+      <div class="donut-legend">${legend}</div>
+    </div>
+  </div>`
+}
+
+function buildDischargeChart(usable, net, recharge, cons) {
+  const W = 280, H = 140, pad = { t: 10, r: 10, b: 24, l: 32 }
+  const gW = W - pad.l - pad.r, gH = H - pad.t - pad.b
+  const batTotal = S.bat.ah * S.bat.v * S.batNb
+  if (batTotal <= 0) return ''
+
+  const reservePct = (1 - S.dod) * 100
+  const maxDays = Math.min(net > 0 ? Math.ceil(usable / net) + 1 : 14, 30)
+  const xScale = gW / Math.max(maxDays, 1)
+
+  const battOnlyPts = []
+  const withRechPts = []
+  for (let d = 0; d <= maxDays; d++) {
+    const x = pad.l + d * xScale
+    const remainBat = Math.max(0, batTotal - cons * d)
+    const pctBat = (remainBat / batTotal) * 100
+    battOnlyPts.push(`${x},${pad.t + gH * (1 - pctBat / 100)}`)
+
+    const remainRech = Math.max(0, batTotal - Math.max(0, cons - recharge) * d)
+    const pctRech = (remainRech / batTotal) * 100
+    withRechPts.push(`${x},${pad.t + gH * (1 - pctRech / 100)}`)
+  }
+
+  const dodYPos = pad.t + gH * (1 - reservePct / 100)
+
+  const yTicks = [0, 25, 50, 75, 100]
+  const gridLines = yTicks.map(pct => {
+    const y = pad.t + gH * (1 - pct / 100)
+    return `<line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="var(--b1)" stroke-width="0.5"/>
+      <text x="${pad.l - 4}" y="${y + 3}" text-anchor="end" fill="var(--t3)" font-size="6" font-family="var(--mono)">${pct}</text>`
+  }).join('')
+
+  const xTicks = []
+  const step = maxDays <= 7 ? 1 : maxDays <= 15 ? 2 : 5
+  for (let d = 0; d <= maxDays; d += step) {
+    const x = pad.l + d * xScale
+    xTicks.push(`<text x="${x}" y="${H - 4}" text-anchor="middle" fill="var(--t3)" font-size="6" font-family="var(--mono)">${d}</text>`)
+  }
+
+  const hasRecharge = dailyRecharge > 0
+
+  return `<div class="card">
+    <div class="ct te"><i class="ti ti-chart-line"></i>${t('chart.discharge.title')}</div>
+    <div class="discharge-chart">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" aria-label="${t('chart.discharge.title')}">
+        ${gridLines}
+        ${xTicks.join('')}
+        <text x="${W / 2}" y="${H}" text-anchor="middle" fill="var(--t3)" font-size="6">${t('chart.discharge.days')}</text>
+        <line x1="${pad.l}" y1="${dodYPos}" x2="${W - pad.r}" y2="${dodYPos}" stroke="var(--rd)" stroke-width="0.7" stroke-dasharray="3,2" opacity="0.6"/>
+        <polyline points="${battOnlyPts.join(' ')}" fill="none" stroke="var(--am)" stroke-width="1.5" stroke-linejoin="round"/>
+        ${hasRecharge ? `<polyline points="${withRechPts.join(' ')}" fill="none" stroke="var(--gr)" stroke-width="1.5" stroke-linejoin="round"/>` : ''}
+      </svg>
+    </div>
+    <div class="discharge-legend">
+      <div class="discharge-legend-item"><div class="discharge-legend-line" style="background:var(--am)"></div>${t('chart.discharge.batteryOnly')}</div>
+      ${hasRecharge ? `<div class="discharge-legend-item"><div class="discharge-legend-line" style="background:var(--gr)"></div>${t('chart.discharge.withRecharge')}</div>` : ''}
+      <div class="discharge-legend-item"><div class="discharge-legend-line" style="background:var(--rd);height:1px;border-top:1px dashed var(--rd)"></div>${t('chart.discharge.dodLimit')} (${Math.round(S.dod * 100)}%)</div>
+    </div>
+  </div>`
+}
+
 function buildEnergyTab() {
   const { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
   const isDanger = net > usable
@@ -1121,6 +1234,9 @@ function buildEnergyTab() {
           </div>
         </div>
       </div>
+
+      ${buildDonutChart(breakdown)}
+      ${buildDischargeChart(usable, net, recharge, cons)}
 
       <div class="card">
         <div class="ct"><i class="ti ti-list"></i>${t('detail.title')}</div>
