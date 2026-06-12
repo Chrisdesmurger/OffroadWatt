@@ -290,6 +290,25 @@ const DICT = {
     'modal.custom.category': 'Category',
 
     // Confirm / alerts
+    // Scenarios
+    'scenarios.title': 'Quick-start scenarios',
+    'scenarios.desc': 'Load a ready-made configuration tailored to a specific use case.',
+    'scenarios.btn': 'Scenarios',
+    'scenarios.apply': 'Apply',
+    'scenarios.undo': 'Undo',
+    'scenarios.applied': 'Scenario applied!',
+    'scenarios.undone': 'Previous configuration restored',
+    'scenario.weekend.name': 'Festival weekend',
+    'scenario.weekend.desc': 'Fridge, music, lighting — light battery for a 2-day trip.',
+    'scenario.nomad.name': 'Digital nomad',
+    'scenario.nomad.desc': 'Laptop, fridge, 4G router — work remotely for ~7 days.',
+    'scenario.winter.name': 'Winter stay',
+    'scenario.winter.desc': 'Diesel heater, fridge, reinforced lighting — serious battery needed.',
+    'scenario.minimal.name': 'Minimalist van',
+    'scenario.minimal.desc': 'Compact fridge + LEDs — budget-friendly, low consumption.',
+    'scenario.family.name': 'Family',
+    'scenario.family.desc': 'TV, microwave, fridge, multiple devices — full comfort setup.',
+
     'confirm.deleteConfig': 'Delete this configuration?',
     'alert.error': 'Error: ',
 
@@ -608,6 +627,25 @@ const DICT = {
     'modal.custom.hours': 'Horas/día',
     'modal.custom.category': 'Categoría',
 
+    // Scenarios
+    'scenarios.title': 'Escenarios rápidos',
+    'scenarios.desc': 'Carga una configuración lista adaptada a un caso de uso concreto.',
+    'scenarios.btn': 'Escenarios',
+    'scenarios.apply': 'Aplicar',
+    'scenarios.undo': 'Deshacer',
+    'scenarios.applied': '¡Escenario aplicado!',
+    'scenarios.undone': 'Configuración anterior restaurada',
+    'scenario.weekend.name': 'Fin de semana festivo',
+    'scenario.weekend.desc': 'Nevera, música, iluminación — batería ligera para 2 días.',
+    'scenario.nomad.name': 'Nómada digital',
+    'scenario.nomad.desc': 'Portátil, nevera, router 4G — trabaja en remoto ~7 días.',
+    'scenario.winter.name': 'Estancia invernal',
+    'scenario.winter.desc': 'Calefacción diésel, nevera, iluminación reforzada — gran batería.',
+    'scenario.minimal.name': 'Van minimalista',
+    'scenario.minimal.desc': 'Nevera compacta + LED — económico, bajo consumo.',
+    'scenario.family.name': 'Familia',
+    'scenario.family.desc': 'TV, microondas, nevera, múltiples dispositivos — máximo confort.',
+
     'confirm.deleteConfig': '¿Eliminar esta configuración?',
     'alert.error': 'Error: ',
 
@@ -923,6 +961,25 @@ const DICT = {
     'modal.custom.watts': 'Watts',
     'modal.custom.hours': 'Heures/jour',
     'modal.custom.category': 'Catégorie',
+
+    // Scenarios
+    'scenarios.title': 'Scénarios rapides',
+    'scenarios.desc': 'Chargez une configuration prête à l\'emploi adaptée à un cas d\'usage.',
+    'scenarios.btn': 'Scénarios',
+    'scenarios.apply': 'Appliquer',
+    'scenarios.undo': 'Annuler',
+    'scenarios.applied': 'Scénario appliqué !',
+    'scenarios.undone': 'Configuration précédente restaurée',
+    'scenario.weekend.name': 'Weekend festif',
+    'scenario.weekend.desc': 'Frigo, musique, éclairage — batterie légère pour 2 jours.',
+    'scenario.nomad.name': 'Nomade digital',
+    'scenario.nomad.desc': 'Laptop, frigo, routeur 4G — travail en autonomie ~7 jours.',
+    'scenario.winter.name': 'Séjour hivernal',
+    'scenario.winter.desc': 'Chauffage diesel, frigo, éclairage renforcé — grosse batterie nécessaire.',
+    'scenario.minimal.name': 'Van minimaliste',
+    'scenario.minimal.desc': 'Frigo compact + LED — setup économique, faible consommation.',
+    'scenario.family.name': 'Famille',
+    'scenario.family.desc': 'TV, micro-ondes, frigo, appareils multiples — confort maximal.',
 
     'confirm.deleteConfig': 'Supprimer cette configuration ?',
     'alert.error': 'Erreur : ',

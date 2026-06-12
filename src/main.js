@@ -366,6 +366,166 @@ function skipWizard() {
   set({ modal: null })
 }
 
+// ─── SCENARIOS (#19) ─────────────────────────────────────────────────────────
+// Pre-built configurations for common use cases. Each scenario defines a
+// complete energy setup: appliances, battery, solar, and alternator.
+
+const SCENARIOS = [
+  {
+    id: 'weekend',
+    icon: 'ti-music',
+    vtype: 'van',
+    bat: { ah: 100, v: 12, type: 'AGM' },
+    batNb: 1,
+    solOn: false, solW: 200, solNb: 1, solEff: 0.85, sunIdx: 3,
+    altOn: true, altAmps: 20, altHours: 1,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 40L', icon: 'ti-fridge',       w: 45, h: 24,  cat: 'Cuisine'   },
+      { n: 'Enceinte Bluetooth',                icon: 'ti-music',        w: 15, h: 6,   cat: 'Tech'      },
+      { n: 'Éclairage LED bande 5m',            icon: 'ti-bulb',         w: 12, h: 5,   cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×4',            icon: 'ti-lamp',         w: 12, h: 4,   cat: 'Éclairage' },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',w: 20, h: 2,   cat: 'Tech'      },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',      w: 30, h: 0.5, cat: 'Eau'       },
+    ],
+  },
+  {
+    id: 'nomad',
+    icon: 'ti-device-laptop',
+    vtype: 'van',
+    bat: { ah: 200, v: 12, type: 'LI' },
+    batNb: 1,
+    solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 5,
+    altOn: true, altAmps: 20, altHours: 1,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 55L', icon: 'ti-fridge',         w: 50, h: 24,  cat: 'Cuisine'   },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65, h: 6,   cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 20, h: 2,   cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10, h: 24,  cat: 'Tech'      },
+      { n: 'Spots LED encastrés ×6',            icon: 'ti-lamp',           w: 18, h: 4,   cat: 'Éclairage' },
+      { n: 'Plafonnier LED 12V principal',       icon: 'ti-bulb',           w: 12, h: 5,   cat: 'Éclairage' },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 30, h: 0.5, cat: 'Eau'       },
+      { n: 'Ventilateur plafond 12V',           icon: 'ti-wind',           w: 22, h: 6,   cat: 'Confort'   },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,  h: 24,  cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3, h: 24,  cat: 'Système'   },
+    ],
+  },
+  {
+    id: 'winter',
+    icon: 'ti-snowflake',
+    vtype: 'campervan',
+    bat: { ah: 300, v: 12, type: 'LI' },
+    batNb: 1,
+    solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 3,
+    altOn: true, altAmps: 30, altHours: 2,
+    apps: [
+      { n: 'Chauffage diesel 2kW',              icon: 'ti-temperature',    w: 10, h: 10, cat: 'Confort',
+        modes: [
+          { label: 'Veille / allumage', watts: 10 },
+          { label: 'Puissance min',     watts: 30 },
+          { label: 'Puissance max',     watts: 80 },
+        ], activeMode: 1 },
+      { n: 'Réfrigérateur compresseur 12V 75L', icon: 'ti-fridge',         w: 55, h: 24,  cat: 'Cuisine'   },
+      { n: 'Plafonnier LED 12V principal',       icon: 'ti-bulb',           w: 12, h: 6,   cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×6',            icon: 'ti-lamp',           w: 18, h: 5,   cat: 'Éclairage' },
+      { n: 'Éclairage de lecture 12V',           icon: 'ti-lamp',           w: 6,  h: 3,   cat: 'Éclairage' },
+      { n: 'Couverture chauffante 12V',          icon: 'ti-bed',            w: 60, h: 6,   cat: 'Confort'   },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65, h: 4,   cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 20, h: 2,   cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10, h: 24,  cat: 'Tech'      },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 50, h: 0.5, cat: 'Eau'       },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,  h: 24,  cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3, h: 24,  cat: 'Système'   },
+    ],
+  },
+  {
+    id: 'minimal',
+    icon: 'ti-leaf',
+    vtype: 'van',
+    bat: { ah: 100, v: 12, type: 'LI' },
+    batNb: 1,
+    solOn: true, solW: 100, solNb: 1, solEff: 0.85, sunIdx: 5,
+    altOn: true, altAmps: 20, altHours: 1,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 40L', icon: 'ti-fridge',         w: 45, h: 24,  cat: 'Cuisine'   },
+      { n: 'Éclairage LED bande 5m',            icon: 'ti-bulb',           w: 12, h: 4,   cat: 'Éclairage' },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 15, h: 2,   cat: 'Tech'      },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 30, h: 0.5, cat: 'Eau'       },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,  h: 24,  cat: 'Système'   },
+    ],
+  },
+  {
+    id: 'family',
+    icon: 'ti-users',
+    vtype: 'campervan',
+    bat: { ah: 280, v: 12, type: 'LI' },
+    batNb: 1,
+    solOn: true, solW: 200, solNb: 3, solEff: 0.85, sunIdx: 5,
+    altOn: true, altAmps: 30, altHours: 2,
+    apps: [
+      { n: 'Réfrigérateur compresseur 12V 75L', icon: 'ti-fridge',         w: 55,  h: 24,   cat: 'Cuisine'   },
+      { n: 'Micro-ondes',                       icon: 'ti-microwave',      w: 900, h: 0.25, cat: 'Cuisine'   },
+      { n: 'Télévision 24" LED',                icon: 'ti-device-tv',      w: 25,  h: 3,    cat: 'Tech'      },
+      { n: 'Laptop',                            icon: 'ti-device-laptop',  w: 65,  h: 4,    cat: 'Tech'      },
+      { n: 'Smartphone ×2',                     icon: 'ti-device-mobile',  w: 20,  h: 3,    cat: 'Tech'      },
+      { n: 'Routeur 4G',                        icon: 'ti-wifi',           w: 10,  h: 24,   cat: 'Tech'      },
+      { n: 'Plafonnier LED 12V principal',       icon: 'ti-bulb',           w: 12,  h: 5,    cat: 'Éclairage' },
+      { n: 'Spots LED encastrés ×6',            icon: 'ti-lamp',           w: 18,  h: 4,    cat: 'Éclairage' },
+      { n: 'Luminaire LED cuisine 12V',          icon: 'ti-lamp',           w: 8,   h: 3,    cat: 'Éclairage' },
+      { n: 'Aérateur de toit 12V',              icon: 'ti-wind',           w: 35,  h: 6,    cat: 'Confort'   },
+      { n: 'Pompe à eau',                       icon: 'ti-droplet',        w: 50,  h: 0.5,  cat: 'Eau'       },
+      { n: 'Régulateur MPPT',                   icon: 'ti-solar-panel',    w: 5,   h: 24,   cat: 'Système'   },
+      { n: 'BMS batterie Lithium',              icon: 'ti-battery-charging',w: 3,  h: 24,   cat: 'Système'   },
+    ],
+  },
+]
+
+let _undoState = null
+let _undoTimer = null
+
+function applyScenario(id) {
+  const sc = SCENARIOS.find(s => s.id === id)
+  if (!sc) return
+  _undoState = JSON.parse(JSON.stringify({
+    vtype: S.vtype, apps: S.apps, bat: { ah: S.bat.ah, v: S.bat.v },
+    batNb: S.batNb, dod: S.dod, batType: S.batType,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff,
+    sunIdx: S.sunIdx, customSunH: S.customSunH,
+    altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
+  }))
+  clearTimeout(_undoTimer)
+  _undoTimer = setTimeout(() => { _undoState = null }, 10000)
+  const bat = BATS.find(b => b.ah === sc.bat.ah && b.v === sc.bat.v && b.type === sc.bat.type) || BATS[0]
+  const base = Date.now()
+  const apps = sc.apps.map((a, i) => ({
+    id: base + i, n: a.n, icon: a.icon, w: a.w, h: a.h, on: true, cat: a.cat,
+    ...(a.modes ? { modes: a.modes.map(m => ({ ...m })), activeMode: a.activeMode ?? 0 } : {}),
+  }))
+  set({
+    vtype: sc.vtype, apps, bat, batType: bat.type, batNb: sc.batNb, dod: DOD[bat.type],
+    solOn: sc.solOn, solW: sc.solW, solNb: sc.solNb, solEff: sc.solEff, sunIdx: sc.sunIdx,
+    altOn: sc.altOn, altAmps: sc.altAmps, altHours: sc.altHours,
+    modal: null, tab: 'energy',
+  })
+  showToast(t('scenarios.applied'), { label: t('scenarios.undo'), fn: undoScenario })
+}
+
+function undoScenario() {
+  if (!_undoState) return
+  const p = _undoState
+  _undoState = null
+  clearTimeout(_undoTimer)
+  const bat = BATS.find(b => b.ah === p.bat?.ah && b.v === p.bat?.v) || S.bat
+  set({
+    vtype: p.vtype, apps: p.apps, bat, batType: p.batType || bat.type,
+    batNb: p.batNb, dod: p.dod,
+    solOn: p.solOn, solW: p.solW, solNb: p.solNb, solEff: p.solEff,
+    sunIdx: p.sunIdx, customSunH: p.customSunH,
+    altOn: p.altOn, altAmps: p.altAmps, altHours: p.altHours,
+    tab: 'energy',
+  })
+  showToast(t('scenarios.undone'))
+}
+
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
@@ -610,7 +770,7 @@ function loadStateFromURL() {
 }
 
 // Toast éphémère réutilisable (auto-disparait)
-function showToast(msg) {
+function showToast(msg, action) {
   let el = document.getElementById('ow-toast')
   if (!el) {
     el = document.createElement('div')
@@ -618,12 +778,16 @@ function showToast(msg) {
     el.className = 'ow-toast'
     document.body.appendChild(el)
   }
-  el.textContent = msg
-  // force reflow pour rejouer la transition si déjà visible
+  if (action) {
+    el.innerHTML = `${msg} <button id="undo-scenario" style="margin-left:8px;background:rgba(6,32,28,.3);border:1px solid rgba(6,32,28,.4);color:inherit;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;font-weight:600">${action.label}</button>`
+    el.querySelector('#undo-scenario')?.addEventListener('click', action.fn)
+  } else {
+    el.textContent = msg
+  }
   void el.offsetWidth
   el.classList.add('show')
   clearTimeout(showToast._t)
-  showToast._t = setTimeout(() => el.classList.remove('show'), 2400)
+  showToast._t = setTimeout(() => el.classList.remove('show'), action ? 8000 : 2400)
 }
 
 // Copie un texte dans le presse-papier (avec fallback execCommand)
@@ -937,8 +1101,9 @@ function buildAppsCard() {
       ${groups}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-      <button class="addbtn" style="flex:1;min-width:140px" id="open-catalog"><i class="ti ti-book"></i>${t('btn.catalog')}</button>
-      <button class="addbtn" style="flex:1;min-width:140px" id="open-custom"><i class="ti ti-plus"></i>${t('btn.custom')}</button>
+      <button class="addbtn" style="flex:1;min-width:100px" id="open-catalog"><i class="ti ti-book"></i>${t('btn.catalog')}</button>
+      <button class="addbtn" style="flex:1;min-width:100px" id="open-custom"><i class="ti ti-plus"></i>${t('btn.custom')}</button>
+      <button class="addbtn" style="flex:1;min-width:100px" id="open-scenarios"><i class="ti ti-target"></i>${t('scenarios.btn')}</button>
     </div>
     <div class="cons-footer">
       <div>
@@ -1692,6 +1857,51 @@ function buildModal() {
 
   if (m.type === 'wizard') return buildWizardModal(m)
 
+  if (m.type === 'scenarios') {
+    const cards = SCENARIOS.map(sc => {
+      const bat = BATS.find(b => b.ah === sc.bat.ah && b.v === sc.bat.v && b.type === sc.bat.type) || BATS[0]
+      const base = Date.now()
+      const apps = sc.apps.map((a, i) => ({
+        id: base + i, n: a.n, icon: a.icon, w: a.w, h: a.h, on: true, cat: a.cat,
+        ...(a.modes ? { modes: a.modes.map(mm => ({ ...mm })), activeMode: a.activeMode ?? 0 } : {}),
+      }))
+      const fakeState = {
+        apps, bat, batNb: sc.batNb, dod: DOD[bat.type],
+        solOn: sc.solOn, solW: sc.solW, solNb: sc.solNb, solEff: sc.solEff, sunIdx: sc.sunIdx, customSunH: '',
+        altOn: sc.altOn, altAmps: sc.altAmps, altHours: sc.altHours,
+      }
+      const { cons, autDays } = calc(fakeState)
+      const autStr = !isFinite(autDays) ? '∞' : autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ` ${t('unit.days')}`
+      const consAh = toAh(cons)
+      return `
+        <div class="scenario-card" data-scenario="${sc.id}">
+          <div class="scenario-icon"><i class="ti ${sc.icon}"></i></div>
+          <div class="scenario-body">
+            <div class="scenario-name">${t('scenario.' + sc.id + '.name')}</div>
+            <div class="scenario-desc">${t('scenario.' + sc.id + '.desc')}</div>
+            <div class="scenario-meta">
+              <span><i class="ti ti-battery"></i>${bat.ah}Ah ${tbattype(bat.type)}</span>
+              ${sc.solOn ? `<span><i class="ti ti-sun"></i>${sc.solW * sc.solNb}Wc</span>` : ''}
+              <span><i class="ti ti-clock"></i>${autStr}</span>
+              <span><i class="ti ti-plug"></i>${consAh} Ah/${t('unit.days').charAt(0)}</span>
+            </div>
+          </div>
+          <button class="mo-ok scenario-apply" data-apply-scenario="${sc.id}">
+            <i class="ti ti-download" style="font-size:11px"></i> ${t('scenarios.apply')}
+          </button>
+        </div>`
+    }).join('')
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:560px">
+        <h3><i class="ti ti-target"></i> ${t('scenarios.title')}</h3>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:14px">${t('scenarios.desc')}</p>
+        <div class="scenario-list">${cards}</div>
+        <div class="mo-btns" style="margin-top:12px"><button id="close-modal" class="mo-cancel" style="flex:1">${t('btn.close')}</button></div>
+      </div>
+    </div>`
+  }
+
   if (m.type === 'share') {
     const url = m.url || ''
     const u = encodeURIComponent(url)
@@ -2064,6 +2274,13 @@ function bindEvents() {
   }))
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } }))
+  // Scenarios
+  document.getElementById('open-scenarios')?.addEventListener('click', () => set({ modal: { type: 'scenarios' } }))
+  document.querySelectorAll('[data-apply-scenario]').forEach(el => el.addEventListener('click', (e) => {
+    e.stopPropagation()
+    applyScenario(el.dataset.applyScenario)
+  }))
+  document.getElementById('undo-scenario')?.addEventListener('click', () => undoScenario())
   document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 
   // Comparateur
