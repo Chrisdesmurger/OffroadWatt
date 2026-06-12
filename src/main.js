@@ -1137,28 +1137,6 @@ function buildEnergyTab() {
         </div>
       </div>
 
-      <div class="card">
-        <div class="ct te"><i class="ti ti-chart-bar"></i>${t('market.title')}</div>
-        <div class="rec-list">
-          ${BATS.filter((b, i, arr) => arr.findIndex(x => x.ah === b.ah && x.v === b.v) === i).map(b => {
-            const wu = b.ah * b.v * DOD[b.type]
-            const d = net > 0 ? wu / net : Infinity
-            const isCur = S.bat.ah === b.ah && S.bat.v === b.v
-            return `
-            <div class="ritem${d >= 1 ? ' best' : ''}">
-              <div>
-                <div class="ri-c">${b.ah}Ah ${b.v}V${isCur ? `<span class="btag">${t('market.selected')}</span>` : ''}</div>
-                <div class="ri-s">${tbattype(b.type)} · ${t('market.raw')} ${b.ah} Ah · ${t('market.usable')} ${Math.round(b.ah * DOD[b.type])} Ah</div>
-              </div>
-              <div>
-                <div class="ri-d">${isFinite(d) && d < 999 ? d.toFixed(1) + ' j' : '∞'}</div>
-                <div class="ri-n">${t('market.autonomy')}</div>
-              </div>
-            </div>`
-          }).join('')}
-        </div>
-      </div>
-
       <button class="save-cfg-btn" id="save-config-btn">
         <i class="ti ti-device-floppy"></i>
         ${S.user ? `${t('save.myConfig')}${S.userConfigs.length ? ` <span class="save-count">${S.userConfigs.length}</span>` : ''}` : t('save.accountRequired')}
