@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>OffroadWatt — Admin catalogue</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--bg:#090b0a;--card:#141a16;--b1:#1e2820;--t1:#ddeedd;--t2:#7a9985;--t3:#4a6455;
+    --am:#f0a030;--te:#2dd4bf;--rd:#f87171;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;--r:8px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--t1);font-family:var(--sans);line-height:1.5;padding:24px;max-width:880px;margin:0 auto}
+  h1{font-family:var(--mono);font-size:20px;color:var(--am);margin-bottom:4px}
+  .sub{color:var(--t3);font-size:12px;margin-bottom:24px}
+  .card{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:18px;margin-bottom:16px}
+  label{font-size:11px;color:var(--t2);display:block;margin-bottom:4px}
+  input,select{width:100%;background:#0f1310;border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:13px;padding:9px 11px;font-family:var(--sans)}
+  button{cursor:pointer;border:none;border-radius:var(--r);font-weight:600;font-size:13px;padding:9px 16px;font-family:var(--sans);display:inline-flex;align-items:center;gap:6px}
+  .btn-am{background:var(--am);color:#090b0a}
+  .btn-te{background:var(--te);color:#090b0a}
+  .btn-gh{background:none;border:1px solid var(--b1);color:var(--t2)}
+  .row{display:flex;gap:10px;align-items:flex-end}
+  .row>div{flex:1}
+  .res{border:1px solid var(--b1);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+  .res.dup{opacity:.45}
+  .res .nm{font-size:13px;font-weight:600}
+  .res .mt{font-size:11px;color:var(--t3);font-family:var(--mono)}
+  .res .badge{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px;background:rgba(248,113,113,.12);color:var(--rd);border:1px solid #6b2a2a}
+  .muted{color:var(--t3);font-size:12px}
+  .stat{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--te);margin-right:12px}
+  .hidden{display:none}
+  .spin{animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--b1);border-radius:var(--r);padding:10px 16px;font-size:13px}
+</style>
+</head>
+<body>
+  <h1><i class="ti ti-database-cog"></i> Admin catalogue</h1>
+  <div class="sub">Recherche IA d'équipements réels → validation → insertion dans <code>equipment_catalog</code>. Jamais de suppression.</div>
+
+  <!-- LOGIN -->
+  <div id="login" class="card hidden">
+    <label>Connexion admin (lien magique par email)</label>
+    <div class="row">
+      <div><input id="email" type="email" placeholder="votre@email.com"></div>
+      <button class="btn-am" id="send-link"><i class="ti ti-mail"></i> Recevoir le lien</button>
+    </div>
+    <div id="login-msg" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <!-- DENIED -->
+  <div id="denied" class="card hidden">
+    <div style="color:var(--rd)"><i class="ti ti-lock"></i> Accès réservé à l'administrateur.</div>
+    <button class="btn-gh" id="signout2" style="margin-top:10px"><i class="ti ti-logout"></i> Se déconnecter</button>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div id="counts" class="muted">Chargement…</div>
+        <button class="btn-gh" id="signout"><i class="ti ti-logout"></i> Déconnexion</button>
+      </div>
+      <div class="row">
+        <div style="flex:0 0 180px">
+          <label>Catégorie</label>
+          <select id="cat">
+            <option>Cuisine</option><option>Confort</option><option>Tech</option>
+            <option>Eau</option><option>Éclairage</option><option>Système</option>
+          </select>
+        </div>
+        <div>
+          <label>Mot-clé (optionnel)</label>
+          <input id="kw" placeholder="ex: réfrigérateur compresseur, chauffage diesel…">
+        </div>
+        <button class="btn-am" id="search"><i class="ti ti-search"></i> Rechercher</button>
+      </div>
+    </div>
+
+    <div id="results-card" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <strong id="results-title"></strong>
+        <button class="btn-te" id="add-selected"><i class="ti ti-plus"></i> Ajouter la sélection</button>
+      </div>
+      <div id="results"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+<script type="module">
+const OWNER_EMAIL = 'christophe-desmurger@outlook.com'
+const SB_URL = 'https://ofjpskrjlwfebaqomijm.supabase.co'
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
+const ICON_BY_CAT = { Cuisine:'ti-tools-kitchen-2', Confort:'ti-temperature', Tech:'ti-device-laptop', Eau:'ti-droplet', 'Éclairage':'ti-bulb', 'Système':'ti-settings' }
+const { createClient } = supabase
+const sb = createClient(SB_URL, SB_KEY)
+
+const $ = id => document.getElementById(id)
+const show = (id, on=true) => $(id).classList.toggle('hidden', !on)
+let proposed = []
+
+function toast(msg) { const t=$('toast'); t.textContent=msg; show('toast',true); setTimeout(()=>show('toast',false),2600) }
+
+async function boot() {
+  const { data:{ session } } = await sb.auth.getSession()
+  const email = session?.user?.email
+  if (!email) { show('login',true); return }
+  if (email.toLowerCase() !== OWNER_EMAIL.toLowerCase()) { show('denied',true); return }
+  show('admin',true)
+  refreshCounts()
+}
+
+async function refreshCounts() {
+  const { data } = await sb.from('equipment_catalog').select('category').not('category','is',null).not('watts','is',null)
+  const by = {}; (data||[]).forEach(r => by[r.category]=(by[r.category]||0)+1)
+  $('counts').innerHTML = `<span class="stat">Total : ${data?.length||0}</span>` +
+    Object.keys(by).sort().map(c=>`<span class="stat">${c} : ${by[c]}</span>`).join('')
+}
+
+$('send-link').onclick = async () => {
+  const email = $('email').value.trim()
+  if (!email) return
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } })
+  $('login-msg').textContent = error ? ('Erreur : '+error.message) : 'Lien envoyé ! Vérifiez votre boîte mail.'
+}
+$('signout').onclick = async () => { await sb.auth.signOut(); location.reload() }
+$('signout2').onclick = async () => { await sb.auth.signOut(); location.reload() }
+
+$('search').onclick = async () => {
+  const btn = $('search'); const orig = btn.innerHTML
+  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Recherche…'; btn.disabled = true
+  try {
+    const res = await fetch('/api/admin-search', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ category: $('cat').value, query: $('kw').value, count: 15 }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.detail || data.error || 'Erreur recherche')
+    proposed = data.items || []
+    renderResults(data.category)
+  } catch (e) { toast('Erreur : '+e.message) }
+  finally { btn.innerHTML = orig; btn.disabled = false }
+}
+
+function renderResults(category) {
+  show('results-card', true)
+  const newCount = proposed.filter(p=>!p.duplicate).length
+  $('results-title').textContent = `${proposed.length} proposés · ${newCount} nouveaux — ${category}`
+  $('results').innerHTML = proposed.map((p,i)=>`
+    <div class="res ${p.duplicate?'dup':''}">
+      <input type="checkbox" data-i="${i}" ${p.duplicate?'':'checked'} ${p.duplicate?'disabled':''} style="width:auto;flex:0 0 auto">
+      <div style="flex:1">
+        <div class="nm">${p.name}</div>
+        <div class="mt">${p.brand||'—'} · ${p.watts}W · ${p.hours}h/j · ${p.voltage}V</div>
+      </div>
+      ${p.duplicate?'<span class="badge">déjà en base</span>':''}
+    </div>`).join('')
+}
+
+$('add-selected').onclick = async () => {
+  const checks = [...document.querySelectorAll('#results input[type=checkbox]:checked')]
+  const rows = checks.map(c => {
+    const p = proposed[+c.dataset.i]
+    return { name:p.name, brand:p.brand||'', category:p.category, icon:ICON_BY_CAT[p.category]||'ti-plug', watts:p.watts, hours:p.hours, voltage:p.voltage }
+  })
+  if (!rows.length) return toast('Rien à ajouter')
+  const { error } = await sb.from('equipment_catalog').upsert(rows, { onConflict:'name,brand', ignoreDuplicates:true })
+  if (error) return toast('Erreur insertion : '+error.message)
+  toast(`${rows.length} équipement(s) ajouté(s)`)
+  show('results-card', false)
+  refreshCounts()
+}
+
+sb.auth.onAuthStateChange(()=>boot())
+boot()
+</script>
+</body>
+</html>
