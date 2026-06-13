@@ -110,109 +110,8 @@ const SUN_ZONES = [
   { r: 'Personnalisé', n: 'Personnalisé', h: 0, eg: '' },
 ]
 
-const CATALOG = [
-  // ── Cuisine ──────────────────────────────────────────────────────────────────
-  { n: 'Réfrigérateur compresseur 12V 40L (Dometic CFX3 40)', icon: 'ti-fridge', w: 45, h: 24, cat: 'Cuisine' },
-  { n: 'Réfrigérateur compresseur 12V 55L (ARB Elements)', icon: 'ti-fridge', w: 50, h: 24, cat: 'Cuisine' },
-  { n: 'Réfrigérateur compresseur 12V 75L (Dometic CFX3 75)', icon: 'ti-fridge', w: 55, h: 24, cat: 'Cuisine' },
-  { n: 'Congélateur portable 12V 30L (BougeRV)', icon: 'ti-snowflake', w: 45, h: 24, cat: 'Cuisine' },
-  { n: 'Réfrigérateur à absorption 3 voies 90L (Dometic RM8401)', icon: 'ti-fridge', w: 180, h: 24, cat: 'Cuisine' },
-  { n: 'Cave à vin portable 12V (Dometic W12)', icon: 'ti-bottle', w: 40, h: 24, cat: 'Cuisine' },
-  { n: 'Plaque induction 1 feu 1800W (Duxtop 9600LS)', icon: 'ti-flame', w: 1800, h: 0.5, cat: 'Cuisine' },
-  { n: 'Plaque induction 2 feux 3500W (Caso Triple2500)', icon: 'ti-flame', w: 3500, h: 0.5, cat: 'Cuisine' },
-  { n: 'Plaque gaz + allumage électrique', icon: 'ti-flame', w: 3, h: 0.5, cat: 'Cuisine' },
-  { n: 'Micro-ondes 700W (Inverter)', icon: 'ti-microwave', w: 900, h: 0.25, cat: 'Cuisine' },
-  { n: 'Micro-ondes 1000W (Dometic MWO 24)', icon: 'ti-microwave', w: 1200, h: 0.25, cat: 'Cuisine' },
-  { n: 'Machine à café expresso 230V (DeLonghi)', icon: 'ti-coffee', w: 1450, h: 0.15, cat: 'Cuisine' },
-  { n: 'Machine à café 12V (RoadPro)', icon: 'ti-coffee', w: 150, h: 0.2, cat: 'Cuisine' },
-  { n: 'Cafetière filtre 230V (Moulinex)', icon: 'ti-cup', w: 700, h: 0.2, cat: 'Cuisine' },
-  { n: 'Bouilloire électrique 230V 1.5L', icon: 'ti-droplet', w: 2200, h: 0.08, cat: 'Cuisine' },
-  { n: 'Bouilloire 12V 1L (Wagan Tech)', icon: 'ti-droplet', w: 120, h: 0.25, cat: 'Cuisine' },
-  { n: 'Grille-pain 230V 2 tranches (Philips)', icon: 'ti-bread', w: 900, h: 0.1, cat: 'Cuisine' },
-  { n: 'Mini-four 230V 15L (Russell Hobbs)', icon: 'ti-tool', w: 1200, h: 0.5, cat: 'Cuisine' },
-  { n: 'Mixeur plongeant 230V (Bamix)', icon: 'ti-blender', w: 200, h: 0.05, cat: 'Cuisine' },
-  { n: 'Hotte aspirante 12V (ventilateur)', icon: 'ti-wind', w: 25, h: 1, cat: 'Cuisine' },
-  // ── Confort ──────────────────────────────────────────────────────────────────
-  { n: 'Ventilateur 12V bureau (Caframo Sirocco II)', icon: 'ti-wind', w: 5, h: 8, cat: 'Confort' },
-  { n: 'Ventilateur plafond 12V (Fantastic Fan)', icon: 'ti-wind', w: 22, h: 8, cat: 'Confort' },
-  { n: 'Aérateur de toit 12V (Dometic Fan-Tastic 3350)', icon: 'ti-wind', w: 35, h: 8, cat: 'Confort' },
-  { n: 'Climatiseur portable 12V 800W (Webasto Air Top Evo 40)', icon: 'ti-air-conditioning', w: 230, h: 6, cat: 'Confort' },
-  { n: 'Climatiseur split 24V 1000W (Dometic FreshJet 2200)', icon: 'ti-air-conditioning', w: 420, h: 6, cat: 'Confort' },
-  { n: 'Chauffage diesel 2kW (Webasto Air Top 2000 STC)', icon: 'ti-temperature', w: 10, h: 8, cat: 'Confort' },
-  { n: 'Chauffage diesel 4kW (Eberspächer D4)', icon: 'ti-temperature', w: 15, h: 8, cat: 'Confort' },
-  { n: 'Chauffage diesel 5kW (Autoterm Air 5D)', icon: 'ti-temperature', w: 18, h: 8, cat: 'Confort' },
-  { n: 'Chauffage gaz + électronique (Truma Combi 4)', icon: 'ti-temperature', w: 15, h: 8, cat: 'Confort' },
-  { n: 'Chauffage électrique soufflant 1000W', icon: 'ti-temperature', w: 1000, h: 3, cat: 'Confort' },
-  { n: 'Couverture chauffante 12V (Motortrend)', icon: 'ti-bed', w: 60, h: 6, cat: 'Confort' },
-  { n: 'Matelas chauffant 12V (Kingleting)', icon: 'ti-bed', w: 40, h: 8, cat: 'Confort' },
-  { n: 'Chauffe-eau instantané 12V (Fogatti InstaShower)', icon: 'ti-droplets', w: 180, h: 0.5, cat: 'Confort' },
-  { n: 'Chauffe-eau cumulus 10L 230V (Truma Ultrastore)', icon: 'ti-droplets', w: 900, h: 1, cat: 'Confort' },
-  { n: 'Radiateur à eau chaude (chauffage gaz)', icon: 'ti-temperature', w: 8, h: 10, cat: 'Confort' },
-  { n: 'Rideau moustiquaire électrique porte', icon: 'ti-wind', w: 5, h: 12, cat: 'Confort' },
-  // ── Tech ─────────────────────────────────────────────────────────────────────
-  { n: 'Laptop 15" (MacBook Pro M3)', icon: 'ti-device-laptop', w: 30, h: 6, cat: 'Tech' },
-  { n: 'Laptop 15" PC (Dell XPS 15)', icon: 'ti-device-laptop', w: 65, h: 6, cat: 'Tech' },
-  { n: 'Laptop gaming 17" (ASUS ROG)', icon: 'ti-device-laptop', w: 180, h: 4, cat: 'Tech' },
-  { n: 'Smartphone (iPhone 15 Pro, charge)', icon: 'ti-device-mobile', w: 10, h: 2, cat: 'Tech' },
-  { n: 'Smartphones ×2 (charge)', icon: 'ti-device-mobile', w: 20, h: 2, cat: 'Tech' },
-  { n: 'Tablette (iPad Air, charge)', icon: 'ti-device-tablet', w: 20, h: 3, cat: 'Tech' },
-  { n: 'Télévision 24" LED (Avtex)', icon: 'ti-device-tv', w: 25, h: 3, cat: 'Tech' },
-  { n: 'Télévision 32" LED (Cello)', icon: 'ti-device-tv', w: 40, h: 3, cat: 'Tech' },
-  { n: 'Box TNT satellite (Foxsat)', icon: 'ti-device-tv', w: 15, h: 4, cat: 'Tech' },
-  { n: 'Routeur 4G/WiFi (GL.iNet GL-E750)', icon: 'ti-wifi', w: 6, h: 24, cat: 'Tech' },
-  { n: 'Routeur 4G haut débit (Pepwave MAX BR1)', icon: 'ti-wifi', w: 15, h: 24, cat: 'Tech' },
-  { n: 'Amplificateur WiFi (Netgear Orbi)', icon: 'ti-wifi', w: 20, h: 24, cat: 'Tech' },
-  { n: 'Drone DJI Mini 4 Pro (charge batterie)', icon: 'ti-drone', w: 30, h: 1.5, cat: 'Tech' },
-  { n: 'Drone DJI Air 3 (charge batterie)', icon: 'ti-drone', w: 60, h: 1.5, cat: 'Tech' },
-  { n: 'Appareil photo mirrorless (Sony A7, charge)', icon: 'ti-camera', w: 10, h: 1.5, cat: 'Tech' },
-  { n: 'GoPro ×2 (charge)', icon: 'ti-camera', w: 10, h: 2, cat: 'Tech' },
-  { n: 'Enceinte Bluetooth portable (JBL Charge 5)', icon: 'ti-music', w: 15, h: 4, cat: 'Tech' },
-  { n: 'Système audio amplifié 12V (Alpine)', icon: 'ti-music', w: 50, h: 3, cat: 'Tech' },
-  { n: 'Console de jeu portable (Nintendo Switch)', icon: 'ti-device-gamepad', w: 18, h: 3, cat: 'Tech' },
-  { n: 'Imprimante jet d\'encre 230V (Canon PIXMA)', icon: 'ti-printer', w: 12, h: 0.5, cat: 'Tech' },
-  { n: 'Disque dur externe USB (2.5")', icon: 'ti-database', w: 3, h: 4, cat: 'Tech' },
-  // ── Eau ──────────────────────────────────────────────────────────────────────
-  { n: 'Pompe à eau 12V (Flojet 2840)', icon: 'ti-droplet', w: 30, h: 0.5, cat: 'Eau' },
-  { n: 'Pompe à eau 12V haute pression (Shurflo 4008)', icon: 'ti-droplet', w: 50, h: 0.5, cat: 'Eau' },
-  { n: 'Pompe à eau pression auto (Jabsco PAR-MAX 3)', icon: 'ti-droplet', w: 65, h: 0.5, cat: 'Eau' },
-  { n: 'Pompe de transfert eau 12V', icon: 'ti-droplet', w: 50, h: 0.3, cat: 'Eau' },
-  { n: 'Douche extérieure solaire chauffante (Nemo Helio)', icon: 'ti-droplets', w: 10, h: 0.3, cat: 'Eau' },
-  { n: 'Chauffe-eau solaire 25L (pompe + controller)', icon: 'ti-droplets', w: 20, h: 0.5, cat: 'Eau' },
-  { n: 'WC électrique à cassette (Dometic CTS 4110)', icon: 'ti-toilet-paper', w: 35, h: 0.3, cat: 'Eau' },
-  { n: 'WC à compostage électrique (Nature\'s Head)', icon: 'ti-toilet-paper', w: 5, h: 24, cat: 'Eau' },
-  { n: 'Dessalinisateur 12V (Katadyn Power Survivor)', icon: 'ti-droplet', w: 40, h: 2, cat: 'Eau' },
-  { n: 'Filtre à eau UV (SteriPen) + pompe', icon: 'ti-droplet', w: 8, h: 0.5, cat: 'Eau' },
-  { n: 'Moniteur niveau eau (jauge)', icon: 'ti-droplet', w: 1, h: 24, cat: 'Eau' },
-  { n: 'Pompe vide-cave / évacuation', icon: 'ti-droplet', w: 80, h: 0.2, cat: 'Eau' },
-  // ── Éclairage ────────────────────────────────────────────────────────────────
-  { n: 'Éclairage LED bande 5m 12V (Govee)', icon: 'ti-bulb', w: 12, h: 5, cat: 'Éclairage' },
-  { n: 'Spots LED encastrés ×4 12V (3W chacun)', icon: 'ti-lamp', w: 12, h: 4, cat: 'Éclairage' },
-  { n: 'Spots LED encastrés ×6 12V (3W chacun)', icon: 'ti-lamp', w: 18, h: 4, cat: 'Éclairage' },
-  { n: 'Plafonnier LED 12V principal (12W)', icon: 'ti-bulb', w: 12, h: 5, cat: 'Éclairage' },
-  { n: 'Luminaire LED cuisine 12V (8W)', icon: 'ti-lamp', w: 8, h: 3, cat: 'Éclairage' },
-  { n: "Lampe d'ambiance 12V (Paulmann)", icon: 'ti-lamp-2', w: 6, h: 5, cat: 'Éclairage' },
-  { n: 'Éclairage de lecture 12V (2×3W)', icon: 'ti-lamp', w: 6, h: 2, cat: 'Éclairage' },
-  { n: 'Lumière extérieure LED auvent 12V', icon: 'ti-lamp', w: 10, h: 3, cat: 'Éclairage' },
-  { n: 'Phares de travail LED 12V ×2 (20W chacun)', icon: 'ti-focus', w: 40, h: 2, cat: 'Éclairage' },
-  { n: 'Projecteur LED 12V 50W (chantier)', icon: 'ti-focus', w: 50, h: 2, cat: 'Éclairage' },
-  { n: 'Éclairage coffres extérieurs 12V', icon: 'ti-bulb', w: 5, h: 1, cat: 'Éclairage' },
-  // ── Système ──────────────────────────────────────────────────────────────────
-  { n: 'Onduleur / Convertisseur 12V→230V 1000W (Victron Phoenix)', icon: 'ti-plug', w: 10, h: 24, cat: 'Système' },
-  { n: 'Onduleur/chargeur 12V 1500W (Victron MultiPlus)', icon: 'ti-plug', w: 15, h: 24, cat: 'Système' },
-  { n: 'Régulateur MPPT 75/15 (Victron)', icon: 'ti-solar-panel', w: 2, h: 24, cat: 'Système' },
-  { n: 'Régulateur MPPT 100/50 (Victron)', icon: 'ti-solar-panel', w: 4, h: 24, cat: 'Système' },
-  { n: 'Régulateur MPPT 150/35 (EPever Tracer)', icon: 'ti-solar-panel', w: 4, h: 24, cat: 'Système' },
-  { n: 'Chargeur DC-DC B2B 30A (Victron Orion-Tr Smart)', icon: 'ti-car', w: 15, h: 4, cat: 'Système' },
-  { n: 'Chargeur DC-DC B2B 40A (Sterling BB1240)', icon: 'ti-car', w: 20, h: 4, cat: 'Système' },
-  { n: 'BMS batterie Lithium (Daly 100A)', icon: 'ti-battery-charging', w: 3, h: 24, cat: 'Système' },
-  { n: 'Moniteur batterie 500A (Victron BMV-712)', icon: 'ti-battery', w: 1, h: 24, cat: 'Système' },
-  { n: 'Moniteur batterie (Renogy 500A)', icon: 'ti-battery', w: 1, h: 24, cat: 'Système' },
-  { n: 'Alarme 12V + sirène', icon: 'ti-alarm', w: 3, h: 24, cat: 'Système' },
-  { n: 'GPS tracker 12V (câblé, Rewire Security)', icon: 'ti-map-pin', w: 2, h: 24, cat: 'Système' },
-  { n: 'Centrale de commande 12V (Victron Cerbo GX)', icon: 'ti-settings', w: 4, h: 24, cat: 'Système' },
-  { n: 'Répartiteur de charge (VSR 12V)', icon: 'ti-plug', w: 1, h: 4, cat: 'Système' },
-  { n: 'Réchauffeur de batterie 12V (en hiver)', icon: 'ti-temperature', w: 25, h: 8, cat: 'Système' },
-]
+let CATALOG = []  // chargé 100% depuis Supabase au boot (loadCatalogFromDB)
+const ICON_BY_CAT = { Cuisine: 'ti-tools-kitchen-2', Confort: 'ti-temperature', Tech: 'ti-device-laptop', Eau: 'ti-droplet', 'Éclairage': 'ti-bulb', 'Système': 'ti-settings' }
 
 const CATS = ['Tout', 'Cuisine', 'Confort', 'Tech', 'Eau', 'Éclairage', 'Système']
 const CATICONS = {
@@ -1882,7 +1781,7 @@ function buildModal() {
               </div>
               <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
             </div>`).join('')}
-          ${allItems.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">Aucun appareil trouvé</div>` : ''}
+          ${allItems.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${!catalogLoaded ? 'Chargement du catalogue…' : 'Aucun appareil trouvé'}</div>` : ''}
         </div>
         <div class="mo-btns"><button id="close-modal" class="mo-cancel">${t('btn.close')}</button></div>
       </div>
@@ -2126,6 +2025,37 @@ function confirmCustom() {
   set({ apps: [...S.apps, { id: Date.now(), n, icon: icons[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
+// ─── CATALOGUE (100% Supabase) ───────────────────────────────────────────────
+// Charge le catalogue d'appareils depuis equipment_catalog. Aucune donnée
+// statique : la table est alimentée par le seed initial + l'agent hebdomadaire
+// (api/cron-catalog.js) qui n'insère jamais de doublon et ne supprime rien.
+let catalogLoaded = false
+async function loadCatalogFromDB() {
+  try {
+    const { data, error } = await supabase
+      .from('equipment_catalog')
+      .select('name, icon, watts, hours, category')
+      .not('category', 'is', null)
+      .not('watts', 'is', null)
+      .order('category', { ascending: true })
+      .order('name', { ascending: true })
+    if (error) throw error
+    CATALOG = (data || []).map(r => ({
+      n: r.name,
+      icon: r.icon || ICON_BY_CAT[r.category] || 'ti-plug',
+      w: Number(r.watts),
+      h: r.hours != null ? Number(r.hours) : 4,
+      cat: r.category,
+    }))
+  } catch (e) {
+    console.warn('Catalogue indisponible :', e?.message || e)
+    CATALOG = []
+  } finally {
+    catalogLoaded = true
+    if (S.modal?.type === 'catalog') render()
+  }
+}
+
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
 loadPersistedState()
@@ -2141,4 +2071,5 @@ try {
 render()
 if (sharedLoaded) showToast(t('share.loaded'))
 if (hasShortParam) loadShortLink()  // chargement asynchrone depuis Supabase
+loadCatalogFromDB()                 // catalogue chargé 100% depuis Supabase
 initAuth()

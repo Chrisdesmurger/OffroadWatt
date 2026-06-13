@@ -5,6 +5,10 @@
   "functions": {
     "api/search.js":       { "maxDuration": 10 },
     "api/refine.js":       { "maxDuration": 15 },
-    "api/send-summary.js": { "maxDuration": 10 }
-  }
+    "api/send-summary.js": { "maxDuration": 10 },
+    "api/cron-catalog.js": { "maxDuration": 30 }
+  },
+  "crons": [
+    { "path": "/api/cron-catalog", "schedule": "0 6 * * 1" }
+  ]
 }
