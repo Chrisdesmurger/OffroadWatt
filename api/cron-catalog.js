@@ -26,7 +26,7 @@ function isoWeek(d = new Date()) {
   return Math.ceil((((date - yearStart) / 86400000) + 1) / 7)
 }
 
-const SYSTEM_PROMPT = `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
+const SYSTEM_TEXT = `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
 Tu connais précisément les modèles réels et leur consommation électrique moyenne réaliste en usage off-grid.
 
 MARQUES D'ÉQUIPEMENTS PRIORITAIRES :
@@ -51,6 +51,8 @@ RÈGLES STRICTES :
 - Reste STRICTEMENT dans la catégorie demandée.
 - Utilise search_existing pour éviter les doublons.
 - Varie les gammes de prix (entrée / milieu / haut de gamme).`
+
+const SYSTEM = [{ type: 'text', text: SYSTEM_TEXT, cache_control: { type: 'ephemeral' } }]
 
 const TOOLS = [
   {
@@ -87,6 +89,7 @@ const TOOLS = [
       },
       required: ['items'],
     },
+    cache_control: { type: 'ephemeral' },
   },
 ]
 
@@ -115,8 +118,8 @@ export default async function handler(req) {
   const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
   if (!apiKey) return new Response(JSON.stringify({ error: 'ANTHROPIC_KEY manquante' }), { status: 500 })
 
-  const category = CATEGORIES[isoWeek() % CATEGORIES.length]
-  const brandHints = (EQUIPMENT_BRANDS[category] || []).join(', ')
+  const category    = CATEGORIES[isoWeek() % CATEGORIES.length]
+  const brandHints  = (EQUIPMENT_BRANDS[category] || []).join(', ')
 
   try {
     const existingRes = await fetch(
@@ -143,12 +146,16 @@ Stratégie :
     while (rounds < 6) {
       const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 4096,
-          temperature: 0,
-          system: SYSTEM_PROMPT,
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8096,
+          system: SYSTEM,
           tools: TOOLS,
           tool_choice: { type: 'auto' },
           messages,
@@ -199,13 +206,13 @@ Stratégie :
       if (!key || seen.has(key)) continue
       seen.add(key)
       toInsert.push({
-        name:     it.name,
-        brand:    it.brand || '',
+        name:    it.name,
+        brand:   it.brand || '',
         category,
-        icon:     ICON_BY_CAT[category] || 'ti-plug',
-        watts:    Number(it.watts) || null,
-        hours:    it.hours != null ? Number(it.hours) : 4,
-        voltage:  Number(it.voltage) || 12,
+        icon:    ICON_BY_CAT[category] || 'ti-plug',
+        watts:   Number(it.watts) || null,
+        hours:   it.hours != null ? Number(it.hours) : 4,
+        voltage: Number(it.voltage) || 12,
       })
     }
 
