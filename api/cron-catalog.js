@@ -1,4 +1,4 @@
-// Serverless (Node.js) — maxDuration 60s défini dans vercel.json
+// Serverless Node.js — maxDuration: 60s dans vercel.json
 
 const SB_URL = process.env.SUPABASE_URL || 'https://ofjpskrjlwfebaqomijm.supabase.co'
 const SB_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
@@ -8,7 +8,6 @@ const ICON_BY_CAT = {
   Cuisine: 'ti-tools-kitchen-2', Confort: 'ti-temperature', Tech: 'ti-device-laptop',
   Eau: 'ti-droplet', 'Éclairage': 'ti-bulb', 'Système': 'ti-settings',
 }
-
 const EQUIPMENT_BRANDS = {
   Cuisine:    ['Dometic', 'Comet', 'ENO', 'Campingaz', 'Smev', 'Thetford', 'Beem', 'Severin'],
   Confort:    ['Webasto', 'Eberspächer', 'Espar', 'Truma', 'Propex', 'Planar', 'Autoterm', 'Dometic'],
@@ -26,7 +25,10 @@ function isoWeek(d = new Date()) {
   return Math.ceil((((date - yearStart) / 86400000) + 1) / 7)
 }
 
-const SYSTEM_TEXT = `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
+const SYSTEM = [{
+  type: 'text',
+  cache_control: { type: 'ephemeral' },
+  text: `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
 Tu connais précisément les modèles réels et leur consommation électrique moyenne réaliste en usage off-grid.
 
 MARQUES D'ÉQUIPEMENTS PRIORITAIRES :
@@ -37,7 +39,7 @@ MARQUES D'ÉQUIPEMENTS PRIORITAIRES :
 - Éclairage : Narva, Ring, Hella, LED Autolamps, Osram, Rigid Industries
 - Système : Victron Energy, Renogy, Mastervolt, Studer, Votronic, CTEK, Büttner
 
-MARCHÉ CAMPING-CAR (contexte) :
+MARCHÉ CAMPING-CAR :
 - Haut de gamme : Hymer, Carthago, Niesmann & Bischoff, Frankia, EuraMobil, Mobilvetta
 - Milieu de gamme : Bailey, Elddis, AutoSleeper, Dethleffs, Bürstner, Pilote, Chausson
 - Entrée de gamme : Adria, Carado, Sunlight, Swift, Benimar, Laika, Jayco, Avida, Nebula
@@ -46,13 +48,12 @@ RÈGLES STRICTES :
 - Ne propose que des produits RÉELS et identifiables (marque + modèle précis).
 - watts = consommation électrique MOYENNE 12V réaliste (pas le pic).
   Frigos à compresseur : moyenne avec cycle ~30% (ex. 12V 75L ≈ 55W moyens).
-  Chauffages à combustible (diesel/gaz) : UNIQUEMENT l'électrique.
+  Chauffages diesel/gaz : UNIQUEMENT l'électrique (ventilateur + pompe + électronique).
 - hours = nombre d'heures d'utilisation typique par jour.
 - Reste STRICTEMENT dans la catégorie demandée.
-- Utilise search_existing pour éviter les doublons.
-- Varie les gammes de prix (entrée / milieu / haut de gamme).`
-
-const SYSTEM = [{ type: 'text', text: SYSTEM_TEXT, cache_control: { type: 'ephemeral' } }]
+- Utilise search_existing avant de proposer pour éviter les doublons.
+- Varie les gammes (entrée / milieu / haut de gamme).`,
+}]
 
 const TOOLS = [
   {
@@ -93,11 +94,7 @@ const TOOLS = [
   },
 ]
 
-const sbHeaders = {
-  apikey: SB_KEY,
-  Authorization: `Bearer ${SB_KEY}`,
-  'Content-Type': 'application/json',
-}
+const sbHeaders = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' }
 
 async function searchExisting(keyword, category) {
   const url = `${SB_URL}/rest/v1/equipment_catalog?select=name,brand&or=(name.ilike.*${encodeURIComponent(keyword)}*,brand.ilike.*${encodeURIComponent(keyword)}*)&category=eq.${encodeURIComponent(category)}&limit=20`
@@ -106,20 +103,18 @@ async function searchExisting(keyword, category) {
   return (await res.json()).map(r => `${r.name} (${r.brand || '—'})`)
 }
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   const secret = process.env.CRON_SECRET
   if (secret) {
-    const auth = req.headers.get('authorization') || ''
-    if (auth !== `Bearer ${secret}`) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
-    }
+    const auth = req.headers['authorization'] || ''
+    if (auth !== `Bearer ${secret}`) { res.status(401).json({ error: 'Unauthorized' }); return }
   }
 
   const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
-  if (!apiKey) return new Response(JSON.stringify({ error: 'ANTHROPIC_KEY manquante' }), { status: 500 })
+  if (!apiKey) { res.status(500).json({ error: 'ANTHROPIC_KEY manquante' }); return }
 
-  const category    = CATEGORIES[isoWeek() % CATEGORIES.length]
-  const brandHints  = (EQUIPMENT_BRANDS[category] || []).join(', ')
+  const category   = CATEGORIES[isoWeek() % CATEGORIES.length]
+  const brandHints = (EQUIPMENT_BRANDS[category] || []).join(', ')
 
   try {
     const existingRes = await fetch(
@@ -164,7 +159,7 @@ Stratégie :
 
       if (!aiRes.ok) {
         const err = await aiRes.text()
-        return new Response(JSON.stringify({ error: 'Anthropic', detail: err, category }), { status: 502 })
+        res.status(502).json({ error: 'Anthropic', detail: err, category }); return
       }
 
       const data = await aiRes.json()
@@ -182,7 +177,7 @@ Stratégie :
             tool_use_id: tu.id,
             content: found.length
               ? `${found.length} trouvé(s) :\n${found.join('\n')}`
-              : 'Aucun résultat — cette marque/type n\'est pas encore dans le catalogue.',
+              : 'Aucun — cette marque/type n\'est pas encore dans le catalogue.',
           })
         } else if (tu.name === 'add_equipment') {
           allProposed.push(...(tu.input.items || []))
@@ -198,7 +193,6 @@ Stratégie :
       rounds++
     }
 
-    // Filtre doublons + insertion
     const seen = new Set(existingNames)
     const toInsert = []
     for (const it of allProposed) {
@@ -206,12 +200,10 @@ Stratégie :
       if (!key || seen.has(key)) continue
       seen.add(key)
       toInsert.push({
-        name:    it.name,
-        brand:   it.brand || '',
-        category,
-        icon:    ICON_BY_CAT[category] || 'ti-plug',
-        watts:   Number(it.watts) || null,
-        hours:   it.hours != null ? Number(it.hours) : 4,
+        name: it.name, brand: it.brand || '', category,
+        icon: ICON_BY_CAT[category] || 'ti-plug',
+        watts: Number(it.watts) || null,
+        hours: it.hours != null ? Number(it.hours) : 4,
         voltage: Number(it.voltage) || 12,
       })
     }
@@ -231,14 +223,12 @@ Stratégie :
         inserted = Array.isArray(rows) ? rows.length : toInsert.length
       } else {
         const err = await insRes.text()
-        return new Response(JSON.stringify({ error: 'Supabase insert', detail: err, category }), { status: 502 })
+        res.status(502).json({ error: 'Supabase insert', detail: err, category }); return
       }
     }
 
-    return new Response(JSON.stringify({
-      ok: true, category, week: isoWeek(), rounds, proposed: allProposed.length, inserted,
-    }), { headers: { 'Content-Type': 'application/json' } })
+    res.status(200).json({ ok: true, category, week: isoWeek(), rounds, proposed: allProposed.length, inserted })
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e?.message || e), category }), { status: 500 })
+    res.status(500).json({ error: String(e?.message || e), category })
   }
 }
