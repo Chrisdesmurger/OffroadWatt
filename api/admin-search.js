@@ -18,13 +18,7 @@ const EQUIPMENT_BRANDS = {
   Système:    ['Victron Energy', 'Renogy', 'Epever', 'SRNE', 'Votronic', 'Büttner', 'CTEK', 'Sterling', 'Mastervolt', 'Studer'],
 }
 
-const VEHICLE_BRANDS = {
-  HighEnd: ['Hymer', 'Carthago', 'Niesmann & Bischoff', 'Frankia', 'EuraMobil', 'Mobilvetta', 'Wingamm', 'ACM'],
-  Mid:     ['Bailey', 'Elddis', 'AutoSleeper', 'AutoTrail', 'Dethleffs', 'Bürstner', 'Pilote', 'Chausson', 'CI Magis'],
-  Entry:   ['Adria', 'Carado', 'Sunlight', 'RollerTeam', 'Swift', 'Benimar', 'Laika', 'Jayco', 'Avida', 'Nebula'],
-}
-
-const SYSTEM_PROMPT = `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
+const SYSTEM_TEXT = `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
 Tu connais précisément les modèles réels et leur consommation électrique moyenne réaliste en usage off-grid.
 
 MARQUES D'ÉQUIPEMENTS PRIORITAIRES (favorise ces fabricants reconnus) :
@@ -36,9 +30,9 @@ MARQUES D'ÉQUIPEMENTS PRIORITAIRES (favorise ces fabricants reconnus) :
 - Système : Victron Energy, Renogy, Mastervolt, Studer, Votronic, CTEK, Büttner
 
 MARCHÉ CAMPING-CAR (contexte des équipements typiques) :
-- Haut de gamme : Hymer, Carthago, Niesmann & Bischoff, Frankia, EuraMobil, Mobilvetta
-- Milieu de gamme : Bailey, Elddis, AutoSleeper, Dethleffs, Bürstner, Pilote, Chausson
-- Entrée de gamme : Adria, Carado, Sunlight, Swift, Benimar, Laika, Jayco, Avida
+- Haut de gamme : Hymer, Carthago, Niesmann & Bischoff, Frankia, EuraMobil, Mobilvetta, Wingamm
+- Milieu de gamme : Bailey, Elddis, AutoSleeper, AutoTrail, Dethleffs, Bürstner, Pilote, Chausson, CI Magis
+- Entrée de gamme : Adria, Carado, Sunlight, RollerTeam, Swift, Benimar, Laika, Jayco, Avida, Nebula
 
 RÈGLES STRICTES :
 - Ne propose que des produits RÉELS et identifiables (marque + modèle précis).
@@ -47,8 +41,11 @@ RÈGLES STRICTES :
   Chauffages à combustible (diesel/gaz) : UNIQUEMENT l'électrique (ventilateur + pompe + électronique).
 - hours = nombre d'heures d'utilisation typique par jour.
 - Reste STRICTEMENT dans la catégorie demandée.
-- Utilise search_existing pour vérifier l'existant avant de proposer.
+- Utilise search_existing pour vérifier ce qui est déjà en base avant de proposer.
 - Propose des équipements variés : entrée de gamme, milieu, haut de gamme.`
+
+// System prompt en tableau pour le cache_control
+const SYSTEM = [{ type: 'text', text: SYSTEM_TEXT, cache_control: { type: 'ephemeral' } }]
 
 const TOOLS = [
   {
@@ -85,6 +82,8 @@ const TOOLS = [
       },
       required: ['items'],
     },
+    // Cache le dernier outil (= toute la liste des outils en pratique)
+    cache_control: { type: 'ephemeral' },
   },
 ]
 
@@ -130,7 +129,6 @@ Stratégie :
 2. Propose des équipements absents du catalogue, variés (entrée/milieu/haut de gamme).
 3. Tu peux faire plusieurs appels search_existing et plusieurs appels propose_equipment.`
 
-    // Boucle agentique
     const messages = [{ role: 'user', content: userMsg }]
     const allProposed = []
     let rounds = 0
@@ -138,12 +136,16 @@ Stratégie :
     while (rounds < 6) {
       const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 4096,
-          temperature: 0,
-          system: SYSTEM_PROMPT,
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8096,
+          system: SYSTEM,
           tools: TOOLS,
           tool_choice: { type: 'auto' },
           messages,
@@ -170,7 +172,7 @@ Stratégie :
             tool_use_id: tu.id,
             content: found.length
               ? `${found.length} trouvé(s) :\n${found.join('\n')}`
-              : 'Aucun résultat — ce type/marque n\'est pas encore dans le catalogue.',
+              : 'Aucun résultat — cette marque/type n\'est pas encore dans le catalogue.',
           })
         } else if (tu.name === 'propose_equipment') {
           const items = tu.input.items || []
