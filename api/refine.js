@@ -1,9 +1,11 @@
+import { checkRateLimit } from './_rate-limit.js'
+
 export const config = { runtime: 'edge' }
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 const SYSTEM_PROMPT = `You are an expert in 12V mobile electrical systems for campervans and overlanding vehicles.
@@ -88,6 +90,9 @@ export default async function handler(req) {
   }
 
   if (!name) return new Response('Missing name', { status: 400, headers: CORS })
+
+  const blocked = await checkRateLimit(req, 'refine', CORS)
+  if (blocked) return blocked
 
   const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
   if (!apiKey) return new Response('Missing API key', { status: 500, headers: CORS })
