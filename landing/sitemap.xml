@@ -107,4 +107,34 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/agm-gel-litio-bateria-autocaravana"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/agm-vs-gel-vs-lithium-campervan-battery"/>
   </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/brancher-chargeur-dc-dc-camping-car"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/instalar-cargador-dc-dc-furgoneta-camper"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/fr/brancher-chargeur-dc-dc-camping-car</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/brancher-chargeur-dc-dc-camping-car"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/instalar-cargador-dc-dc-furgoneta-camper"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/es/instalar-cargador-dc-dc-furgoneta-camper</loc>
+    <lastmod>2026-06-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/brancher-chargeur-dc-dc-camping-car"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/instalar-cargador-dc-dc-furgoneta-camper"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/how-to-wire-dc-dc-charger-campervan"/>
+  </url>
 </urlset>
