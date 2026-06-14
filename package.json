@@ -2,6 +2,7 @@
   "name": "offroadwatt",
   "version": "1.0.0",
   "description": "Calculateur d'autonomie électrique camping-car / van / caravane",
+  "type": "module",
   "engines": { "node": "20.x" },
   "scripts": {
     "dev": "vite",
