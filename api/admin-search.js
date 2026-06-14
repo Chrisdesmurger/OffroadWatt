@@ -43,6 +43,9 @@ RÈGLES STRICTES :
 - Varie les gammes (entrée / milieu / haut de gamme).`,
 }]
 
+// System prompt en tableau pour le cache_control
+const SYSTEM = [{ type: 'text', text: SYSTEM_TEXT, cache_control: { type: 'ephemeral' } }]
+
 const TOOLS = [
   {
     name: 'search_existing',
