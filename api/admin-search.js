@@ -1,4 +1,5 @@
-export const config = { runtime: 'edge' }
+// Serverless (Node.js) — pas Edge — pour bénéficier du maxDuration 60s
+// Edge functions ont un hard cap à 25s sur Vercel Hobby
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -133,7 +134,7 @@ Stratégie :
     const allProposed = []
     let rounds = 0
 
-    while (rounds < 6) {
+    while (rounds < 3) {
       const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
