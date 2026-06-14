@@ -10,5 +10,8 @@
   },
   "crons": [
     { "path": "/api/cron-catalog", "schedule": "0 6 * * 1" }
+  ],
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" }
   ]
 }
