@@ -92,8 +92,11 @@
         <div style="flex:0 0 180px">
           <label>Catégorie</label>
           <select id="cat">
-            <option>Cuisine</option><option>Confort</option><option>Tech</option>
-            <option>Eau</option><option>Éclairage</option><option>Système</option>
+            <option>Réfrigérateur</option><option>Micro-onde</option><option>Four</option>
+            <option>Chauffe-eau</option><option>Chauffage</option>
+            <option>Chargeur solaire</option><option>Chargeur DC-DC</option><option>Onduleur</option>
+            <option>Télévision</option><option>Satellite</option><option>Box internet</option>
+            <option>Pompe à eau</option><option>Chargeur batterie</option>
           </select>
         </div>
         <div>
@@ -160,7 +163,13 @@
 const OWNER_EMAIL = 'christophe-desmurger@outlook.com'
 const SB_URL = 'https://ofjpskrjlwfebaqomijm.supabase.co'
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
-const ICON_BY_CAT = { Cuisine:'ti-tools-kitchen-2', Confort:'ti-temperature', Tech:'ti-device-laptop', Eau:'ti-droplet', 'Éclairage':'ti-bulb', 'Système':'ti-settings' }
+const ICON_BY_CAT = {
+  'Réfrigérateur':'ti-device-fridge', 'Micro-onde':'ti-microwave', 'Four':'ti-flame',
+  'Chauffe-eau':'ti-droplet', 'Chauffage':'ti-temperature', 'Chargeur solaire':'ti-solar-panel',
+  'Chargeur DC-DC':'ti-current-dc', 'Onduleur':'ti-current-ac', 'Télévision':'ti-device-tv',
+  'Satellite':'ti-satellite', 'Box internet':'ti-wifi', 'Pompe à eau':'ti-droplet-half',
+  'Chargeur batterie':'ti-battery-charging',
+}
 const { createClient } = supabase
 const sb = createClient(SB_URL, SB_KEY)
 
