@@ -3,6 +3,13 @@
 import { createClient } from '@supabase/supabase-js'
 import { t, ta, getLang, setLang, initLang, localeCode, LANGS } from './i18n.js'
 
+// ─── ANALYTICS (Plausible) ──────────────────────────────────────────────────
+function track(event, props) {
+  if (typeof window.plausible === 'function') {
+    window.plausible(event, props ? { props } : undefined)
+  }
+}
+
 // Traduction des catégories et régions (les clés internes restent en français)
 const tcat = (c) => t('cat.' + c)
 const tregion = (r) => t('region.' + r)
@@ -280,7 +287,10 @@ async function initAuth() {
   if (session?.user) await onSignIn(session.user)
 
   supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) await onSignIn(session.user)
+    if (event === 'SIGNED_IN' && session?.user) {
+      track('auth_login', { method: session.user.app_metadata?.provider || 'email' })
+      await onSignIn(session.user)
+    }
     if (event === 'SIGNED_OUT') set({ user: null, userConfigs: [] })
   })
 }
@@ -311,6 +321,7 @@ async function signInWithEmail(email) {
     options: { emailRedirectTo: window.location.origin },
   })
   if (error) { set({ authLoading: false }); alert(t('alert.error') + error.message); return }
+  track('auth_signup', { method: 'email' })
   set({ authLoading: false, modal: { type: 'auth-sent', email } })
 }
 
@@ -337,6 +348,7 @@ async function saveCurrentConfig(name) {
   }
 
   await loadUserConfigs()
+  track('config_saved')
   set({ saveLoading: false, modal: null })
 }
 
@@ -602,7 +614,17 @@ async function loadShortLink() {
 
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
-const set = (u) => { Object.assign(S, u); persistState(); render() }
+let _calcTimer
+const CALC_KEYS = ['apps','bat','batNb','dod','solOn','solW','solNb','solEff','sunIdx','customSunH','altOn','altAmps','altHours']
+const set = (u) => {
+  Object.assign(S, u)
+  persistState()
+  render()
+  if (CALC_KEYS.some(k => k in u)) {
+    clearTimeout(_calcTimer)
+    _calcTimer = setTimeout(() => track('calculation_run'), 1500)
+  }
+}
 const sunHOf = (st) => st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
 const sunH = () => sunHOf(S)
 
@@ -1951,7 +1973,7 @@ function bindEvents() {
     set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
   }))
   // Email summary buttons
-  const openSummaryModal = () => set({ modal: { type: 'email-summary' } })
+  const openSummaryModal = () => { track('export_pdf'); set({ modal: { type: 'email-summary' } }) }
   document.getElementById('export-pdf')?.addEventListener('click', openSummaryModal)
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
   // Partage de configuration — ouvre la fenêtre de partage (#13)
@@ -2012,6 +2034,10 @@ function bindEvents() {
   document.querySelectorAll('[data-load-config]').forEach(el => el.addEventListener('click', () => loadConfig(el.dataset.loadConfig)))
   document.querySelectorAll('[data-del-config]').forEach(el => el.addEventListener('click', () => {
     if (confirm(t('confirm.deleteConfig'))) deleteConfig(el.dataset.delConfig)
+  }))
+  // Affiliate link clicks (delegated — works with future PRs #37/#40)
+  document.querySelectorAll('[data-affiliate]').forEach(el => el.addEventListener('click', () => {
+    track('affiliate_click', { product_id: el.dataset.affiliate })
   }))
 }
 
