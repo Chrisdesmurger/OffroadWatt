@@ -94,6 +94,14 @@ const DICT = {
     'solar.sunPerDay': 'Sun / day',
     'solar.production': 'Production / day',
 
+    // Recommended gear (affiliate)
+    'gear.title': 'Recommended gear',
+    'gear.panels': 'Solar panels ({wc} Wc)',
+    'gear.mppt': 'MPPT charge controller',
+    'gear.mpptFor': 'for ~{amps} A',
+    'gear.buy': 'Buy',
+    'gear.disclosure': 'Affiliate links — we may earn a commission, at no extra cost to you.',
+
     // Energy balance
     'balance.title': 'Daily energy balance',
     'balance.whSolar': 'Ah solar / day',
@@ -429,6 +437,14 @@ const DICT = {
     'solar.sunPerDay': 'Sol / día',
     'solar.production': 'Producción / día',
 
+    // Material recomendado (afiliación)
+    'gear.title': 'Material recomendado',
+    'gear.panels': 'Paneles solares ({wc} Wc)',
+    'gear.mppt': 'Regulador de carga MPPT',
+    'gear.mpptFor': 'para ~{amps} A',
+    'gear.buy': 'Comprar',
+    'gear.disclosure': 'Enlaces de afiliación — podemos ganar una comisión, sin coste adicional para ti.',
+
     'balance.title': 'Balance energético diario',
     'balance.whSolar': 'Ah solar / día',
     'balance.whAlt': 'Ah alternador / día',
@@ -744,6 +760,14 @@ const DICT = {
     'solar.installed': 'Puissance installée',
     'solar.sunPerDay': 'Soleil / jour',
     'solar.production': 'Production / jour',
+
+    // Matériel recommandé (affiliation)
+    'gear.title': 'Matériel recommandé',
+    'gear.panels': 'Panneaux solaires ({wc} Wc)',
+    'gear.mppt': 'Régulateur de charge MPPT',
+    'gear.mpptFor': 'pour ~{amps} A',
+    'gear.buy': 'Acheter',
+    'gear.disclosure': 'Liens affiliés — nous pouvons percevoir une commission, sans surcoût pour vous.',
 
     'balance.title': 'Bilan énergétique journalier',
     'balance.whSolar': 'Ah solaire / jour',

@@ -66,6 +66,37 @@ const BAT_TYPES = [
 const DOD = { AGM: 0.5, GEL: 0.5, LI: 0.8 }
 const PANELS = [80, 100, 150, 200, 250, 300, 400, 500]
 
+// ── #11 — Liens affiliés : panneaux solaires + régulateurs MPPT ──────────────
+// Tag affilié Amazon Partenaires, configurable via Vercel (VITE_AMAZON_TAG).
+const AMAZON_TAG = (import.meta.env && import.meta.env.VITE_AMAZON_TAG) || 'offroadwatt-21'
+
+// Construit une URL Amazon FR affiliée. `buyUrl` direct sinon recherche par mots-clés.
+function affiliateUrl(query, buyUrl) {
+  const base = buyUrl || `https://www.amazon.fr/s?k=${encodeURIComponent(query)}`
+  if (/[?&]tag=/.test(base)) return base
+  return base + (base.includes('?') ? '&' : '?') + 'tag=' + AMAZON_TAG
+}
+
+// Marques de panneaux recommandées (panier moyen 80–300€).
+const PANEL_BRANDS = ['Renogy', 'ECO-WORTHY', 'DOKIO']
+
+// Catalogue régulateurs MPPT Victron SmartSolar : ampérage max + prix indicatif €.
+const MPPT_MODELS = [
+  { label: 'Victron SmartSolar MPPT 75/15',  maxA: 15,  eur: 95  },
+  { label: 'Victron SmartSolar MPPT 100/20', maxA: 20,  eur: 130 },
+  { label: 'Victron SmartSolar MPPT 100/30', maxA: 30,  eur: 175 },
+  { label: 'Victron SmartSolar MPPT 150/35', maxA: 35,  eur: 230 },
+  { label: 'Victron SmartSolar MPPT 150/45', maxA: 45,  eur: 320 },
+  { label: 'Victron SmartSolar MPPT 150/70', maxA: 70,  eur: 480 },
+  { label: 'Victron SmartSolar MPPT 150/100', maxA: 100, eur: 650 },
+]
+
+// Sélectionne le MPPT adapté : ampérage = Wc total ÷ tension batterie, marge +25%.
+function recommendMppt(totalWc, voltage) {
+  const neededA = (totalWc / (voltage || 12)) * 1.25
+  return MPPT_MODELS.find(m => m.maxA >= neededA) || MPPT_MODELS[MPPT_MODELS.length - 1]
+}
+
 const SUN_ZONES = [
   { r: 'Europe', n: 'Scandinavie', h: 2.5, eg: 'Oslo, Helsinki, Stockholm' },
   { r: 'Europe', n: 'Royaume-Uni', h: 3.0, eg: 'Londres, Dublin, Édimbourg' },
@@ -852,6 +883,37 @@ function buildAppsCard() {
   </div>`
 }
 
+// #11 — Section « Matériel recommandé » dans la carte Solaire (liens affiliés).
+function buildSolarGear() {
+  const totalWc = S.solW * S.solNb
+  const mppt = recommendMppt(totalWc, S.bat.v)
+  const ampsAtV = Math.round(totalWc / (S.bat.v || 12))
+
+  const panelRows = PANEL_BRANDS.map(brand => {
+    const name = `${brand} ${S.solW}W`
+    const url = affiliateUrl(`panneau solaire ${brand} ${S.solW}W camping-car`)
+    return `<a class="gear-item" href="${url}" target="_blank" rel="nofollow sponsored noopener" data-affiliate="panel-${brand.toLowerCase()}">
+      <span class="gear-name"><i class="ti ti-solar-panel"></i>${name}</span>
+      <span class="gear-buy">${t('gear.buy')}<i class="ti ti-external-link"></i></span>
+    </a>`
+  }).join('')
+
+  const mpptUrl = affiliateUrl(mppt.label)
+  const mpptRow = `<a class="gear-item" href="${mpptUrl}" target="_blank" rel="nofollow sponsored noopener" data-affiliate="mppt">
+    <span class="gear-name"><i class="ti ti-adjustments-bolt"></i>${mppt.label}<span class="gear-sub">${t('gear.mpptFor', { amps: ampsAtV })} · ~${mppt.eur}€</span></span>
+    <span class="gear-buy">${t('gear.buy')}<i class="ti ti-external-link"></i></span>
+  </a>`
+
+  return `<div class="gear-box">
+    <div class="gear-title"><i class="ti ti-shopping-cart"></i>${t('gear.title')}</div>
+    <div class="gear-label">${t('gear.panels', { wc: S.solW })}</div>
+    ${panelRows}
+    <div class="gear-label">${t('gear.mppt')}</div>
+    ${mpptRow}
+    <div class="gear-note">${t('gear.disclosure')}</div>
+  </div>`
+}
+
 function buildEnergyTab() {
   const { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
   const isDanger = net > usable
@@ -972,7 +1034,8 @@ function buildEnergyTab() {
           <div class="ss-item"><div class="ssn">${sunH()} h</div><div class="ssl">${t('solar.sunPerDay')}</div></div>
           <div style="width:1px;background:var(--b1)"></div>
           <div class="ss-item"><div class="ssn">${toAh(solar)} Ah</div><div class="ssl">${t('solar.production')}</div></div>
-        </div>`}
+        </div>
+        ${buildSolarGear()}`}
       </div>
 
     </div>
