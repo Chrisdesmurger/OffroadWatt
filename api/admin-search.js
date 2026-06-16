@@ -5,12 +5,19 @@ const SB_URL = process.env.SUPABASE_URL || 'https://ofjpskrjlwfebaqomijm.supabas
 const SB_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
 
 const EQUIPMENT_BRANDS = {
-  Cuisine:    ['Dometic', 'Comet', 'ENO', 'Campingaz', 'Smev', 'Thetford', 'Beem', 'Severin'],
-  Confort:    ['Webasto', 'Eberspächer', 'Espar', 'Truma', 'Propex', 'Planar', 'Autoterm', 'Dometic'],
-  Tech:       ['Victron Energy', 'Renogy', 'Epever', 'Votronic', 'Büttner', 'CTEK', 'Sterling', 'Garmin'],
-  Eau:        ['Seaflo', 'Shurflo', 'Whale', 'Jabsco', 'Flojet', 'Marco', 'Truma'],
-  Éclairage: ['Narva', 'Ring', 'Hella', 'LED Autolamps', 'Osram', 'Rigid Industries', 'ProPlus'],
-  Système:    ['Victron Energy', 'Renogy', 'Mastervolt', 'Studer', 'Votronic', 'CTEK', 'Büttner'],
+  'Réfrigérateur':    ['Dometic', 'Waeco', 'Engel', 'ARB', 'National Luna', 'Iceco', 'Alpicool', 'Brass Monkey'],
+  'Micro-onde':       ['Dometic', 'Severin', 'Russell Hobbs', 'Midea', 'Toshiba', 'Whirlpool'],
+  'Four':             ['Dometic', 'Omnia', 'Coleman', 'Truma', 'Enders'],
+  'Chauffe-eau':      ['Truma', 'Webasto', 'Whale', 'Alde', 'Morco', 'Elgas'],
+  'Chauffage':        ['Webasto', 'Eberspächer', 'Espar', 'Truma', 'Propex', 'Planar', 'Autoterm'],
+  'Chargeur solaire': ['Victron Energy', 'Renogy', 'Epever', 'SRNE', 'Votronic', 'Büttner'],
+  'Chargeur DC-DC':   ['Victron Energy', 'Renogy', 'Sterling', 'Votronic', 'Redarc', 'CTEK', 'Ring'],
+  'Onduleur':         ['Victron Energy', 'Renogy', 'Sterling', 'Studer', 'Mastervolt', 'Ring'],
+  'Télévision':       ['Avtex', 'Oyster', 'Winegard', 'Camos', 'Dometic', 'Roadtrip'],
+  'Satellite':        ['Oyster', 'Maxview', 'Satgear', 'Megasat', 'Teleco', 'Selfsat'],
+  'Box internet':     ['Huawei', 'ZTE', 'Netgear', 'GL.iNet', 'Pepwave', 'Zyxel', 'TP-Link'],
+  'Pompe à eau':      ['Seaflo', 'Shurflo', 'Whale', 'Jabsco', 'Flojet', 'Marco'],
+  'Chargeur batterie':['CTEK', 'Sterling', 'Votronic', 'Victron Energy', 'Büttner', 'Ring', 'Noco'],
 }
 
 const SYSTEM = [{
@@ -19,13 +26,20 @@ const SYSTEM = [{
   text: `Tu es un expert en équipements électriques 12V/24V pour camping-car, van et caravane.
 Tu connais précisément les modèles réels et leur consommation électrique moyenne réaliste en usage off-grid.
 
-MARQUES D'ÉQUIPEMENTS PRIORITAIRES :
-- Cuisine : Dometic, Comet, ENO, Campingaz, Smev, Thetford
-- Confort : Webasto, Eberspächer/Espar, Truma, Propex, Planar, Autoterm, Dometic
-- Tech/Électrique : Victron Energy, Renogy, Epever, Votronic, Büttner, CTEK, Sterling
-- Eau : Seaflo, Shurflo, Whale, Jabsco, Flojet, Marco, Truma
-- Éclairage : Narva, Ring, Hella, LED Autolamps, Osram, Rigid Industries
-- Système : Victron Energy, Renogy, Mastervolt, Studer, Votronic, CTEK, Büttner
+MARQUES D'ÉQUIPEMENTS PRIORITAIRES PAR CATÉGORIE :
+- Réfrigérateur : Dometic, Waeco, Engel, ARB, National Luna, Iceco, Alpicool
+- Micro-onde : Dometic, Severin, Russell Hobbs, Midea, Toshiba
+- Four : Dometic, Omnia, Coleman, Truma, Enders
+- Chauffe-eau : Truma, Webasto, Whale, Alde, Morco
+- Chauffage : Webasto, Eberspächer/Espar, Truma, Propex, Planar, Autoterm
+- Chargeur solaire : Victron Energy, Renogy, Epever, SRNE, Votronic, Büttner
+- Chargeur DC-DC : Victron Energy, Renogy, Sterling, Votronic, Redarc, CTEK
+- Onduleur : Victron Energy, Renogy, Sterling, Studer, Mastervolt
+- Télévision : Avtex, Oyster, Winegard, Camos, Dometic, Roadtrip
+- Satellite : Oyster, Maxview, Satgear, Megasat, Teleco, Selfsat
+- Box internet : Huawei, ZTE, Netgear, GL.iNet, Pepwave, TP-Link
+- Pompe à eau : Seaflo, Shurflo, Whale, Jabsco, Flojet, Marco
+- Chargeur batterie : CTEK, Sterling, Votronic, Victron Energy, Büttner, Noco
 
 MARCHÉ CAMPING-CAR :
 - Haut de gamme : Hymer, Carthago, Niesmann & Bischoff, Frankia, EuraMobil, Mobilvetta
@@ -35,8 +49,9 @@ MARCHÉ CAMPING-CAR :
 RÈGLES STRICTES :
 - Ne propose que des produits RÉELS et identifiables (marque + modèle précis).
 - watts = consommation électrique MOYENNE 12V réaliste (pas le pic).
-  Frigos à compresseur : moyenne avec cycle ~30% (ex. 12V 75L ≈ 55W moyens).
+  Réfrigérateurs à compresseur : moyenne avec cycle ~30% (ex. 12V 75L ≈ 55W moyens).
   Chauffages diesel/gaz : UNIQUEMENT l'électrique (ventilateur + pompe + électronique).
+  Micro-onde/Four : watts de fonctionnement × usage moyen.
 - hours = nombre d'heures d'utilisation typique par jour.
 - Reste STRICTEMENT dans la catégorie demandée.
 - Utilise search_existing avant de proposer pour éviter les doublons.
@@ -82,7 +97,12 @@ const TOOLS = [
   },
 ]
 
-const CATEGORIES = ['Cuisine', 'Confort', 'Tech', 'Eau', 'Éclairage', 'Système']
+const CATEGORIES = [
+  'Réfrigérateur', 'Micro-onde', 'Four', 'Chauffe-eau', 'Chauffage',
+  'Chargeur solaire', 'Chargeur DC-DC', 'Onduleur',
+  'Télévision', 'Satellite', 'Box internet',
+  'Pompe à eau', 'Chargeur batterie',
+]
 
 async function searchExisting(keyword, category) {
   const url = `${SB_URL}/rest/v1/equipment_catalog?select=name,brand&or=(name.ilike.*${encodeURIComponent(keyword)}*,brand.ilike.*${encodeURIComponent(keyword)}*)&category=eq.${encodeURIComponent(category)}&limit=20`
@@ -102,7 +122,7 @@ export default async function handler(req, res) {
 
   // Vercel parse automatiquement le body JSON quand Content-Type: application/json
   const body = req.body || {}
-  const category = CATEGORIES.includes(body.category) ? body.category : 'Cuisine'
+  const category = CATEGORIES.includes(body.category) ? body.category : CATEGORIES[0]
   const query    = (body.query || '').trim()
   const count    = Math.min(Math.max(parseInt(body.count) || 12, 1), 25)
 

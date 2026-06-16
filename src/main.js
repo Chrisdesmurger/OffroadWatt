@@ -111,12 +111,30 @@ const SUN_ZONES = [
 ]
 
 let CATALOG = []  // chargé 100% depuis Supabase au boot (loadCatalogFromDB)
-const ICON_BY_CAT = { Cuisine: 'ti-tools-kitchen-2', Confort: 'ti-temperature', Tech: 'ti-device-laptop', Eau: 'ti-droplet', 'Éclairage': 'ti-bulb', 'Système': 'ti-settings' }
+const ICON_BY_CAT = {
+  'Réfrigérateur':    'ti-device-fridge',
+  'Micro-onde':       'ti-microwave',
+  'Four':             'ti-flame',
+  'Chauffe-eau':      'ti-droplet',
+  'Chauffage':        'ti-temperature',
+  'Chargeur solaire': 'ti-solar-panel',
+  'Chargeur DC-DC':   'ti-current-dc',
+  'Onduleur':         'ti-current-ac',
+  'Télévision':       'ti-device-tv',
+  'Satellite':        'ti-satellite',
+  'Box internet':     'ti-wifi',
+  'Pompe à eau':      'ti-droplet-half',
+  'Chargeur batterie':'ti-battery-charging',
+}
 
-const CATS = ['Tout', 'Cuisine', 'Confort', 'Tech', 'Eau', 'Éclairage', 'Système']
+const CATS = ['Tout', 'Réfrigérateur', 'Micro-onde', 'Four', 'Chauffe-eau', 'Chauffage', 'Chargeur solaire', 'Chargeur DC-DC', 'Onduleur', 'Télévision', 'Satellite', 'Box internet', 'Pompe à eau', 'Chargeur batterie']
 const CATICONS = {
-  Cuisine: 'ti-bowl-spoon', Confort: 'ti-armchair', Tech: 'ti-cpu',
-  Eau: 'ti-droplet', Éclairage: 'ti-bulb', Système: 'ti-settings', Tout: 'ti-apps',
+  Tout: 'ti-apps',
+  'Réfrigérateur': 'ti-device-fridge', 'Micro-onde': 'ti-microwave', 'Four': 'ti-flame',
+  'Chauffe-eau': 'ti-droplet', 'Chauffage': 'ti-temperature', 'Chargeur solaire': 'ti-solar-panel',
+  'Chargeur DC-DC': 'ti-current-dc', 'Onduleur': 'ti-current-ac', 'Télévision': 'ti-device-tv',
+  'Satellite': 'ti-satellite', 'Box internet': 'ti-wifi', 'Pompe à eau': 'ti-droplet-half',
+  'Chargeur batterie': 'ti-battery-charging',
 }
 
 // ─── PRESETS PAR TYPE DE VÉHICULE ──────────────────────────────────────────────
@@ -1769,8 +1787,8 @@ function buildModal() {
         <input id="catalog-search" type="text" placeholder="Rechercher un appareil…" value="${m.search || ''}"
           style="width:100%;margin-bottom:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
         <div class="catcatalog">
-          ${['Tout','Cuisine','Confort','Tech','Eau','Éclairage','Système'].map(c => `
-            <div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${c}</div>`).join('')}
+          ${CATS.map(c => `
+            <div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
         </div>
         <div class="catgrid">
           ${allItems.map(item => `
@@ -1796,7 +1814,7 @@ function buildModal() {
         <div><label style="font-size:11px;color:var(--t2);display:block;margin-bottom:3px">${t('modal.custom.watts')}</label><input id="mw" type="number" placeholder="W" min="0" max="5000" style="width:100%"></div>
         <div><label style="font-size:11px;color:var(--t2);display:block;margin-bottom:3px">${t('modal.custom.hours')}</label><input id="mh" type="number" placeholder="h" min="0" max="24" step="0.5" value="4" style="width:100%"></div>
         <div><label style="font-size:11px;color:var(--t2);display:block;margin-bottom:3px">${t('modal.custom.category')}</label>
-          <select id="mc" style="width:100%">${['Cuisine','Confort','Tech','Eau','Éclairage','Système'].map(c => `<option value="${c}">${tcat(c)}</option>`).join('')}</select>
+          <select id="mc" style="width:100%">${CATS.filter(c => c !== 'Tout').map(c => `<option value="${c}">${tcat(c)}</option>`).join('')}</select>
         </div>
       </div>
       <div class="mo-btns">
@@ -2021,8 +2039,7 @@ function confirmCustom() {
   const h = parseFloat(document.getElementById('mh')?.value) || 0
   const cat = document.getElementById('mc')?.value || 'Tech'
   if (!n) return
-  const icons = { Cuisine: 'ti-bowl-spoon', Confort: 'ti-armchair', Éclairage: 'ti-bulb', Eau: 'ti-droplet', Tech: 'ti-cpu', Système: 'ti-plug' }
-  set({ apps: [...S.apps, { id: Date.now(), n, icon: icons[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
+  set({ apps: [...S.apps, { id: Date.now(), n, icon: ICON_BY_CAT[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
 // ─── CATALOGUE (100% Supabase) ───────────────────────────────────────────────
