@@ -1067,6 +1067,10 @@ function buildEnergyTab() {
         <i class="ti ti-link"></i> ${t('share.config')}
       </button>
 
+      <button class="shopping-btn" id="open-shopping-list">
+        <i class="ti ti-shopping-cart"></i> ${t('btn.shoppingList')}
+      </button>
+
       <div class="capture-row">
         <span class="capture-lbl"><i class="ti ti-arrows-diff"></i> ${t('capture.label')}</span>
         <button class="capture-btn${S.scenarios.A ? ' filled' : ''}" id="capture-a">${t('capture.toA')}</button>
@@ -1582,10 +1586,91 @@ function buildWizardModal(m) {
   </div>`
 }
 
+function buildShoppingItems() {
+  const items = []
+  const batLabel = t('modal.shopping.batRec', { type: tbattype(S.bat.type), ah: S.bat.ah, v: S.bat.v })
+  items.push({ icon: 'ti-battery-charging', cat: t('modal.shopping.battery'), name: batLabel, qty: S.batNb, eur: (S.bat.eur || 0) * S.batNb })
+
+  if (S.solOn !== false) {
+    items.push({ icon: 'ti-solar-panel', cat: t('modal.shopping.solar'), name: t('modal.shopping.panelRec', { w: S.solW }), qty: S.solNb, eur: Math.round(S.solW * S.solNb * PANEL_EUR_PER_WC) })
+    const totalWc = S.solW * S.solNb
+    const amps = Math.ceil(totalWc / S.bat.v * 1.25)
+    let spec, mpptEur
+    if (amps <= 15)      { spec = '75/15';   mpptEur = 120 }
+    else if (amps <= 20) { spec = '100/20';  mpptEur = 160 }
+    else if (amps <= 30) { spec = '100/30';  mpptEur = 210 }
+    else if (amps <= 50) { spec = '150/35';  mpptEur = 280 }
+    else if (amps <= 70) { spec = '150/45';  mpptEur = 350 }
+    else                 { spec = '150/100'; mpptEur = 550 }
+    items.push({ icon: 'ti-solar-panel', cat: t('modal.shopping.mppt'), name: t('modal.shopping.mpptRec', { spec }), qty: 1, eur: mpptEur })
+  }
+
+  if (S.altOn) {
+    items.push({ icon: 'ti-engine', cat: t('modal.shopping.charger'), name: t('modal.shopping.chargerRec', { a: S.altAmps }), qty: 1, eur: Math.round(S.altAmps * ALT_EUR_PER_A) })
+  }
+
+  const maxAmps = Math.max(S.solOn !== false ? Math.ceil((S.solW * S.solNb) / S.bat.v) : 0, S.altOn ? S.altAmps : 0, 20)
+  let mm2, cableEur
+  if (maxAmps <= 20)      { mm2 = 4;  cableEur = 25 }
+  else if (maxAmps <= 35) { mm2 = 6;  cableEur = 35 }
+  else if (maxAmps <= 50) { mm2 = 10; cableEur = 50 }
+  else if (maxAmps <= 80) { mm2 = 16; cableEur = 70 }
+  else                    { mm2 = 25; cableEur = 95 }
+  items.push({ icon: 'ti-plug', cat: t('modal.shopping.cables'), name: t('modal.shopping.cableNote', { mm: mm2, m: 5 }), qty: 1, eur: cableEur })
+
+  const fuseAmps = Math.ceil(maxAmps * 1.25 / 5) * 5
+  items.push({ icon: 'ti-shield', cat: t('modal.shopping.fuses'), name: t('modal.shopping.fuseNote', { a: fuseAmps }), qty: 1, eur: 20 })
+
+  return items
+}
+
+function shoppingListToText(items) {
+  const lines = items.map(it => {
+    const q = it.qty > 1 ? ` ×${it.qty}` : ''
+    return `- ${it.cat}: ${it.name}${q} — ~${it.eur}€`
+  })
+  const total = items.reduce((s, it) => s + it.eur, 0)
+  lines.push('', `${t('modal.shopping.total')}: ~${total}€`)
+  lines.push(t('modal.shopping.indicative'))
+  return lines.join('\n')
+}
+
 function buildModal() {
   const m = S.modal
 
   if (m.type === 'wizard') return buildWizardModal(m)
+
+  if (m.type === 'shopping-list') {
+    const items = buildShoppingItems()
+    const total = items.reduce((s, it) => s + it.eur, 0)
+    return `
+    <div class="ov" id="modal-overlay">
+      <div class="mo" style="max-width:480px">
+        <h3><i class="ti ti-shopping-cart"></i> ${t('modal.shopping.title')}</h3>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:12px">${t('modal.shopping.desc')}</p>
+        <div class="shop-list">
+          ${items.map(it => `
+            <div class="shop-item">
+              <i class="${it.icon}" style="font-size:15px;color:var(--te);flex-shrink:0"></i>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:11px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.3px;font-size:9px">${it.cat}</div>
+                <div style="font-size:12px;color:var(--t1)">${it.name}${it.qty > 1 ? ` <span style="color:var(--am);font-family:var(--mono);font-size:11px">${t('modal.shopping.qty', { n: it.qty })}</span>` : ''}</div>
+              </div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--am);font-weight:700;flex-shrink:0">~${it.eur}€</div>
+            </div>`).join('')}
+        </div>
+        <div class="shop-total">
+          <span>${t('modal.shopping.total')}</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--am)">~${total}€</span>
+        </div>
+        <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:8px">${t('modal.shopping.indicative')}</p>
+        <div class="mo-btns" style="margin-top:12px">
+          <button id="close-modal" class="mo-cancel">${t('btn.close')}</button>
+          <button id="shopping-copy" class="mo-ok"><i class="ti ti-copy" style="font-size:11px"></i> ${t('modal.shopping.copy')}</button>
+        </div>
+      </div>
+    </div>`
+  }
 
   if (m.type === 'share') {
     const url = m.url || ''
@@ -1974,6 +2059,12 @@ function bindEvents() {
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
   // Partage de configuration — ouvre la fenêtre de partage (#13)
   document.getElementById('share-config-btn')?.addEventListener('click', openShareModal)
+  document.getElementById('open-shopping-list')?.addEventListener('click', () => set({ modal: { type: 'shopping-list' } }))
+  document.getElementById('shopping-copy')?.addEventListener('click', async () => {
+    const items = buildShoppingItems()
+    const ok = await copyText(shoppingListToText(items))
+    showToast(ok ? t('modal.shopping.copied') : '')
+  })
   document.getElementById('share-header-btn')?.addEventListener('click', openShareModal)
   document.getElementById('share-copy')?.addEventListener('click', async () => {
     const ok = await copyText(S.modal?.url || '')
