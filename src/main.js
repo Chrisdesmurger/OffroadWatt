@@ -403,7 +403,7 @@ let S = {
   solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
-  user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false,
+  user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false, shoppingLoading: false,
   scenarios: { A: null, B: null }, hookupCost: 4,
 }
 
@@ -1586,13 +1586,33 @@ function buildWizardModal(m) {
   </div>`
 }
 
+const REGION_PRICING = {
+  'Europe':                { mult: 1.0, sym: '€' },
+  'Afrique & Moyen-Orient':{ mult: 0.85, sym: '€' },
+  'Amériques':             { mult: 1.15, sym: '$' },
+  'Asie-Pacifique':        { mult: 1.10, sym: '$' },
+  'Personnalisé':          { mult: 1.0, sym: '€' },
+}
+
+function regionPrice(eurBase) {
+  const zone = SUN_ZONES[S.sunIdx]
+  const rp = REGION_PRICING[zone?.r] || REGION_PRICING['Europe']
+  return Math.round(eurBase * rp.mult)
+}
+
+function regionSymbol() {
+  const zone = SUN_ZONES[S.sunIdx]
+  return (REGION_PRICING[zone?.r] || REGION_PRICING['Europe']).sym
+}
+
 function buildShoppingItems() {
   const items = []
+  const sym = regionSymbol()
   const batLabel = t('modal.shopping.batRec', { type: tbattype(S.bat.type), ah: S.bat.ah, v: S.bat.v })
-  items.push({ icon: 'ti-battery-charging', cat: t('modal.shopping.battery'), name: batLabel, qty: S.batNb, eur: (S.bat.eur || 0) * S.batNb })
+  items.push({ icon: 'ti-battery-charging', cat: t('modal.shopping.battery'), name: batLabel, qty: S.batNb, price: regionPrice((S.bat.eur || 0) * S.batNb), sym })
 
   if (S.solOn !== false) {
-    items.push({ icon: 'ti-solar-panel', cat: t('modal.shopping.solar'), name: t('modal.shopping.panelRec', { w: S.solW }), qty: S.solNb, eur: Math.round(S.solW * S.solNb * PANEL_EUR_PER_WC) })
+    items.push({ icon: 'ti-solar-panel', cat: t('modal.shopping.solar'), name: t('modal.shopping.panelRec', { w: S.solW }), qty: S.solNb, price: regionPrice(Math.round(S.solW * S.solNb * PANEL_EUR_PER_WC)), sym })
     const totalWc = S.solW * S.solNb
     const amps = Math.ceil(totalWc / S.bat.v * 1.25)
     let spec, mpptEur
@@ -1602,11 +1622,11 @@ function buildShoppingItems() {
     else if (amps <= 50) { spec = '150/35';  mpptEur = 280 }
     else if (amps <= 70) { spec = '150/45';  mpptEur = 350 }
     else                 { spec = '150/100'; mpptEur = 550 }
-    items.push({ icon: 'ti-solar-panel', cat: t('modal.shopping.mppt'), name: t('modal.shopping.mpptRec', { spec }), qty: 1, eur: mpptEur })
+    items.push({ icon: 'ti-solar-panel', cat: t('modal.shopping.mppt'), name: t('modal.shopping.mpptRec', { spec }), qty: 1, price: regionPrice(mpptEur), sym })
   }
 
   if (S.altOn) {
-    items.push({ icon: 'ti-engine', cat: t('modal.shopping.charger'), name: t('modal.shopping.chargerRec', { a: S.altAmps }), qty: 1, eur: Math.round(S.altAmps * ALT_EUR_PER_A) })
+    items.push({ icon: 'ti-engine', cat: t('modal.shopping.charger'), name: t('modal.shopping.chargerRec', { a: S.altAmps }), qty: 1, price: regionPrice(Math.round(S.altAmps * ALT_EUR_PER_A)), sym })
   }
 
   const maxAmps = Math.max(S.solOn !== false ? Math.ceil((S.solW * S.solNb) / S.bat.v) : 0, S.altOn ? S.altAmps : 0, 20)
@@ -1616,21 +1636,59 @@ function buildShoppingItems() {
   else if (maxAmps <= 50) { mm2 = 10; cableEur = 50 }
   else if (maxAmps <= 80) { mm2 = 16; cableEur = 70 }
   else                    { mm2 = 25; cableEur = 95 }
-  items.push({ icon: 'ti-plug', cat: t('modal.shopping.cables'), name: t('modal.shopping.cableNote', { mm: mm2, m: 5 }), qty: 1, eur: cableEur })
+  items.push({ icon: 'ti-plug', cat: t('modal.shopping.cables'), name: t('modal.shopping.cableNote', { mm: mm2, m: 5 }), qty: 1, price: regionPrice(cableEur), sym })
 
   const fuseAmps = Math.ceil(maxAmps * 1.25 / 5) * 5
-  items.push({ icon: 'ti-shield', cat: t('modal.shopping.fuses'), name: t('modal.shopping.fuseNote', { a: fuseAmps }), qty: 1, eur: 20 })
+  items.push({ icon: 'ti-shield', cat: t('modal.shopping.fuses'), name: t('modal.shopping.fuseNote', { a: fuseAmps }), qty: 1, price: regionPrice(20), sym })
 
   return items
 }
 
+function buildShoppingEmailHtml(items) {
+  const total = items.reduce((s, it) => s + it.price, 0)
+  const sym = items[0]?.sym || '€'
+  const zone = SUN_ZONES[S.sunIdx]
+  const dateStr = new Date().toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
+  const rows = items.map(it => {
+    const q = it.qty > 1 ? ` <span style="color:#a0a09a;font-size:10px">×${it.qty}</span>` : ''
+    return `<tr>
+      <td style="padding:8px 0;border-bottom:1px solid #f0ede9;font-size:12px;color:#2a2925">${it.cat}</td>
+      <td style="padding:8px;border-bottom:1px solid #f0ede9;font-size:12px;color:#2a2925">${it.name}${q}</td>
+      <td style="padding:8px 0 8px 8px;border-bottom:1px solid #f0ede9;font-family:'Courier New',monospace;text-align:right;font-size:12px;font-weight:700;color:#c47a18">~${it.price}${sym}</td>
+    </tr>`
+  }).join('')
+
+  return `<!DOCTYPE html><html lang="${getLang()}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OffroadWatt</title></head>
+<body style="margin:0;padding:0;background:#f2f1ef;font-family:Arial,'Helvetica Neue',sans-serif;color:#2a2925">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px">
+  <div style="background:#141817;border-radius:14px 14px 0 0;padding:22px 28px;border:1px solid #253029;border-bottom:none">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td><span style="font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#c47a18">OffroadWatt</span></td>
+      <td style="text-align:right"><span style="font-size:11px;color:#4a6358">${dateStr}</span></td></tr>
+      <tr><td colspan="2" style="padding-top:4px"><span style="font-size:11px;color:#4a6358">${t('modal.shopping.title')} — ${zone?.n || ''}</span></td></tr>
+    </table>
+  </div>
+  <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:20px 24px">
+    <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f0ede9">${t('modal.shopping.title')}</div>
+    <table width="100%" cellpadding="0" cellspacing="0">${rows}
+      <tr><td colspan="2" style="padding:12px 0 0;font-weight:700;font-size:13px;border-top:2px solid #f0ede9">${t('modal.shopping.total')}</td>
+      <td style="padding:12px 0 0 8px;font-family:'Courier New',monospace;text-align:right;font-size:16px;font-weight:700;color:#c47a18;border-top:2px solid #f0ede9">~${total}${sym}</td></tr>
+    </table>
+  </div>
+  <div style="background:#faf9f7;border:1px solid #e4e3e0;border-top:none;border-radius:0 0 14px 14px;padding:14px 24px;text-align:center">
+    <span style="font-size:10px;color:#a0a09a">${t('modal.shopping.indicative')}</span>
+  </div>
+</div></body></html>`
+}
+
 function shoppingListToText(items) {
+  const sym = items[0]?.sym || '€'
   const lines = items.map(it => {
     const q = it.qty > 1 ? ` ×${it.qty}` : ''
-    return `- ${it.cat}: ${it.name}${q} — ~${it.eur}€`
+    return `- ${it.cat}: ${it.name}${q} — ~${it.price}${sym}`
   })
-  const total = items.reduce((s, it) => s + it.eur, 0)
-  lines.push('', `${t('modal.shopping.total')}: ~${total}€`)
+  const total = items.reduce((s, it) => s + it.price, 0)
+  lines.push('', `${t('modal.shopping.total')}: ~${total}${sym}`)
   lines.push(t('modal.shopping.indicative'))
   return lines.join('\n')
 }
@@ -1641,32 +1699,57 @@ function buildModal() {
   if (m.type === 'wizard') return buildWizardModal(m)
 
   if (m.type === 'shopping-list') {
+    if (m.sent) {
+      return `
+      <div class="ov" id="modal-overlay">
+        <div class="mo" style="max-width:380px;text-align:center">
+          <div style="font-size:36px;margin-bottom:8px">✅</div>
+          <h3>${t('modal.shopping.sentTitle')}</h3>
+          <p style="font-size:12px;color:var(--t2);margin:8px 0 16px">${t('modal.shopping.sentBody', { email: `<strong style="color:var(--t1)">${m.email}</strong>` })}</p>
+          <button id="close-modal" class="mo-ok" style="width:100%">${t('btn.close')}</button>
+        </div>
+      </div>`
+    }
     const items = buildShoppingItems()
-    const total = items.reduce((s, it) => s + it.eur, 0)
+    const total = items.reduce((s, it) => s + it.price, 0)
+    const sym = items[0]?.sym || '€'
+    const zone = SUN_ZONES[S.sunIdx]
+    const regionLabel = zone?.r !== 'Personnalisé' ? zone?.n || '' : ''
     return `
     <div class="ov" id="modal-overlay">
       <div class="mo" style="max-width:480px">
         <h3><i class="ti ti-shopping-cart"></i> ${t('modal.shopping.title')}</h3>
-        <p style="font-size:11px;color:var(--t2);margin-bottom:12px">${t('modal.shopping.desc')}</p>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:12px">${t('modal.shopping.desc')}${regionLabel ? ` <span style="color:var(--so);font-weight:500">${regionLabel}</span>` : ''}</p>
         <div class="shop-list">
           ${items.map(it => `
             <div class="shop-item">
               <i class="${it.icon}" style="font-size:15px;color:var(--te);flex-shrink:0"></i>
               <div style="flex:1;min-width:0">
-                <div style="font-size:11px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.3px;font-size:9px">${it.cat}</div>
+                <div style="font-size:9px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.3px">${it.cat}</div>
                 <div style="font-size:12px;color:var(--t1)">${it.name}${it.qty > 1 ? ` <span style="color:var(--am);font-family:var(--mono);font-size:11px">${t('modal.shopping.qty', { n: it.qty })}</span>` : ''}</div>
               </div>
-              <div style="font-family:var(--mono);font-size:12px;color:var(--am);font-weight:700;flex-shrink:0">~${it.eur}€</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--am);font-weight:700;flex-shrink:0">~${it.price}${sym}</div>
             </div>`).join('')}
         </div>
         <div class="shop-total">
           <span>${t('modal.shopping.total')}</span>
-          <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--am)">~${total}€</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--am)">~${total}${sym}</span>
         </div>
         <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:8px">${t('modal.shopping.indicative')}</p>
-        <div class="mo-btns" style="margin-top:12px">
+        <div style="margin-top:14px">
+          <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">${t('modal.shopping.sendLabel')}</label>
+          <input id="shopping-email" type="email" placeholder="${t('modal.auth.emailPlaceholder')}"
+            style="width:100%;margin-bottom:8px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px"
+            value="${S.user?.email || ''}">
+        </div>
+        ${m.error ? `<p style="font-size:11px;color:var(--rd);text-align:center">${m.error}</p>` : ''}
+        <div class="mo-btns" style="margin-top:8px">
           <button id="close-modal" class="mo-cancel">${t('btn.close')}</button>
-          <button id="shopping-copy" class="mo-ok"><i class="ti ti-copy" style="font-size:11px"></i> ${t('modal.shopping.copy')}</button>
+          <button id="shopping-send" class="mo-ok" ${S.shoppingLoading ? 'disabled' : ''}>
+            ${S.shoppingLoading
+              ? `<i class="ti ti-loader-2" style="font-size:11px;animation:spin 1s linear infinite"></i> ${t('modal.shopping.sending')}`
+              : `<i class="ti ti-send" style="font-size:11px"></i> ${t('modal.shopping.send')}`}
+          </button>
         </div>
       </div>
     </div>`
@@ -2060,10 +2143,27 @@ function bindEvents() {
   // Partage de configuration — ouvre la fenêtre de partage (#13)
   document.getElementById('share-config-btn')?.addEventListener('click', openShareModal)
   document.getElementById('open-shopping-list')?.addEventListener('click', () => set({ modal: { type: 'shopping-list' } }))
-  document.getElementById('shopping-copy')?.addEventListener('click', async () => {
-    const items = buildShoppingItems()
-    const ok = await copyText(shoppingListToText(items))
-    showToast(ok ? t('modal.shopping.copied') : '')
+  document.getElementById('shopping-send')?.addEventListener('click', async () => {
+    const email = document.getElementById('shopping-email')?.value?.trim()
+    if (!email) return
+    set({ shoppingLoading: true })
+    try {
+      const items = buildShoppingItems()
+      const html = buildShoppingEmailHtml(items)
+      const total = items.reduce((s, it) => s + it.price, 0)
+      const sym = items[0]?.sym || '€'
+      const subject = `${t('modal.shopping.title')} — ~${total}${sym}`
+      const res = await fetch('/api/send-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, subject, html }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Error')
+      set({ shoppingLoading: false, modal: { type: 'shopping-list', sent: true, email } })
+    } catch (err) {
+      set({ shoppingLoading: false, modal: { ...S.modal, error: err.message } })
+    }
   })
   document.getElementById('share-header-btn')?.addEventListener('click', openShareModal)
   document.getElementById('share-copy')?.addEventListener('click', async () => {
