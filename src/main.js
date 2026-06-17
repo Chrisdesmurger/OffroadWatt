@@ -2052,7 +2052,10 @@ function buildModal() {
         </div>` : ''}
         ${filterMode === 'type' && !search ? `
         <div class="catcatalog" style="margin-bottom:10px">
-          ${CATS.map(c => `<div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
+          ${CATS.map(c => {
+            const cnt = c === 'Tout' ? CATALOG.length : CATALOG.filter(i => i.cat === c).length
+            return `<div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)} (${cnt})</div>`
+          }).join('')}
         </div>` : ''}
         ${showGrid ? `
         <div class="catgrid">
