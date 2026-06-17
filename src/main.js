@@ -562,6 +562,33 @@ function loadStateFromURL() {
   } catch (_) { return false }
 }
 
+// ─── PWA INSTALL PROMPT ──────────────────────────────────────────────────────
+let _deferredInstallPrompt = null
+let _pwaInstalled = false
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault()
+  _deferredInstallPrompt = e
+  render()
+})
+window.addEventListener('appinstalled', () => {
+  _deferredInstallPrompt = null
+  _pwaInstalled = true
+  showToast(t('pwa.installed'))
+  render()
+})
+
+function isPwaDisplayMode() {
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+}
+
+async function installPwa() {
+  if (!_deferredInstallPrompt) return
+  _deferredInstallPrompt.prompt()
+  const { outcome } = await _deferredInstallPrompt.userChoice
+  if (outcome === 'accepted') _deferredInstallPrompt = null
+  render()
+}
+
 // Toast éphémère réutilisable (auto-disparait)
 function showToast(msg) {
   let el = document.getElementById('ow-toast')
@@ -791,6 +818,13 @@ function buildHeader() {
     <span class="hdr-share-lbl">${t('share.headerBtn')}</span>
   </button>`
 
+  const installEl = _deferredInstallPrompt && !isPwaDisplayMode()
+    ? `<button class="hdr-share-btn" id="pwa-install-btn" title="${t('pwa.install')}">
+        <i class="ti ti-download" style="font-size:14px"></i>
+        <span class="hdr-share-lbl">${t('pwa.installShort')}</span>
+      </button>`
+    : ''
+
   const langEl = `<div class="lang-switch">
     ${LANGS.map(l => `<button class="lang-opt${getLang() === l.id ? ' on' : ''}" data-lang="${l.id}" title="${l.name}">${l.label}</button>`).join('')}
   </div>`
@@ -807,9 +841,26 @@ function buildHeader() {
           <i class="ti ${ic}"></i><span>${t(lb)}</span>
         </div>`).join('')}
       ${shareEl}
+      ${installEl}
       ${langEl}
       ${authEl}
     </div>
+  </div>
+  ${buildPwaIosBanner()}`
+}
+
+function buildPwaIosBanner() {
+  if (isPwaDisplayMode() || _pwaInstalled) return ''
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream
+  if (!isIos) return ''
+  try { if (localStorage.getItem('ow_pwa_ios_dismissed')) return '' } catch (_) {}
+  return `<div class="pwa-ios-banner" id="pwa-ios-banner">
+    <i class="ti ti-device-mobile-down" style="font-size:18px;color:var(--am);flex-shrink:0"></i>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px">${t('pwa.iosTitle')}</div>
+      <div style="font-size:10px;color:var(--t2);line-height:1.4">${t('pwa.iosInstructions')}</div>
+    </div>
+    <button class="delbtn" id="pwa-ios-dismiss" title="Close" style="flex-shrink:0"><i class="ti ti-x"></i></button>
   </div>`
 }
 
@@ -2324,6 +2375,11 @@ function bindEvents() {
     }
   })
   document.getElementById('share-header-btn')?.addEventListener('click', openShareModal)
+  document.getElementById('pwa-install-btn')?.addEventListener('click', installPwa)
+  document.getElementById('pwa-ios-dismiss')?.addEventListener('click', () => {
+    try { localStorage.setItem('ow_pwa_ios_dismissed', '1') } catch (_) {}
+    document.getElementById('pwa-ios-banner')?.remove()
+  })
   document.getElementById('share-copy')?.addEventListener('click', async () => {
     const ok = await copyText(S.modal?.url || '')
     showToast(ok ? t('share.copied') : t('share.failed'))
