@@ -203,12 +203,10 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .cat-mode-btn:hover{border-color:var(--b2);color:var(--t2)}
 .cat-mode-btn.on{border-color:var(--am);color:var(--am);background:rgba(240,160,48,.07)}
 .cat-mode-btn i{font-size:13px}
-.cat-brand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-bottom:12px}
-.cat-brand-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .12s;text-align:center}
-.cat-brand-card:hover{border-color:var(--te2);background:rgba(45,212,191,.04)}
-.cat-brand-card.on{border-color:var(--te);background:rgba(45,212,191,.08)}
-.cat-brand-name{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px}
-.cat-brand-count{font-size:10px;font-family:var(--mono);color:var(--t3)}
+.cat-brand-grid{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.cat-brand-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:3px 9px;font-size:10px;font-family:var(--mono);color:var(--t3);cursor:pointer;transition:all .12s;text-transform:uppercase;letter-spacing:.4px}
+.cat-brand-card:hover{border-color:var(--te2);color:var(--t2)}
+.cat-brand-card.on{border-color:var(--te);color:var(--te);background:rgba(45,212,191,.07)}
 .cat-brand-other{border-style:dashed}
 .cat-basket{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-top:8px}
 .cat-basket-items{display:flex;flex-wrap:wrap;gap:4px}

@@ -2033,7 +2033,7 @@ function buildModal() {
       filtered = filtered.filter(c => c.cat === cf)
     }
 
-    const showGrid = search || (filterMode === 'brand' && bf) || filterMode === 'type'
+    const showGrid = true
 
     return `
     <div class="ov" id="modal-overlay">
@@ -2047,16 +2047,8 @@ function buildModal() {
         </div>
         ${filterMode === 'brand' && !search ? `
         <div class="cat-brand-grid">
-          ${topBrands.map(b => `
-            <div class="cat-brand-card${bf === b ? ' on' : ''}" data-modal-brand="${b}">
-              <div class="cat-brand-name">${b}</div>
-              <div class="cat-brand-count">${brandCounts[b]} ${t('catalog.items')}</div>
-            </div>`).join('')}
-          ${otherBrandNames.length > 0 ? `
-            <div class="cat-brand-card cat-brand-other${bf === '__other__' ? ' on' : ''}" data-modal-brand="__other__">
-              <div class="cat-brand-name">${t('catalog.otherBrands')}</div>
-              <div class="cat-brand-count">${otherBrandNames.reduce((s, b) => s + (brandCounts[b] || 0), 0)} ${t('catalog.items')}</div>
-            </div>` : ''}
+          ${topBrands.map(b => `<div class="cat-brand-card${bf === b ? ' on' : ''}" data-modal-brand="${b}">${b} (${brandCounts[b]})</div>`).join('')}
+          ${otherBrandNames.length > 0 ? `<div class="cat-brand-card cat-brand-other${bf === '__other__' ? ' on' : ''}" data-modal-brand="__other__">${t('catalog.otherBrands')} (${otherBrandNames.reduce((s, b) => s + (brandCounts[b] || 0), 0)})</div>` : ''}
         </div>` : ''}
         ${filterMode === 'type' && !search ? `
         <div class="catcatalog" style="margin-bottom:10px">
