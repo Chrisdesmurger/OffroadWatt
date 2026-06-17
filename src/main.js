@@ -2011,36 +2011,73 @@ function buildModal() {
 
   if (m.type === 'catalog') {
     const cf = m.catFilter || 'Tout'
+    const bf = m.brandFilter || 'Tout'
     const search = (m.search || '').toLowerCase().trim()
+    const selected = m.selected || []
     const batV = S.bat?.v || 12
     const toAhLocal = (wh) => { const ah = wh / batV; return ah >= 10 ? Math.round(ah) : +ah.toFixed(1) }
 
-    const allItems = search
-      ? CATALOG.filter(c => c.n.toLowerCase().includes(search))
-      : (cf === 'Tout' ? CATALOG : CATALOG.filter(c => c.cat === cf))
+    let filtered = CATALOG
+    if (search) {
+      filtered = filtered.filter(c => c.n.toLowerCase().includes(search) || c.brand.toLowerCase().includes(search))
+    } else {
+      if (cf !== 'Tout') filtered = filtered.filter(c => c.cat === cf)
+      if (bf !== 'Tout') filtered = filtered.filter(c => c.brand === bf)
+    }
+
+    const brandsInCat = [...new Set((cf === 'Tout' ? CATALOG : CATALOG.filter(c => c.cat === cf)).map(c => c.brand).filter(Boolean))].sort()
 
     return `
     <div class="ov" id="modal-overlay">
-      <div class="mo">
-        <h3><i class="ti ti-book"></i> Catalogue d'appareils <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${CATALOG.length} appareils</span></h3>
-        <input id="catalog-search" type="text" placeholder="Rechercher un appareil…" value="${m.search || ''}"
+      <div class="mo mo-catalog">
+        <h3><i class="ti ti-book"></i> ${t('catalog.title')} <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${CATALOG.length} ${t('catalog.items')}</span></h3>
+        <input id="catalog-search" type="text" placeholder="${t('catalog.searchPlaceholder')}" value="${m.search || ''}"
           style="width:100%;margin-bottom:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
-        <div class="catcatalog">
-          ${CATS.map(c => `
-            <div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
+        <div class="cat-filters-row">
+          <div class="cat-filter-group">
+            <span class="cat-filter-label"><i class="ti ti-category"></i> ${t('catalog.type')}</span>
+            <div class="catcatalog">
+              ${CATS.map(c => `<div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
+            </div>
+          </div>
+          ${brandsInCat.length > 0 ? `
+          <div class="cat-filter-group">
+            <span class="cat-filter-label"><i class="ti ti-tag"></i> ${t('catalog.brand')}</span>
+            <div class="catcatalog">
+              <div class="cf${bf === 'Tout' && !search ? ' on' : ''}" data-modal-brand="Tout">${t('cat.Tout')}</div>
+              ${brandsInCat.map(b => `<div class="cf cf-brand${bf === b && !search ? ' on' : ''}" data-modal-brand="${b}">${b}</div>`).join('')}
+            </div>
+          </div>` : ''}
         </div>
         <div class="catgrid">
-          ${allItems.map(item => `
-            <div class="catitem" data-catalog="${CATALOG.indexOf(item)}">
+          ${filtered.map(item => {
+            const idx = CATALOG.indexOf(item)
+            const isSel = selected.includes(idx)
+            return `
+            <div class="catitem${isSel ? ' catitem-sel' : ''}" data-catalog-toggle="${idx}">
               <div>
+                ${item.brand ? `<div class="cib">${item.brand}</div>` : ''}
                 <div class="cin">${item.n}</div>
                 <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span><span style="color:var(--te)">${toAhLocal(item.w * item.h)} Ah/j</span></div>
               </div>
-              <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
-            </div>`).join('')}
-          ${allItems.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${!catalogLoaded ? 'Chargement du catalogue…' : 'Aucun appareil trouvé'}</div>` : ''}
+              <i class="ti ${isSel ? 'ti-check' : 'ti-plus'}" style="font-size:14px;color:${isSel ? 'var(--te)' : 'var(--t3)'}"></i>
+            </div>`
+          }).join('')}
+          ${filtered.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${!catalogLoaded ? t('catalog.loading') : t('catalog.empty')}</div>` : ''}
         </div>
-        <div class="mo-btns"><button id="close-modal" class="mo-cancel">${t('btn.close')}</button></div>
+        ${selected.length > 0 ? `
+        <div class="cat-basket">
+          <div class="cat-basket-items">
+            ${selected.map(idx => {
+              const it = CATALOG[idx]
+              return it ? `<span class="cat-basket-tag" data-basket-remove="${idx}">${it.brand ? it.brand + ' ' : ''}${it.n} <i class="ti ti-x"></i></span>` : ''
+            }).join('')}
+          </div>
+        </div>` : ''}
+        <div class="mo-btns">
+          <button id="close-modal" class="mo-cancel">${t('btn.close')}</button>
+          ${selected.length > 0 ? `<button id="catalog-confirm" class="mo-ok"><i class="ti ti-plus"></i> ${t('catalog.addCount', { count: selected.length })}</button>` : ''}
+        </div>
       </div>
     </div>`
   }
@@ -2194,17 +2231,38 @@ function bindEvents() {
   document.getElementById('close-modal')?.addEventListener('click', () => set({ modal: null }))
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
   // Catalog category filter inside modal
-  document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat } })))
-  // Add from local catalog presets
-  document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
-    const item = CATALOG[parseInt(el.dataset.catalog)]
-    track('appliance_added', { name: item.n, cat: item.cat, watts: item.w, source: 'catalog' })
-    set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
+  document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat, brandFilter: 'Tout' } })))
+  // Catalog brand filter
+  document.querySelectorAll('[data-modal-brand]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, brandFilter: el.dataset.modalBrand } })))
+  // Toggle catalog item selection (multi-select)
+  document.querySelectorAll('[data-catalog-toggle]').forEach(el => el.addEventListener('click', () => {
+    const idx = parseInt(el.dataset.catalogToggle)
+    const sel = [...(S.modal?.selected || [])]
+    const pos = sel.indexOf(idx)
+    if (pos >= 0) sel.splice(pos, 1); else sel.push(idx)
+    set({ modal: { ...S.modal, selected: sel } })
   }))
+  // Remove from basket
+  document.querySelectorAll('[data-basket-remove]').forEach(el => el.addEventListener('click', e => {
+    e.stopPropagation()
+    const idx = parseInt(el.dataset.basketRemove)
+    const sel = (S.modal?.selected || []).filter(i => i !== idx)
+    set({ modal: { ...S.modal, selected: sel } })
+  }))
+  // Confirm catalog selection — add all selected items
+  document.getElementById('catalog-confirm')?.addEventListener('click', () => {
+    const sel = S.modal?.selected || []
+    const newApps = sel.map(idx => {
+      const item = CATALOG[idx]
+      if (!item) return null
+      return { id: Date.now() + idx, n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }
+    }).filter(Boolean)
+    set({ apps: [...S.apps, ...newApps], modal: null, tab: 'energy' })
+  })
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => {
     track('catalog_opened')
-    set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } })
+    set({ modal: { type: 'catalog', catFilter: 'Tout', brandFilter: 'Tout', search: '', selected: [] } })
   })
   document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 
@@ -2330,7 +2388,7 @@ async function loadCatalogFromDB() {
   try {
     const { data, error } = await supabase
       .from('equipment_catalog')
-      .select('name, icon, watts, hours, category')
+      .select('name, icon, watts, hours, category, brand')
       .not('category', 'is', null)
       .not('watts', 'is', null)
       .order('category', { ascending: true })
@@ -2342,6 +2400,7 @@ async function loadCatalogFromDB() {
       w: Number(r.watts),
       h: r.hours != null ? Number(r.hours) : 4,
       cat: r.category,
+      brand: r.brand || '',
     }))
   } catch (e) {
     console.warn('Catalogue indisponible :', e?.message || e)
