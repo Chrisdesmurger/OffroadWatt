@@ -305,6 +305,13 @@ const DICT = {
     'modal.custom.hours': 'Hours/day',
     'modal.custom.category': 'Category',
 
+    // PWA
+    'pwa.install': 'Install the app on your device',
+    'pwa.installShort': 'Install',
+    'pwa.installed': 'App installed successfully!',
+    'pwa.iosTitle': 'Install OffroadWatt',
+    'pwa.iosInstructions': 'Tap the share button, then "Add to Home Screen"',
+
     // Confirm / alerts
     'confirm.deleteConfig': 'Delete this configuration?',
     'alert.error': 'Error: ',
@@ -671,6 +678,13 @@ const DICT = {
     'modal.custom.hours': 'Horas/día',
     'modal.custom.category': 'Categoría',
 
+    // PWA
+    'pwa.install': 'Instalar la app en tu dispositivo',
+    'pwa.installShort': 'Instalar',
+    'pwa.installed': '¡App instalada correctamente!',
+    'pwa.iosTitle': 'Instalar OffroadWatt',
+    'pwa.iosInstructions': 'Toca el botón compartir, luego "Añadir a pantalla de inicio"',
+
     'confirm.deleteConfig': '¿Eliminar esta configuración?',
     'alert.error': 'Error: ',
 
@@ -1033,6 +1047,13 @@ const DICT = {
     'modal.custom.watts': 'Watts',
     'modal.custom.hours': 'Heures/jour',
     'modal.custom.category': 'Catégorie',
+
+    // PWA
+    'pwa.install': "Installer l'app sur votre appareil",
+    'pwa.installShort': 'Installer',
+    'pwa.installed': 'App installée avec succès !',
+    'pwa.iosTitle': 'Installer OffroadWatt',
+    'pwa.iosInstructions': 'Touchez le bouton partager, puis "Sur l\'écran d\'accueil"',
 
     'confirm.deleteConfig': 'Supprimer cette configuration ?',
     'alert.error': 'Erreur : ',
