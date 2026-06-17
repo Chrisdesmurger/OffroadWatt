@@ -2010,22 +2010,30 @@ function buildModal() {
   }
 
   if (m.type === 'catalog') {
+    const filterMode = m.filterMode || 'brand'
     const cf = m.catFilter || 'Tout'
-    const bf = m.brandFilter || 'Tout'
+    const bf = m.brandFilter || ''
     const search = (m.search || '').toLowerCase().trim()
     const selected = m.selected || []
     const batV = S.bat?.v || 12
     const toAhLocal = (wh) => { const ah = wh / batV; return ah >= 10 ? Math.round(ah) : +ah.toFixed(1) }
 
+    const brandCounts = {}
+    for (const c of CATALOG) { if (c.brand) brandCounts[c.brand] = (brandCounts[c.brand] || 0) + 1 }
+    const topBrands = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(e => e[0])
+    const otherBrandNames = Object.keys(brandCounts).filter(b => !topBrands.includes(b)).sort()
+
     let filtered = CATALOG
     if (search) {
       filtered = filtered.filter(c => c.n.toLowerCase().includes(search) || c.brand.toLowerCase().includes(search))
-    } else {
-      if (cf !== 'Tout') filtered = filtered.filter(c => c.cat === cf)
-      if (bf !== 'Tout') filtered = filtered.filter(c => c.brand === bf)
+    } else if (filterMode === 'brand' && bf) {
+      if (bf === '__other__') filtered = filtered.filter(c => !topBrands.includes(c.brand))
+      else filtered = filtered.filter(c => c.brand === bf)
+    } else if (filterMode === 'type' && cf !== 'Tout') {
+      filtered = filtered.filter(c => c.cat === cf)
     }
 
-    const brandsInCat = [...new Set((cf === 'Tout' ? CATALOG : CATALOG.filter(c => c.cat === cf)).map(c => c.brand).filter(Boolean))].sort()
+    const showGrid = search || (filterMode === 'brand' && bf) || filterMode === 'type'
 
     return `
     <div class="ov" id="modal-overlay">
@@ -2033,22 +2041,28 @@ function buildModal() {
         <h3><i class="ti ti-book"></i> ${t('catalog.title')} <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${CATALOG.length} ${t('catalog.items')}</span></h3>
         <input id="catalog-search" type="text" placeholder="${t('catalog.searchPlaceholder')}" value="${m.search || ''}"
           style="width:100%;margin-bottom:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
-        <div class="cat-filters-row">
-          <div class="cat-filter-group">
-            <span class="cat-filter-label"><i class="ti ti-category"></i> ${t('catalog.type')}</span>
-            <div class="catcatalog">
-              ${CATS.map(c => `<div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
-            </div>
-          </div>
-          ${brandsInCat.length > 0 ? `
-          <div class="cat-filter-group">
-            <span class="cat-filter-label"><i class="ti ti-tag"></i> ${t('catalog.brand')}</span>
-            <div class="catcatalog">
-              <div class="cf${bf === 'Tout' && !search ? ' on' : ''}" data-modal-brand="Tout">${t('cat.Tout')}</div>
-              ${brandsInCat.map(b => `<div class="cf cf-brand${bf === b && !search ? ' on' : ''}" data-modal-brand="${b}">${b}</div>`).join('')}
-            </div>
-          </div>` : ''}
+        <div class="cat-mode-switch">
+          <button class="cat-mode-btn${filterMode === 'brand' ? ' on' : ''}" data-filter-mode="brand"><i class="ti ti-tag"></i> ${t('catalog.byBrand')}</button>
+          <button class="cat-mode-btn${filterMode === 'type' ? ' on' : ''}" data-filter-mode="type"><i class="ti ti-category"></i> ${t('catalog.byType')}</button>
         </div>
+        ${filterMode === 'brand' && !search ? `
+        <div class="cat-brand-grid">
+          ${topBrands.map(b => `
+            <div class="cat-brand-card${bf === b ? ' on' : ''}" data-modal-brand="${b}">
+              <div class="cat-brand-name">${b}</div>
+              <div class="cat-brand-count">${brandCounts[b]} ${t('catalog.items')}</div>
+            </div>`).join('')}
+          ${otherBrandNames.length > 0 ? `
+            <div class="cat-brand-card cat-brand-other${bf === '__other__' ? ' on' : ''}" data-modal-brand="__other__">
+              <div class="cat-brand-name">${t('catalog.otherBrands')}</div>
+              <div class="cat-brand-count">${otherBrandNames.reduce((s, b) => s + (brandCounts[b] || 0), 0)} ${t('catalog.items')}</div>
+            </div>` : ''}
+        </div>` : ''}
+        ${filterMode === 'type' && !search ? `
+        <div class="catcatalog" style="margin-bottom:10px">
+          ${CATS.map(c => `<div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
+        </div>` : ''}
+        ${showGrid ? `
         <div class="catgrid">
           ${filtered.map(item => {
             const idx = CATALOG.indexOf(item)
@@ -2064,7 +2078,7 @@ function buildModal() {
             </div>`
           }).join('')}
           ${filtered.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${!catalogLoaded ? t('catalog.loading') : t('catalog.empty')}</div>` : ''}
-        </div>
+        </div>` : ''}
         ${selected.length > 0 ? `
         <div class="cat-basket">
           <div class="cat-basket-items">
@@ -2230,10 +2244,17 @@ function bindEvents() {
   })
   document.getElementById('close-modal')?.addEventListener('click', () => set({ modal: null }))
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
-  // Catalog category filter inside modal
-  document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat, brandFilter: 'Tout' } })))
-  // Catalog brand filter
-  document.querySelectorAll('[data-modal-brand]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, brandFilter: el.dataset.modalBrand } })))
+  // Catalog filter mode switch (brand / type)
+  document.querySelectorAll('[data-filter-mode]').forEach(el => el.addEventListener('click', () => {
+    set({ modal: { ...S.modal, filterMode: el.dataset.filterMode, catFilter: 'Tout', brandFilter: '' } })
+  }))
+  // Catalog category filter inside modal (type mode)
+  document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat } })))
+  // Catalog brand card click (brand mode)
+  document.querySelectorAll('[data-modal-brand]').forEach(el => el.addEventListener('click', () => {
+    const b = el.dataset.modalBrand
+    set({ modal: { ...S.modal, brandFilter: S.modal?.brandFilter === b ? '' : b } })
+  }))
   // Toggle catalog item selection (multi-select)
   document.querySelectorAll('[data-catalog-toggle]').forEach(el => el.addEventListener('click', () => {
     const idx = parseInt(el.dataset.catalogToggle)
@@ -2262,7 +2283,7 @@ function bindEvents() {
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => {
     track('catalog_opened')
-    set({ modal: { type: 'catalog', catFilter: 'Tout', brandFilter: 'Tout', search: '', selected: [] } })
+    set({ modal: { type: 'catalog', filterMode: 'brand', catFilter: 'Tout', brandFilter: '', search: '', selected: [] } })
   })
   document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 

@@ -198,11 +198,18 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .catitem-ai{border-color:var(--te3)}.catitem-ai:hover{border-color:var(--te2);background:rgba(45,212,191,.05)}
 .catgrid-sep{padding:5px 2px;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--te);opacity:.7}
 .mo-catalog{max-width:680px}
-.cat-filters-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.cat-filter-group{display:flex;align-items:flex-start;gap:8px}
-.cat-filter-label{font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;padding-top:4px;min-width:52px;display:flex;align-items:center;gap:4px}
-.cat-filter-label i{font-size:12px}
-.cf-brand{border-style:dashed}
+.cat-mode-switch{display:flex;gap:4px;margin-bottom:12px}
+.cat-mode-btn{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:5px 12px;font-size:11px;font-family:var(--mono);color:var(--t3);cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:5px}
+.cat-mode-btn:hover{border-color:var(--b2);color:var(--t2)}
+.cat-mode-btn.on{border-color:var(--am);color:var(--am);background:rgba(240,160,48,.07)}
+.cat-mode-btn i{font-size:13px}
+.cat-brand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-bottom:12px}
+.cat-brand-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .12s;text-align:center}
+.cat-brand-card:hover{border-color:var(--te2);background:rgba(45,212,191,.04)}
+.cat-brand-card.on{border-color:var(--te);background:rgba(45,212,191,.08)}
+.cat-brand-name{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.cat-brand-count{font-size:10px;font-family:var(--mono);color:var(--t3)}
+.cat-brand-other{border-style:dashed}
 .cat-basket{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 10px;margin-top:8px}
 .cat-basket-items{display:flex;flex-wrap:wrap;gap:4px}
 .cat-basket-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(45,212,191,.1);border:1px solid var(--te3);border-radius:12px;padding:3px 8px;font-size:10px;color:var(--te);cursor:pointer;transition:all .12s}
