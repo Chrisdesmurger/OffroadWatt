@@ -258,18 +258,16 @@ function batForBudget(vtype, budgetId) {
 function finishWizard(w) {
   const vtype = w.vtype || 'campervan'
   let apps = instantiatePresetApps(vtype)
-  // Retire les appareils des usages optionnels non sélectionnés
   const selected = new Set(w.usages || [])
   apps = apps.filter(a => {
     const usage = USAGES.find(u => u.match(a.n))
     return usage ? selected.has(usage.id) : true
   })
   const bat = batForBudget(vtype, w.budget)
-  // Solaire : 'have' / 'want' activent les panneaux, 'no' les désactive
   const solOn = w.solar ? (w.solar !== 'no') : true
-  // Sans panneaux, retirer le régulateur MPPT des consommateurs (cohérent avec le toggle solaire)
   if (!solOn) apps = apps.filter(a => !/mppt|régulateur/i.test(a.n))
   try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  track('wizard_completed', { vtype, solar: w.solar, budget: w.budget, usages: [...selected], appCount: apps.length })
   set({
     vtype, apps, solOn,
     altOn: VTYPE_PRESETS[vtype]?.altOn ?? true,
@@ -280,6 +278,7 @@ function finishWizard(w) {
 
 function skipWizard() {
   try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  track('wizard_skipped')
   set({ modal: null })
 }
 
@@ -290,6 +289,41 @@ const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 // Client Supabase (auth + requêtes authentifiées)
 const supabase = createClient(SB_URL, SB_KEY)
+
+// ─── ANALYTICS ──────────────────────────────────────────────────────────────
+
+const SID_KEY = 'ow_sid'
+function getSessionId() {
+  let sid = sessionStorage.getItem(SID_KEY)
+  if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem(SID_KEY, sid) }
+  return sid
+}
+
+const _utm = (() => {
+  const p = new URLSearchParams(window.location.search)
+  return { source: p.get('utm_source'), medium: p.get('utm_medium'), campaign: p.get('utm_campaign') }
+})()
+
+const _deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile'
+  : /Tablet|iPad/i.test(navigator.userAgent) ? 'tablet' : 'desktop'
+
+function track(event, props = {}) {
+  try {
+    supabase.from('analytics_events').insert({
+      session_id: getSessionId(),
+      user_id: S?.user?.id || null,
+      event,
+      props,
+      referrer: document.referrer || null,
+      utm_source: _utm.source,
+      utm_medium: _utm.medium,
+      utm_campaign: _utm.campaign,
+      device: _deviceType,
+      lang: getLang(),
+      region: SUN_ZONES[S?.sunIdx ?? 0]?.r || null,
+    }).then(() => {}, () => {})
+  } catch (_) {}
+}
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
@@ -306,6 +340,7 @@ async function initAuth() {
 async function onSignIn(user) {
   const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single()
   const plan = profile?.plan || 'free'
+  track('auth_signed_in', { plan, provider: user.app_metadata?.provider || 'email' })
   set({ user: { id: user.id, email: user.email, plan }, modal: null, authLoading: false })
   loadUserConfigs()
 }
@@ -355,6 +390,7 @@ async function saveCurrentConfig(name) {
   }
 
   await loadUserConfigs()
+  track('config_saved', { appCount: S.apps.length, vtype: S.vtype, batType: S.batType })
   set({ saveLoading: false, modal: null })
 }
 
@@ -598,8 +634,8 @@ async function openShareModal() {
   let url
   try { url = await createShortLink() }
   catch (_) { url = longShareUrl() }
-  // L'utilisateur a peut-être fermé la modale entre-temps
   if (S.modal?.type !== 'share') return
+  track('share_link_created', { vtype: S.vtype, appCount: S.apps.filter(a => a.on).length })
   set({ modal: { type: 'share', loading: false, url } })
 }
 
@@ -612,6 +648,7 @@ async function loadShortLink() {
     if (error || !data?.state) return
     if (!applyDecodedState(data.state)) return
     persistState()
+    track('shared_link_opened', { code })
     window.history.replaceState({}, '', window.location.pathname)
     render()
     showToast(t('share.loaded'))
@@ -662,6 +699,7 @@ function snapshotState(label) {
 
 function captureScenario(slot) {
   const snap = snapshotState(slot === 'A' ? 'Setup A' : 'Setup B')
+  track('compare_captured', { slot, vtype: S.vtype, appCount: S.apps.filter(a => a.on).length })
   set({ scenarios: { ...S.scenarios, [slot]: snap }, tab: 'compare' })
 }
 
@@ -2031,6 +2069,7 @@ function buildModal() {
 function bindEvents() {
   // Language switch
   document.querySelectorAll('[data-lang]').forEach(el => el.addEventListener('click', () => {
+    track('lang_changed', { lang: el.dataset.lang })
     setLang(el.dataset.lang)
     render()
   }))
@@ -2068,7 +2107,10 @@ function bindEvents() {
   document.getElementById('wiz-finish')?.addEventListener('click', () => finishWizard(S.modal))
   document.getElementById('wiz-skip')?.addEventListener('click', () => skipWizard())
   // Tabs
-  document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => set({ tab: el.dataset.tab })))
+  document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => {
+    track('tab_viewed', { tab: el.dataset.tab })
+    set({ tab: el.dataset.tab })
+  }))
   // Categories filter
   document.querySelectorAll('[data-cat]').forEach(el => el.addEventListener('click', () => set({ catFilter: el.dataset.cat })))
   // App toggles
@@ -2156,10 +2198,14 @@ function bindEvents() {
   // Add from local catalog presets
   document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
     const item = CATALOG[parseInt(el.dataset.catalog)]
+    track('appliance_added', { name: item.n, cat: item.cat, watts: item.w, source: 'catalog' })
     set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
   }))
   // Add catalog
-  document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } }))
+  document.getElementById('open-catalog')?.addEventListener('click', () => {
+    track('catalog_opened')
+    set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } })
+  })
   document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 
   // Comparateur
@@ -2170,12 +2216,18 @@ function bindEvents() {
     set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
   }))
   // Email summary buttons
-  const openSummaryModal = () => set({ modal: { type: 'email-summary' } })
+  const openSummaryModal = () => {
+    track('export_opened', { vtype: S.vtype })
+    set({ modal: { type: 'email-summary' } })
+  }
   document.getElementById('export-pdf')?.addEventListener('click', openSummaryModal)
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
   // Partage de configuration — ouvre la fenêtre de partage (#13)
   document.getElementById('share-config-btn')?.addEventListener('click', openShareModal)
-  document.getElementById('open-shopping-list')?.addEventListener('click', () => set({ modal: { type: 'shopping-list' } }))
+  document.getElementById('open-shopping-list')?.addEventListener('click', () => {
+    track('shopping_list_opened', { vtype: S.vtype, appCount: S.apps.filter(a => a.on).length })
+    set({ modal: { type: 'shopping-list' } })
+  })
   document.getElementById('shopping-send')?.addEventListener('click', async () => {
     const email = document.getElementById('shopping-email')?.value?.trim()
     if (!email) return
@@ -2193,6 +2245,7 @@ function bindEvents() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Error')
+      track('shopping_email_sent', { total, sym, itemCount: items.length, vtype: S.vtype, region: SUN_ZONES[S.sunIdx]?.r })
       set({ shoppingLoading: false, modal: { type: 'shopping-list', sent: true, email } })
     } catch (err) {
       set({ shoppingLoading: false, modal: { ...S.modal, error: err.message } })
@@ -2223,6 +2276,7 @@ function bindEvents() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Erreur envoi')
+      track('summary_email_sent', { vtype: S.vtype, autDays: autDays, consAh: toAh(cons) })
       set({ summaryLoading: false, modal: { type: 'email-summary', sent: true, email } })
     } catch (err) {
       set({ summaryLoading: false, modal: { ...S.modal, error: err.message } })
@@ -2263,6 +2317,7 @@ function confirmCustom() {
   const h = parseFloat(document.getElementById('mh')?.value) || 0
   const cat = document.getElementById('mc')?.value || 'Tech'
   if (!n) return
+  track('appliance_added', { name: n, cat, watts: w, source: 'custom' })
   set({ apps: [...S.apps, { id: Date.now(), n, icon: ICON_BY_CAT[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
@@ -2310,6 +2365,12 @@ try {
   }
 } catch (_) {}
 render()
+track('session_started', {
+  isNewUser: !localStorage.getItem(ONBOARDED_KEY),
+  fromShare: sharedLoaded || hasShortParam,
+  vtype: S.vtype,
+  appCount: S.apps.length,
+})
 if (sharedLoaded) showToast(t('share.loaded'))
 if (hasShortParam) loadShortLink()  // chargement asynchrone depuis Supabase
 loadCatalogFromDB()                 // catalogue chargé 100% depuis Supabase
