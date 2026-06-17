@@ -382,8 +382,14 @@ const DICT = {
     'modal.shopping.mpptRec': 'Victron SmartSolar {spec}',
     'modal.shopping.chargerRec': '{a}A DC-DC charger',
     'modal.shopping.batRec': '{type} {ah}Ah {v}V',
+    'email.shopping.greeting': 'Hey there! 👋',
+    'email.shopping.intro': 'Here\'s the equipment list for your {vtype} setup — we\'ve put together everything you need for <strong style="color:#c47a18">{days}</strong> of off-grid freedom.',
+    'email.shopping.introInfinite': 'Here\'s the equipment list for your {vtype} setup — with this configuration, your solar covers 100% of your needs. Total energy independence! ☀️',
+    'email.shopping.tip': '💡 <strong>Pro tip:</strong> Start with the battery and solar panels — they\'re the heart of your system. The MPPT regulator and cables can be added later, but getting the right battery capacity from day one will save you headaches down the road.',
+    'email.shopping.cta': 'Ready to hit the road? Fine-tune your setup anytime at',
+    'email.shopping.closing': 'Happy travels! 🚐',
+    'email.shopping.team': 'The OffroadWatt team',
   },
-
   es: {
     'app.tagline': 'Calculadora de autonomía eléctrica • autocaravana • caravana • furgoneta',
     'vt.campervan': 'Autocaravana',
@@ -730,8 +736,14 @@ const DICT = {
     'modal.shopping.mpptRec': 'Victron SmartSolar {spec}',
     'modal.shopping.chargerRec': 'Cargador DC-DC {a}A',
     'modal.shopping.batRec': '{type} {ah}Ah {v}V',
+    'email.shopping.greeting': '¡Hola! 👋',
+    'email.shopping.intro': 'Aquí tienes la lista de materiales para tu {vtype} — todo lo que necesitas para <strong style="color:#c47a18">{days}</strong> de libertad sin conexión.',
+    'email.shopping.introInfinite': 'Aquí tienes la lista de materiales para tu {vtype} — con esta configuración, tu solar cubre el 100% de tus necesidades. ¡Independencia energética total! ☀️',
+    'email.shopping.tip': '💡 <strong>Consejo:</strong> Empieza por la batería y los paneles solares — son el corazón de tu sistema. El regulador MPPT y los cables se pueden añadir después, pero elegir la capacidad correcta de batería desde el principio te ahorrará problemas.',
+    'email.shopping.cta': '¿Listo para la aventura? Ajusta tu configuración cuando quieras en',
+    'email.shopping.closing': '¡Buen viaje! 🚐',
+    'email.shopping.team': 'El equipo OffroadWatt',
   },
-
   fr: {
     'app.tagline': "Calculateur d'autonomie électrique • camping-car • caravane • van",
     'vt.campervan': 'Camping-car',
@@ -1077,6 +1089,13 @@ const DICT = {
     'modal.shopping.mpptRec': 'Victron SmartSolar {spec}',
     'modal.shopping.chargerRec': 'Chargeur DC-DC {a}A',
     'modal.shopping.batRec': '{type} {ah}Ah {v}V',
+    'email.shopping.greeting': 'Salut ! 👋',
+    'email.shopping.intro': 'Voici la liste de matériel pour ton {vtype} — on a rassemblé tout ce qu\'il te faut pour <strong style="color:#c47a18">{days}</strong> d\'autonomie en toute liberté.',
+    'email.shopping.introInfinite': 'Voici la liste de matériel pour ton {vtype} — avec cette configuration, ton solaire couvre 100% de tes besoins. Autonomie totale ! ☀️',
+    'email.shopping.tip': '💡 <strong>Notre conseil :</strong> Commence par la batterie et les panneaux solaires — c\'est le cœur de ton installation. Le régulateur MPPT et les câbles peuvent venir ensuite, mais bien dimensionner ta batterie dès le départ t\'évitera bien des galères.',
+    'email.shopping.cta': 'Prêt à prendre la route ? Ajuste ta configuration à tout moment sur',
+    'email.shopping.closing': 'Bonne route ! 🚐',
+    'email.shopping.team': 'L\'équipe OffroadWatt',
   },
 }
 

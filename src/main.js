@@ -258,18 +258,16 @@ function batForBudget(vtype, budgetId) {
 function finishWizard(w) {
   const vtype = w.vtype || 'campervan'
   let apps = instantiatePresetApps(vtype)
-  // Retire les appareils des usages optionnels non sélectionnés
   const selected = new Set(w.usages || [])
   apps = apps.filter(a => {
     const usage = USAGES.find(u => u.match(a.n))
     return usage ? selected.has(usage.id) : true
   })
   const bat = batForBudget(vtype, w.budget)
-  // Solaire : 'have' / 'want' activent les panneaux, 'no' les désactive
   const solOn = w.solar ? (w.solar !== 'no') : true
-  // Sans panneaux, retirer le régulateur MPPT des consommateurs (cohérent avec le toggle solaire)
   if (!solOn) apps = apps.filter(a => !/mppt|régulateur/i.test(a.n))
   try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  track('wizard_completed', { vtype, solar: w.solar, budget: w.budget, usages: [...selected], appCount: apps.length })
   set({
     vtype, apps, solOn,
     altOn: VTYPE_PRESETS[vtype]?.altOn ?? true,
@@ -280,6 +278,7 @@ function finishWizard(w) {
 
 function skipWizard() {
   try { localStorage.setItem(ONBOARDED_KEY, '1') } catch (_) {}
+  track('wizard_skipped')
   set({ modal: null })
 }
 
@@ -290,6 +289,41 @@ const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 // Client Supabase (auth + requêtes authentifiées)
 const supabase = createClient(SB_URL, SB_KEY)
+
+// ─── ANALYTICS ──────────────────────────────────────────────────────────────
+
+const SID_KEY = 'ow_sid'
+function getSessionId() {
+  let sid = sessionStorage.getItem(SID_KEY)
+  if (!sid) { sid = crypto.randomUUID(); sessionStorage.setItem(SID_KEY, sid) }
+  return sid
+}
+
+const _utm = (() => {
+  const p = new URLSearchParams(window.location.search)
+  return { source: p.get('utm_source'), medium: p.get('utm_medium'), campaign: p.get('utm_campaign') }
+})()
+
+const _deviceType = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile'
+  : /Tablet|iPad/i.test(navigator.userAgent) ? 'tablet' : 'desktop'
+
+function track(event, props = {}) {
+  try {
+    supabase.from('analytics_events').insert({
+      session_id: getSessionId(),
+      user_id: S?.user?.id || null,
+      event,
+      props,
+      referrer: document.referrer || null,
+      utm_source: _utm.source,
+      utm_medium: _utm.medium,
+      utm_campaign: _utm.campaign,
+      device: _deviceType,
+      lang: getLang(),
+      region: SUN_ZONES[S?.sunIdx ?? 0]?.r || null,
+    }).then(() => {}, () => {})
+  } catch (_) {}
+}
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
@@ -306,6 +340,7 @@ async function initAuth() {
 async function onSignIn(user) {
   const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single()
   const plan = profile?.plan || 'free'
+  track('auth_signed_in', { plan, provider: user.app_metadata?.provider || 'email' })
   set({ user: { id: user.id, email: user.email, plan }, modal: null, authLoading: false })
   loadUserConfigs()
 }
@@ -355,6 +390,7 @@ async function saveCurrentConfig(name) {
   }
 
   await loadUserConfigs()
+  track('config_saved', { appCount: S.apps.length, vtype: S.vtype, batType: S.batType })
   set({ saveLoading: false, modal: null })
 }
 
@@ -598,8 +634,8 @@ async function openShareModal() {
   let url
   try { url = await createShortLink() }
   catch (_) { url = longShareUrl() }
-  // L'utilisateur a peut-être fermé la modale entre-temps
   if (S.modal?.type !== 'share') return
+  track('share_link_created', { vtype: S.vtype, appCount: S.apps.filter(a => a.on).length })
   set({ modal: { type: 'share', loading: false, url } })
 }
 
@@ -612,6 +648,7 @@ async function loadShortLink() {
     if (error || !data?.state) return
     if (!applyDecodedState(data.state)) return
     persistState()
+    track('shared_link_opened', { code })
     window.history.replaceState({}, '', window.location.pathname)
     render()
     showToast(t('share.loaded'))
@@ -662,6 +699,7 @@ function snapshotState(label) {
 
 function captureScenario(slot) {
   const snap = snapshotState(slot === 'A' ? 'Setup A' : 'Setup B')
+  track('compare_captured', { slot, vtype: S.vtype, appCount: S.apps.filter(a => a.on).length })
   set({ scenarios: { ...S.scenarios, [slot]: snap }, tab: 'compare' })
 }
 
@@ -1649,6 +1687,13 @@ function buildShoppingEmailHtml(items) {
   const sym = items[0]?.sym || '€'
   const zone = SUN_ZONES[S.sunIdx]
   const dateStr = new Date().toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
+  const { autDays } = calc()
+  const vtypeLabel = t('vt.' + S.vtype)
+  const daysStr = !isFinite(autDays) ? '' : autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ` ${t('unit.days')}`
+  const introText = isFinite(autDays)
+    ? t('email.shopping.intro', { vtype: vtypeLabel, days: daysStr })
+    : t('email.shopping.introInfinite', { vtype: vtypeLabel })
+
   const rows = items.map(it => {
     const q = it.qty > 1 ? ` <span style="color:#a0a09a;font-size:10px">×${it.qty}</span>` : ''
     return `<tr>
@@ -1661,6 +1706,8 @@ function buildShoppingEmailHtml(items) {
   return `<!DOCTYPE html><html lang="${getLang()}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OffroadWatt</title></head>
 <body style="margin:0;padding:0;background:#f2f1ef;font-family:Arial,'Helvetica Neue',sans-serif;color:#2a2925">
 <div style="max-width:600px;margin:0 auto;padding:24px 16px">
+
+  <!-- Header -->
   <div style="background:#141817;border-radius:14px 14px 0 0;padding:22px 28px;border:1px solid #253029;border-bottom:none">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr><td><span style="font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#c47a18">OffroadWatt</span></td>
@@ -1668,6 +1715,14 @@ function buildShoppingEmailHtml(items) {
       <tr><td colspan="2" style="padding-top:4px"><span style="font-size:11px;color:#4a6358">${t('modal.shopping.title')} — ${zone?.n || ''}</span></td></tr>
     </table>
   </div>
+
+  <!-- Greeting + personalized intro -->
+  <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:24px 28px">
+    <p style="font-size:16px;font-weight:700;color:#2a2925;margin:0 0 10px">${t('email.shopping.greeting')}</p>
+    <p style="font-size:13px;line-height:1.65;color:#4a4a45;margin:0 0 16px">${introText}</p>
+  </div>
+
+  <!-- Shopping list table -->
   <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:20px 24px">
     <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f0ede9">${t('modal.shopping.title')}</div>
     <table width="100%" cellpadding="0" cellspacing="0">${rows}
@@ -1675,9 +1730,25 @@ function buildShoppingEmailHtml(items) {
       <td style="padding:12px 0 0 8px;font-family:'Courier New',monospace;text-align:right;font-size:16px;font-weight:700;color:#c47a18;border-top:2px solid #f0ede9">~${total}${sym}</td></tr>
     </table>
   </div>
-  <div style="background:#faf9f7;border:1px solid #e4e3e0;border-top:none;border-radius:0 0 14px 14px;padding:14px 24px;text-align:center">
-    <span style="font-size:10px;color:#a0a09a">${t('modal.shopping.indicative')}</span>
+
+  <!-- Pro tip -->
+  <div style="background:#fffbf0;border:1px solid #f0e4c8;border-top:none;padding:16px 24px">
+    <p style="font-size:12px;line-height:1.6;color:#5a5040;margin:0">${t('email.shopping.tip')}</p>
   </div>
+
+  <!-- CTA -->
+  <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:20px 24px;text-align:center">
+    <p style="font-size:13px;color:#4a4a45;margin:0 0 14px">${t('email.shopping.cta')}</p>
+    <a href="https://app.offroadwatt.com" style="display:inline-block;background:#c47a18;color:#ffffff;font-family:'Courier New',monospace;font-size:13px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:6px;letter-spacing:.5px">app.offroadwatt.com</a>
+  </div>
+
+  <!-- Closing + footer -->
+  <div style="background:#faf9f7;border:1px solid #e4e3e0;border-top:none;border-radius:0 0 14px 14px;padding:18px 24px;text-align:center">
+    <p style="font-size:13px;color:#4a4a45;margin:0 0 4px">${t('email.shopping.closing')}</p>
+    <p style="font-size:11px;color:#a0a09a;margin:0 0 10px">${t('email.shopping.team')}</p>
+    <span style="font-size:10px;color:#c0bdb8">${t('modal.shopping.indicative')}</span>
+  </div>
+
 </div></body></html>`
 }
 
@@ -1998,6 +2069,7 @@ function buildModal() {
 function bindEvents() {
   // Language switch
   document.querySelectorAll('[data-lang]').forEach(el => el.addEventListener('click', () => {
+    track('lang_changed', { lang: el.dataset.lang })
     setLang(el.dataset.lang)
     render()
   }))
@@ -2035,7 +2107,10 @@ function bindEvents() {
   document.getElementById('wiz-finish')?.addEventListener('click', () => finishWizard(S.modal))
   document.getElementById('wiz-skip')?.addEventListener('click', () => skipWizard())
   // Tabs
-  document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => set({ tab: el.dataset.tab })))
+  document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => {
+    track('tab_viewed', { tab: el.dataset.tab })
+    set({ tab: el.dataset.tab })
+  }))
   // Categories filter
   document.querySelectorAll('[data-cat]').forEach(el => el.addEventListener('click', () => set({ catFilter: el.dataset.cat })))
   // App toggles
@@ -2123,10 +2198,14 @@ function bindEvents() {
   // Add from local catalog presets
   document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
     const item = CATALOG[parseInt(el.dataset.catalog)]
+    track('appliance_added', { name: item.n, cat: item.cat, watts: item.w, source: 'catalog' })
     set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
   }))
   // Add catalog
-  document.getElementById('open-catalog')?.addEventListener('click', () => set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } }))
+  document.getElementById('open-catalog')?.addEventListener('click', () => {
+    track('catalog_opened')
+    set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } })
+  })
   document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 
   // Comparateur
@@ -2137,12 +2216,18 @@ function bindEvents() {
     set({ scenarios: { ...S.scenarios, [el.dataset.clearScenario]: null } })
   }))
   // Email summary buttons
-  const openSummaryModal = () => set({ modal: { type: 'email-summary' } })
+  const openSummaryModal = () => {
+    track('export_opened', { vtype: S.vtype })
+    set({ modal: { type: 'email-summary' } })
+  }
   document.getElementById('export-pdf')?.addEventListener('click', openSummaryModal)
   document.getElementById('export-compare-pdf')?.addEventListener('click', openSummaryModal)
   // Partage de configuration — ouvre la fenêtre de partage (#13)
   document.getElementById('share-config-btn')?.addEventListener('click', openShareModal)
-  document.getElementById('open-shopping-list')?.addEventListener('click', () => set({ modal: { type: 'shopping-list' } }))
+  document.getElementById('open-shopping-list')?.addEventListener('click', () => {
+    track('shopping_list_opened', { vtype: S.vtype, appCount: S.apps.filter(a => a.on).length })
+    set({ modal: { type: 'shopping-list' } })
+  })
   document.getElementById('shopping-send')?.addEventListener('click', async () => {
     const email = document.getElementById('shopping-email')?.value?.trim()
     if (!email) return
@@ -2160,6 +2245,7 @@ function bindEvents() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Error')
+      track('shopping_email_sent', { total, sym, itemCount: items.length, vtype: S.vtype, region: SUN_ZONES[S.sunIdx]?.r })
       set({ shoppingLoading: false, modal: { type: 'shopping-list', sent: true, email } })
     } catch (err) {
       set({ shoppingLoading: false, modal: { ...S.modal, error: err.message } })
@@ -2190,6 +2276,7 @@ function bindEvents() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Erreur envoi')
+      track('summary_email_sent', { vtype: S.vtype, autDays: autDays, consAh: toAh(cons) })
       set({ summaryLoading: false, modal: { type: 'email-summary', sent: true, email } })
     } catch (err) {
       set({ summaryLoading: false, modal: { ...S.modal, error: err.message } })
@@ -2230,6 +2317,7 @@ function confirmCustom() {
   const h = parseFloat(document.getElementById('mh')?.value) || 0
   const cat = document.getElementById('mc')?.value || 'Tech'
   if (!n) return
+  track('appliance_added', { name: n, cat, watts: w, source: 'custom' })
   set({ apps: [...S.apps, { id: Date.now(), n, icon: ICON_BY_CAT[cat] || 'ti-plug', w, h, on: true, cat }], modal: null })
 }
 
@@ -2277,6 +2365,12 @@ try {
   }
 } catch (_) {}
 render()
+track('session_started', {
+  isNewUser: !localStorage.getItem(ONBOARDED_KEY),
+  fromShare: sharedLoaded || hasShortParam,
+  vtype: S.vtype,
+  appCount: S.apps.length,
+})
 if (sharedLoaded) showToast(t('share.loaded'))
 if (hasShortParam) loadShortLink()  // chargement asynchrone depuis Supabase
 loadCatalogFromDB()                 // catalogue chargé 100% depuis Supabase
