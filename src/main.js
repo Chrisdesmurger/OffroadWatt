@@ -1649,6 +1649,13 @@ function buildShoppingEmailHtml(items) {
   const sym = items[0]?.sym || '€'
   const zone = SUN_ZONES[S.sunIdx]
   const dateStr = new Date().toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
+  const { autDays } = calc()
+  const vtypeLabel = t('vt.' + S.vtype)
+  const daysStr = !isFinite(autDays) ? '' : autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ` ${t('unit.days')}`
+  const introText = isFinite(autDays)
+    ? t('email.shopping.intro', { vtype: vtypeLabel, days: daysStr })
+    : t('email.shopping.introInfinite', { vtype: vtypeLabel })
+
   const rows = items.map(it => {
     const q = it.qty > 1 ? ` <span style="color:#a0a09a;font-size:10px">×${it.qty}</span>` : ''
     return `<tr>
@@ -1661,6 +1668,8 @@ function buildShoppingEmailHtml(items) {
   return `<!DOCTYPE html><html lang="${getLang()}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OffroadWatt</title></head>
 <body style="margin:0;padding:0;background:#f2f1ef;font-family:Arial,'Helvetica Neue',sans-serif;color:#2a2925">
 <div style="max-width:600px;margin:0 auto;padding:24px 16px">
+
+  <!-- Header -->
   <div style="background:#141817;border-radius:14px 14px 0 0;padding:22px 28px;border:1px solid #253029;border-bottom:none">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr><td><span style="font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#c47a18">OffroadWatt</span></td>
@@ -1668,6 +1677,14 @@ function buildShoppingEmailHtml(items) {
       <tr><td colspan="2" style="padding-top:4px"><span style="font-size:11px;color:#4a6358">${t('modal.shopping.title')} — ${zone?.n || ''}</span></td></tr>
     </table>
   </div>
+
+  <!-- Greeting + personalized intro -->
+  <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:24px 28px">
+    <p style="font-size:16px;font-weight:700;color:#2a2925;margin:0 0 10px">${t('email.shopping.greeting')}</p>
+    <p style="font-size:13px;line-height:1.65;color:#4a4a45;margin:0 0 16px">${introText}</p>
+  </div>
+
+  <!-- Shopping list table -->
   <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:20px 24px">
     <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f0ede9">${t('modal.shopping.title')}</div>
     <table width="100%" cellpadding="0" cellspacing="0">${rows}
@@ -1675,9 +1692,25 @@ function buildShoppingEmailHtml(items) {
       <td style="padding:12px 0 0 8px;font-family:'Courier New',monospace;text-align:right;font-size:16px;font-weight:700;color:#c47a18;border-top:2px solid #f0ede9">~${total}${sym}</td></tr>
     </table>
   </div>
-  <div style="background:#faf9f7;border:1px solid #e4e3e0;border-top:none;border-radius:0 0 14px 14px;padding:14px 24px;text-align:center">
-    <span style="font-size:10px;color:#a0a09a">${t('modal.shopping.indicative')}</span>
+
+  <!-- Pro tip -->
+  <div style="background:#fffbf0;border:1px solid #f0e4c8;border-top:none;padding:16px 24px">
+    <p style="font-size:12px;line-height:1.6;color:#5a5040;margin:0">${t('email.shopping.tip')}</p>
   </div>
+
+  <!-- CTA -->
+  <div style="background:#ffffff;border:1px solid #e4e3e0;border-top:none;padding:20px 24px;text-align:center">
+    <p style="font-size:13px;color:#4a4a45;margin:0 0 14px">${t('email.shopping.cta')}</p>
+    <a href="https://app.offroadwatt.com" style="display:inline-block;background:#c47a18;color:#ffffff;font-family:'Courier New',monospace;font-size:13px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:6px;letter-spacing:.5px">app.offroadwatt.com</a>
+  </div>
+
+  <!-- Closing + footer -->
+  <div style="background:#faf9f7;border:1px solid #e4e3e0;border-top:none;border-radius:0 0 14px 14px;padding:18px 24px;text-align:center">
+    <p style="font-size:13px;color:#4a4a45;margin:0 0 4px">${t('email.shopping.closing')}</p>
+    <p style="font-size:11px;color:#a0a09a;margin:0 0 10px">${t('email.shopping.team')}</p>
+    <span style="font-size:10px;color:#c0bdb8">${t('modal.shopping.indicative')}</span>
+  </div>
+
 </div></body></html>`
 }
 
