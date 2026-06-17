@@ -833,9 +833,7 @@ function buildAppRow(a) {
   const hasModes = a.modes && a.modes.length > 1
   if (hasModes) {
     return `
-    <div class="arow has-modes${!a.on ? ' off' : ''}">
-      <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
-      <i class="${a.icon} ai"></i>
+    <div class="arow has-modes">
       <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
       <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
@@ -850,16 +848,12 @@ function buildAppRow(a) {
     </div>`
   }
   return `
-  <div class="arow two-row${!a.on ? ' off' : ''}">
-    <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
-    <i class="${a.icon} ai"></i>
+  <div class="arow">
     <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
-    <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
+    <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
+    <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
+    <span class="wh">${toAh(a.w * a.h)} Ah</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
-    <div class="row-inputs">
-      <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
-      <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
-    </div>
   </div>`
 }
 
@@ -2010,37 +2004,83 @@ function buildModal() {
   }
 
   if (m.type === 'catalog') {
+    const filterMode = m.filterMode || 'brand'
     const cf = m.catFilter || 'Tout'
+    const bf = m.brandFilter || ''
     const search = (m.search || '').toLowerCase().trim()
+    const selected = m.selected || []
     const batV = S.bat?.v || 12
     const toAhLocal = (wh) => { const ah = wh / batV; return ah >= 10 ? Math.round(ah) : +ah.toFixed(1) }
 
-    const allItems = search
-      ? CATALOG.filter(c => c.n.toLowerCase().includes(search))
-      : (cf === 'Tout' ? CATALOG : CATALOG.filter(c => c.cat === cf))
+    const brandCounts = {}
+    for (const c of CATALOG) { if (c.brand) brandCounts[c.brand] = (brandCounts[c.brand] || 0) + 1 }
+    const topBrands = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(e => e[0])
+    const otherBrandNames = Object.keys(brandCounts).filter(b => !topBrands.includes(b)).sort()
+
+    let filtered = CATALOG
+    if (search) {
+      filtered = filtered.filter(c => c.n.toLowerCase().includes(search) || c.brand.toLowerCase().includes(search))
+    } else if (filterMode === 'brand' && bf) {
+      if (bf === '__other__') filtered = filtered.filter(c => !topBrands.includes(c.brand))
+      else filtered = filtered.filter(c => c.brand === bf)
+    } else if (filterMode === 'type' && cf !== 'Tout') {
+      filtered = filtered.filter(c => c.cat === cf)
+    }
+
+    const showGrid = true
 
     return `
     <div class="ov" id="modal-overlay">
-      <div class="mo">
-        <h3><i class="ti ti-book"></i> Catalogue d'appareils <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${CATALOG.length} appareils</span></h3>
-        <input id="catalog-search" type="text" placeholder="Rechercher un appareil…" value="${m.search || ''}"
+      <div class="mo mo-catalog">
+        <h3><i class="ti ti-book"></i> ${t('catalog.title')} <span style="font-size:10px;color:var(--t3);font-family:var(--mono);font-weight:400;margin-left:4px">${CATALOG.length} ${t('catalog.items')}</span></h3>
+        <input id="catalog-search" type="text" placeholder="${t('catalog.searchPlaceholder')}" value="${m.search || ''}"
           style="width:100%;margin-bottom:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:12px;padding:8px 10px">
-        <div class="catcatalog">
-          ${CATS.map(c => `
-            <div class="cf${cf === c && !search ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)}</div>`).join('')}
+        <div class="cat-mode-switch">
+          <button class="cat-mode-btn${filterMode === 'brand' ? ' on' : ''}" data-filter-mode="brand"><i class="ti ti-tag"></i> ${t('catalog.byBrand')}</button>
+          <button class="cat-mode-btn${filterMode === 'type' ? ' on' : ''}" data-filter-mode="type"><i class="ti ti-category"></i> ${t('catalog.byType')}</button>
         </div>
+        ${filterMode === 'brand' && !search ? `
+        <div class="cat-brand-grid">
+          ${topBrands.map(b => `<div class="cat-brand-card${bf === b ? ' on' : ''}" data-modal-brand="${b}">${b} (${brandCounts[b]})</div>`).join('')}
+          ${otherBrandNames.length > 0 ? `<div class="cat-brand-card cat-brand-other${bf === '__other__' ? ' on' : ''}" data-modal-brand="__other__">${t('catalog.otherBrands')} (${otherBrandNames.reduce((s, b) => s + (brandCounts[b] || 0), 0)})</div>` : ''}
+        </div>` : ''}
+        ${filterMode === 'type' && !search ? `
+        <div class="catcatalog" style="margin-bottom:10px">
+          ${CATS.map(c => {
+            const cnt = c === 'Tout' ? CATALOG.length : CATALOG.filter(i => i.cat === c).length
+            return `<div class="cf${cf === c ? ' on' : ''}" data-modal-cat="${c}">${tcat(c)} (${cnt})</div>`
+          }).join('')}
+        </div>` : ''}
+        ${showGrid ? `
         <div class="catgrid">
-          ${allItems.map(item => `
-            <div class="catitem" data-catalog="${CATALOG.indexOf(item)}">
+          ${filtered.map(item => {
+            const idx = CATALOG.indexOf(item)
+            const isSel = selected.includes(idx)
+            return `
+            <div class="catitem${isSel ? ' catitem-sel' : ''}" data-catalog-toggle="${idx}">
               <div>
+                ${item.brand ? `<div class="cib">${item.brand}</div>` : ''}
                 <div class="cin">${item.n}</div>
                 <div class="cim"><span class="ciw">${item.w}W</span><span>${item.h}h/j</span><span style="color:var(--te)">${toAhLocal(item.w * item.h)} Ah/j</span></div>
               </div>
-              <i class="ti ti-plus" style="font-size:14px;color:var(--t3)"></i>
-            </div>`).join('')}
-          ${allItems.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${!catalogLoaded ? 'Chargement du catalogue…' : 'Aucun appareil trouvé'}</div>` : ''}
+              <i class="ti ${isSel ? 'ti-check' : 'ti-plus'}" style="font-size:14px;color:${isSel ? 'var(--te)' : 'var(--t3)'}"></i>
+            </div>`
+          }).join('')}
+          ${filtered.length === 0 ? `<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--t3);font-size:11px">${!catalogLoaded ? t('catalog.loading') : t('catalog.empty')}</div>` : ''}
+        </div>` : ''}
+        ${selected.length > 0 ? `
+        <div class="cat-basket">
+          <div class="cat-basket-items">
+            ${selected.map(idx => {
+              const it = CATALOG[idx]
+              return it ? `<span class="cat-basket-tag" data-basket-remove="${idx}">${it.brand ? it.brand + ' ' : ''}${it.n} <i class="ti ti-x"></i></span>` : ''
+            }).join('')}
+          </div>
+        </div>` : ''}
+        <div class="mo-btns">
+          <button id="close-modal" class="mo-cancel">${t('btn.close')}</button>
+          ${selected.length > 0 ? `<button id="catalog-confirm" class="mo-ok"><i class="ti ti-plus"></i> ${t('catalog.addCount', { count: selected.length })}</button>` : ''}
         </div>
-        <div class="mo-btns"><button id="close-modal" class="mo-cancel">${t('btn.close')}</button></div>
       </div>
     </div>`
   }
@@ -2131,7 +2171,10 @@ function bindEvents() {
   // Alternateur
   document.getElementById('alt-toggle')?.addEventListener('click', () => set({ altOn: !S.altOn }))
   document.getElementById('alt-amps')?.addEventListener('change', e => set({ altAmps: Math.max(5, parseFloat(e.target.value) || 20) }))
-  document.getElementById('alt-hours')?.addEventListener('change', e => set({ altHours: Math.max(0.5, parseFloat(e.target.value) || 2) }))
+  document.getElementById('alt-hours')?.addEventListener('change', e => {
+    const h = Math.max(0.5, parseFloat(e.target.value) || 2)
+    set({ altHours: h, apps: S.apps.map(a => a.cat === 'Chargeur DC-DC' ? { ...a, h } : a) })
+  })
   // Battery type filter
   document.querySelectorAll('[data-btype]').forEach(el => el.addEventListener('click', () => {
     const t = el.dataset.btype
@@ -2193,18 +2236,47 @@ function bindEvents() {
   })
   document.getElementById('close-modal')?.addEventListener('click', () => set({ modal: null }))
   document.getElementById('confirm-custom')?.addEventListener('click', confirmCustom)
-  // Catalog category filter inside modal
-  document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat } })))
-  // Add from local catalog presets
-  document.querySelectorAll('[data-catalog]').forEach(el => el.addEventListener('click', () => {
-    const item = CATALOG[parseInt(el.dataset.catalog)]
-    track('appliance_added', { name: item.n, cat: item.cat, watts: item.w, source: 'catalog' })
-    set({ apps: [...S.apps, { id: Date.now(), n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }], modal: null, tab: 'energy' })
+  // Catalog filter mode switch (brand / type)
+  document.querySelectorAll('[data-filter-mode]').forEach(el => el.addEventListener('click', () => {
+    set({ modal: { ...S.modal, filterMode: el.dataset.filterMode, catFilter: 'Tout', brandFilter: '' } })
   }))
+  // Catalog category filter inside modal (type mode)
+  document.querySelectorAll('[data-modal-cat]').forEach(el => el.addEventListener('click', () => set({ modal: { ...S.modal, catFilter: el.dataset.modalCat } })))
+  // Catalog brand card click (brand mode)
+  document.querySelectorAll('[data-modal-brand]').forEach(el => el.addEventListener('click', () => {
+    const b = el.dataset.modalBrand
+    set({ modal: { ...S.modal, brandFilter: S.modal?.brandFilter === b ? '' : b } })
+  }))
+  // Toggle catalog item selection (multi-select)
+  document.querySelectorAll('[data-catalog-toggle]').forEach(el => el.addEventListener('click', () => {
+    const idx = parseInt(el.dataset.catalogToggle)
+    const sel = [...(S.modal?.selected || [])]
+    const pos = sel.indexOf(idx)
+    if (pos >= 0) sel.splice(pos, 1); else sel.push(idx)
+    set({ modal: { ...S.modal, selected: sel } })
+  }))
+  // Remove from basket
+  document.querySelectorAll('[data-basket-remove]').forEach(el => el.addEventListener('click', e => {
+    e.stopPropagation()
+    const idx = parseInt(el.dataset.basketRemove)
+    const sel = (S.modal?.selected || []).filter(i => i !== idx)
+    set({ modal: { ...S.modal, selected: sel } })
+  }))
+  // Confirm catalog selection — add all selected items
+  document.getElementById('catalog-confirm')?.addEventListener('click', () => {
+    const sel = S.modal?.selected || []
+    const newApps = sel.map(idx => {
+      const item = CATALOG[idx]
+      if (!item) return null
+      const h = item.cat === 'Chargeur DC-DC' ? S.altHours : item.h
+      return { id: Date.now() + idx, n: item.n, icon: item.icon, w: item.w, h, on: true, cat: item.cat }
+    }).filter(Boolean)
+    set({ apps: [...S.apps, ...newApps], modal: null, tab: 'energy' })
+  })
   // Add catalog
   document.getElementById('open-catalog')?.addEventListener('click', () => {
     track('catalog_opened')
-    set({ modal: { type: 'catalog', catFilter: 'Tout', search: '' } })
+    set({ modal: { type: 'catalog', filterMode: 'brand', catFilter: 'Tout', brandFilter: '', search: '', selected: [] } })
   })
   document.getElementById('catalog-search')?.addEventListener('input', e => { set({ modal: { ...S.modal, search: e.target.value } }) })
 
@@ -2330,7 +2402,7 @@ async function loadCatalogFromDB() {
   try {
     const { data, error } = await supabase
       .from('equipment_catalog')
-      .select('name, icon, watts, hours, category')
+      .select('name, icon, watts, hours, category, brand')
       .not('category', 'is', null)
       .not('watts', 'is', null)
       .order('category', { ascending: true })
@@ -2342,6 +2414,7 @@ async function loadCatalogFromDB() {
       w: Number(r.watts),
       h: r.hours != null ? Number(r.hours) : 4,
       cat: r.category,
+      brand: r.brand || '',
     }))
   } catch (e) {
     console.warn('Catalogue indisponible :', e?.message || e)
