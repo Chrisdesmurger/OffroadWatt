@@ -2171,7 +2171,10 @@ function bindEvents() {
   // Alternateur
   document.getElementById('alt-toggle')?.addEventListener('click', () => set({ altOn: !S.altOn }))
   document.getElementById('alt-amps')?.addEventListener('change', e => set({ altAmps: Math.max(5, parseFloat(e.target.value) || 20) }))
-  document.getElementById('alt-hours')?.addEventListener('change', e => set({ altHours: Math.max(0.5, parseFloat(e.target.value) || 2) }))
+  document.getElementById('alt-hours')?.addEventListener('change', e => {
+    const h = Math.max(0.5, parseFloat(e.target.value) || 2)
+    set({ altHours: h, apps: S.apps.map(a => a.cat === 'Chargeur DC-DC' ? { ...a, h } : a) })
+  })
   // Battery type filter
   document.querySelectorAll('[data-btype]').forEach(el => el.addEventListener('click', () => {
     const t = el.dataset.btype
@@ -2265,7 +2268,8 @@ function bindEvents() {
     const newApps = sel.map(idx => {
       const item = CATALOG[idx]
       if (!item) return null
-      return { id: Date.now() + idx, n: item.n, icon: item.icon, w: item.w, h: item.h, on: true, cat: item.cat }
+      const h = item.cat === 'Chargeur DC-DC' ? S.altHours : item.h
+      return { id: Date.now() + idx, n: item.n, icon: item.icon, w: item.w, h, on: true, cat: item.cat }
     }).filter(Boolean)
     set({ apps: [...S.apps, ...newApps], modal: null, tab: 'energy' })
   })
