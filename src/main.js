@@ -833,9 +833,7 @@ function buildAppRow(a) {
   const hasModes = a.modes && a.modes.length > 1
   if (hasModes) {
     return `
-    <div class="arow has-modes${!a.on ? ' off' : ''}">
-      <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
-      <i class="${a.icon} ai"></i>
+    <div class="arow has-modes">
       <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
       <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
@@ -850,13 +848,11 @@ function buildAppRow(a) {
     </div>`
   }
   return `
-  <div class="arow${!a.on ? ' off' : ''}">
-    <button class="tog${a.on ? ' on' : ''}" data-toggle="${a.id}"></button>
-    <i class="${a.icon} ai"></i>
+  <div class="arow">
     <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
     <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
     <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
-    <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
+    <span class="wh">${toAh(a.w * a.h)} Ah</span>
     <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
   </div>`
 }
