@@ -11,7 +11,7 @@ Keep topics distinct from everything already shipped.
 ## Backlog (high-intent, ranked)
 - [x] AGM vs GEL vs Lithium: which leisure battery for a campervan? *(EN/FR/ES — 2026-06-10)*
 - [x] How to wire a DC-DC (B2B) alternator charger in a van *(EN/FR/ES — 2026-06-14)*
-- [ ] What size inverter do I need for my campervan?
+- [x] What size inverter do I need for my campervan? *(EN/FR/ES — 2026-06-17)*
 - [ ] MPPT vs PWM solar controller for camper vans
 - [ ] How much does a campervan electrical system cost? (budget breakdown)
 - [ ] Campervan fridge power consumption: compressor vs absorption

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <title>OffroadWatt Blog — Campervan electrical guides</title>
 <meta name="description" content="Practical guides on battery autonomy, solar power and electrical consumption for campervans, motorhomes and vans. By the OffroadWatt team.">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -88,6 +90,26 @@ const DICT = {
 
 // One entry per article, with per-language metadata + URL.
 const POSTS = [
+  {
+    img: { en:'/blog/assets/inverter-sizing-hero.png', fr:'/blog/assets/inverter-sizing-hero-fr.png', es:'/blog/assets/inverter-sizing-hero-es.png' },
+    tag: { en:'Electrical guide', fr:'Guide technique', es:'Guia tecnica' },
+    date: { en:'June 17, 2026', fr:'17 juin 2026', es:'17 de junio de 2026' },
+    title: {
+      en:'What size inverter do I need for my campervan?',
+      fr:'Quelle puissance de convertisseur pour un camping-car ?',
+      es:'¿Qué tamaño de inversor necesito para mi autocaravana?'
+    },
+    excerpt: {
+      en:'Pure sine vs modified, wattage sizing by appliance, battery impact formula and a comparison of popular 12V inverters.',
+      fr:'Onde pure vs modifiée, dimensionnement par appareil, impact sur la batterie et comparatif des convertisseurs 12V populaires.',
+      es:'Onda pura vs modificada, dimensionamiento por electrodoméstico, impacto en la batería y comparativa de inversores 12V populares.'
+    },
+    url: {
+      en:'/blog/what-size-inverter-campervan',
+      fr:'/blog/fr/quelle-puissance-convertisseur-camping-car',
+      es:'/blog/es/que-tamano-inversor-autocaravana'
+    }
+  },
   {
     img: { en:'/blog/assets/dc-dc-charger-hero.png', fr:'/blog/assets/dc-dc-charger-hero-fr.png', es:'/blog/assets/dc-dc-charger-hero-es.png' },
     tag: { en:'Installation guide', fr:'Guide d\'installation', es:'Guia de instalacion' },
