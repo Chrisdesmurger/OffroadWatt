@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-const imgBytes = readFileSync('/tmp/hero-candidates/dc2.jpg');
-const imgBase64 = `data:image/jpeg;base64,${imgBytes.toString('base64')}`;
+const imgBytes = readFileSync('/tmp/hero-candidates/dcdc-powertech.webp');
+const imgBase64 = `data:image/webp;base64,${imgBytes.toString('base64')}`;
 
 const HEROES = [
   {
@@ -18,7 +18,7 @@ const HEROES = [
   {
     file: 'landing/blog/assets/dc-dc-charger-hero-fr.png',
     title: 'Brancher un\nChargeur DC-DC\ndans Votre Van',
-    tag: 'Guide d\'installation',
+    tag: "Guide d'installation",
   },
   {
     file: 'landing/blog/assets/dc-dc-charger-hero-es.png',
@@ -44,37 +44,51 @@ body {
   position: relative;
 }
 
+/* Product image — right side, multiply blend to remove white bg */
 .photo {
   position: absolute;
-  top: -120px; right: -100px;
-  width: 950px; height: 960px;
-  object-fit: cover;
-  object-position: center;
+  top: 30px; right: 20px;
+  width: 680px; height: 680px;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+  filter: brightness(0.95) contrast(1.05);
+  z-index: 1;
 }
 
+/* Subtle radial glow behind the product */
+.product-glow {
+  position: absolute;
+  top: 60px; right: 80px;
+  width: 560px; height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,160,48,0.08) 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* Left-side gradient fade */
 .overlay {
   position: absolute; inset: 0;
   background:
     linear-gradient(90deg,
       #090b0a 0%,
-      #090b0a 30%,
-      rgba(9,11,10,0.92) 40%,
-      rgba(9,11,10,0.70) 52%,
-      rgba(9,11,10,0.40) 68%,
-      rgba(9,11,10,0.20) 82%,
-      rgba(9,11,10,0.10) 100%
+      #090b0a 35%,
+      rgba(9,11,10,0.85) 45%,
+      rgba(9,11,10,0.3) 60%,
+      transparent 75%
     );
   z-index: 2;
 }
 
+/* Subtle amber glow at bottom */
 .glow {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 180px;
-  background: linear-gradient(180deg, transparent 0%, rgba(240,160,48,0.08) 100%);
+  height: 120px;
+  background: linear-gradient(180deg, transparent 0%, rgba(240,160,48,0.06) 100%);
   z-index: 3;
 }
 
+/* Green title panel */
 .panel {
   position: absolute;
   top: 100px; left: 60px;
@@ -82,7 +96,7 @@ body {
   padding: 30px 36px;
   border-radius: 6px;
   z-index: 10;
-  max-width: 520px;
+  max-width: 480px;
 }
 .panel span {
   display: block;
@@ -94,6 +108,7 @@ body {
   text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+/* Tag + URL below panel */
 .sub {
   position: absolute;
   bottom: 80px; left: 64px;
@@ -116,6 +131,7 @@ body {
   color: #7a9985;
 }
 
+/* Green geometric accents */
 .block1 {
   position: absolute;
   bottom: 50px; right: 50px;
@@ -144,6 +160,7 @@ body {
   opacity: 0.85;
 }
 
+/* OffroadWatt wordmark */
 .wordmark {
   position: absolute;
   bottom: 30px; left: 64px;
@@ -158,6 +175,7 @@ body {
   color: #4a6455;
 }
 
+/* Accent line */
 .accent-line {
   position: absolute;
   bottom: 60px; left: 64px;
@@ -169,6 +187,7 @@ body {
 </style>
 </head>
 <body>
+  <div class="product-glow"></div>
   <img class="photo" src="${imgBase64}" alt="">
   <div class="overlay"></div>
   <div class="glow"></div>
