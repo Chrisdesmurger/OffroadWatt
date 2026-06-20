@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>MPPT vs PWM: regulador solar para autocaravana (2026)</title>
+<meta name="description" content="MPPT o PWM? Comparativa completa de reguladores de carga solar para autocaravana y furgoneta camper: rendimiento, precio, dimensionamiento y modelos.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="OffroadWatt">
+<meta name="keywords" content="mppt vs pwm autocaravana, regulador solar furgoneta, controlador de carga mppt, pwm solar camper, victron smartsolar, dimensionar regulador solar">
+<link rel="canonical" href="https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana">
+
+<link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan">
+<link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/regulateur-solaire-mppt-vs-pwm-camping-car">
+<link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana">
+<link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="MPPT vs PWM: regulador solar para autocaravana (2026)">
+<meta property="og:description" content="MPPT o PWM? Comparativa de reguladores de carga solar para autocaravana y furgoneta camper.">
+<meta property="og:url" content="https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana">
+<meta property="og:image" content="https://offroadwatt.com/blog/assets/mppt-vs-pwm-hero-es.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:locale" content="es_ES">
+<meta property="article:published_time" content="2026-06-19">
+<meta property="article:modified_time" content="2026-06-19">
+<meta property="article:section" content="Guides">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MPPT vs PWM: regulador solar para autocaravana (2026)">
+<meta name="twitter:description" content="MPPT o PWM? Comparativa completa de reguladores de carga solar para autocaravana.">
+<meta name="twitter:image" content="https://offroadwatt.com/blog/assets/mppt-vs-pwm-hero-es.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "MPPT vs PWM: regulador solar para autocaravana (2026)",
+  "description": "MPPT o PWM? Comparativa completa de reguladores de carga solar para autocaravana y furgoneta camper: rendimiento, precio, dimensionamiento y modelos populares.",
+  "image": "https://offroadwatt.com/blog/assets/mppt-vs-pwm-hero-es.png",
+  "author": { "@type": "Organization", "name": "OffroadWatt", "url": "https://offroadwatt.com" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "logo": { "@type": "ImageObject", "url": "https://offroadwatt.com/og-image.png" }
+  },
+  "datePublished": "2026-06-19",
+  "dateModified": "2026-06-19",
+  "inLanguage": "es",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://offroadwatt.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://offroadwatt.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Regulador MPPT vs PWM", "item": "https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Merece la pena un MPPT para una autocaravana?", "acceptedAnswer": { "@type": "Answer", "text": "Si, para la mayoria de instalaciones por encima de 100W. Un regulador MPPT aprovecha entre un 20 y un 30 % mas de energia que un PWM en las mismas condiciones, especialmente con paneles de mayor voltaje. El sobrecoste (unos 80-150 euros) se amortiza generalmente en menos de un ano." } },
+    { "@type": "Question", "name": "Puedo usar un PWM con un panel de 24V en una bateria de 12V?", "acceptedAnswer": { "@type": "Answer", "text": "Tecnicamente si, pero perderas aproximadamente la mitad de la potencia del panel. El PWM solo puede inyectar corriente a la tension de la bateria: el voltaje excedente del panel de 24V se disipa en forma de calor. Usa un regulador MPPT que convierte ese voltaje extra en corriente adicional." } },
+    { "@type": "Question", "name": "Que tamano de regulador MPPT necesito?", "acceptedAnswer": { "@type": "Answer", "text": "Divide la potencia total de tus paneles entre el voltaje de la bateria (12V o 24V) para obtener la corriente de carga, y anade un 25 % de margen. Ejemplo: 400W en un sistema de 12V: 400 / 12 = 33A, mas 25 % = unos 42A. Elige un regulador de 45A o 50A." } },
+    { "@type": "Question", "name": "Cuanto dura un regulador de carga solar?", "acceptedAnswer": { "@type": "Answer", "text": "Los reguladores MPPT de calidad como la gama Victron SmartSolar duran entre 10 y 15 anos. Los PWM tienen una vida util similar pero suelen reemplazarse antes cuando los usuarios migran a MPPT al ampliar su instalacion solar." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Caracter&iacute;sticas</a>
+    <div class="lang-sel">
+      <a href="/blog/mppt-vs-pwm-solar-controller-campervan" class="lang-btn">EN</a>
+      <a href="/blog/fr/regulateur-solaire-mppt-vs-pwm-camping-car" class="lang-btn">FR</a>
+      <a href="/blog/es/regulador-solar-mppt-vs-pwm-autocaravana" class="lang-btn on">ES</a>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Probar</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="breadcrumb" aria-label="Migas de pan">
+    <a href="/">Inicio</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>MPPT vs PWM</span>
+  </nav>
+
+  <article>
+    <span class="eyebrow"><i class="ti ti-solar-panel"></i> Gu&iacute;a solar y energ&iacute;a</span>
+    <h1>MPPT vs PWM: &iquest;qu&eacute; regulador solar para tu autocaravana?</h1>
+    <div class="article-meta">
+      <span>Por OffroadWatt</span><span class="dot"></span>
+      <time datetime="2026-06-19">19 de junio de 2026</time><span class="dot"></span>
+      <span>10 min de lectura</span>
+    </div>
+
+    <p class="lede">El regulador de carga solar se sit&uacute;a entre tus paneles y tu bater&iacute;a, y decide en silencio cu&aacute;nta energ&iacute;a solar conservas realmente. Elige el tipo equivocado y podr&iacute;as estar perdiendo un 20&ndash;30 % de tu cosecha solar cada d&iacute;a. Esta gu&iacute;a explica las dos tecnolog&iacute;as &mdash; MPPT y PWM &mdash; en lenguaje sencillo, las compara lado a lado y te dice exactamente cu&aacute;ndo cada una tiene sentido.</p>
+
+    <div class="toc">
+      <div class="toc-title">En esta gu&iacute;a</div>
+      <ol>
+        <li><a href="#funcion">Funci&oacute;n del regulador de carga</a></li>
+        <li><a href="#pwm">C&oacute;mo funciona el PWM</a></li>
+        <li><a href="#mppt">C&oacute;mo funciona el MPPT</a></li>
+        <li><a href="#comparativa">Comparativa lado a lado</a></li>
+        <li><a href="#cuando-pwm">Cu&aacute;ndo el PWM es suficiente</a></li>
+        <li><a href="#cuando-mppt">Cu&aacute;ndo el MPPT se amortiza</a></li>
+        <li><a href="#dimensionamiento">Dimensionar tu regulador</a></li>
+        <li><a href="#modelos">Modelos populares</a></li>
+        <li><a href="#errores">Errores comunes</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="funcion">1. Funci&oacute;n del regulador de carga</h2>
+    <p>La salida bruta de un panel solar fluctua con la intensidad de la luz, la temperatura y el &aacute;ngulo de incidencia. Sin regulaci&oacute;n, sobrecargar&iacute;a la bater&iacute;a, acortar&iacute;a su vida &uacute;til o, en casos extremos, causar&iacute;a un escape t&eacute;rmico. El regulador de carga controla la tensi&oacute;n y la corriente para que la bater&iacute;a se cargue de forma segura y eficiente a trav&eacute;s de sus fases bulk, absorci&oacute;n y flotaci&oacute;n.</p>
+    <p>Toda instalaci&oacute;n solar de autocaravana necesita uno. La pregunta es qu&eacute; <em>tipo</em> elegir: PWM (Pulse Width Modulation) o MPPT (Maximum Power Point Tracking). Ambos protegen la bater&iacute;a; la diferencia est&aacute; en cu&aacute;nta energ&iacute;a extraen del panel.</p>
+
+    <h2 id="pwm">2. C&oacute;mo funciona el PWM</h2>
+    <p>Un regulador PWM es b&aacute;sicamente un interruptor electr&oacute;nico. Conecta el panel directamente a la bater&iacute;a y pulsa r&aacute;pidamente la conexi&oacute;n para mantener la tensi&oacute;n de la bater&iacute;a en el nivel correcto. Simple, barato y fiable, pero con una limitaci&oacute;n fundamental.</p>
+    <p>Como el panel queda fijado a la tensi&oacute;n de la bater&iacute;a, cualquier tensi&oacute;n excedente que produzca se pierde. Un panel 12V &laquo;nominal&raquo; produce en realidad unos 18&ndash;21V en su punto de m&aacute;xima potencia. Un regulador PWM reduce esa tensi&oacute;n a la de la bater&iacute;a (unos 12,5&ndash;14,4V) y la diferencia &mdash; unos 4&ndash;7V &mdash; se disipa en calor.</p>
+    <div class="callout"><i class="ti ti-info-circle"></i> <strong>En la pr&aacute;ctica:</strong> un panel de 100W con un regulador PWM en una bater&iacute;a de 12V entrega t&iacute;picamente <strong>65&ndash;80W</strong> de potencia de carga real, dependiendo de la temperatura y el estado de carga.</div>
+
+    <h2 id="mppt">3. C&oacute;mo funciona el MPPT</h2>
+    <p>Un regulador MPPT es un convertidor DC-DC. Rastrea continuamente la combinaci&oacute;n &oacute;ptima tensi&oacute;n/corriente del panel (el &laquo;punto de m&aacute;xima potencia&raquo;) y convierte la tensi&oacute;n superior del panel en tensi&oacute;n de bater&iacute;a, intercambiando voltios por amperios. La energ&iacute;a que el PWM pierde en calor, el MPPT la recupera como corriente de carga adicional.</p>
+    <div class="formula">Corriente extra = (V panel &minus; V bater&iacute;a) &times; A panel &divide; V bater&iacute;a</div>
+    <p>Ese mismo panel de 100W, a trav&eacute;s de un regulador MPPT, entrega <strong>85&ndash;95W</strong> de carga real. La ganancia es a&uacute;n mayor con paneles de mayor tensi&oacute;n (24V o 36V), porque el &laquo;margen&raquo; de tensi&oacute;n convertible crece.</p>
+    <div class="callout"><i class="ti ti-bulb"></i> <strong>Clave:</strong> el MPPT no crea energ&iacute;a. Convierte tensi&oacute;n que no puedes usar en corriente que s&iacute; puedes. Cuanto mayor sea la diferencia entre la tensi&oacute;n del panel y la de la bater&iacute;a, mayor ser&aacute; la ganancia.</div>
+
+    <h2 id="comparativa">4. Comparativa lado a lado</h2>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Criterio</th><th>PWM</th><th>MPPT</th></tr></thead>
+        <tbody>
+          <tr><td>Rendimiento</td><td>65&ndash;80 %</td><td>93&ndash;99 %</td></tr>
+          <tr><td>Precio t&iacute;pico (30A)</td><td>20&ndash;50 &euro;</td><td>100&ndash;250 &euro;</td></tr>
+          <tr><td>Tensi&oacute;n del panel</td><td>Debe coincidir con la bater&iacute;a (12V &rarr; 12V)</td><td>Puede ser superior (24V, 36V en bater&iacute;a 12V)</td></tr>
+          <tr><td>Ideal para</td><td>Sistemas peque&ntilde;os &le; 100W</td><td>Sistemas &ge; 150W, paneles mixtos, uso todo el a&ntilde;o</td></tr>
+          <tr><td>Ganancia en nublado</td><td>Referencia</td><td>+15&ndash;30 % vs PWM</td></tr>
+          <tr><td>Ganancia en fr&iacute;o</td><td>Referencia</td><td>+10&ndash;25 % (los paneles producen m&aacute;s tensi&oacute;n en fr&iacute;o)</td></tr>
+          <tr><td>Complejidad</td><td>Muy simple</td><td>Convertidor DC-DC con microprocesador</td></tr>
+          <tr><td>Bluetooth / app</td><td>Raramente</td><td>Habitual (Victron, Renogy, EPEver)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="cuando-pwm">5. Cu&aacute;ndo el PWM es suficiente</h2>
+    <p>Los reguladores PWM siguen teniendo sentido en algunos casos:</p>
+    <ul>
+      <li><strong>Sistemas peque&ntilde;os (&le; 100W, panel 12V).</strong> La p&eacute;rdida absoluta es peque&ntilde;a &mdash; unos 15&ndash;20W &mdash; y la diferencia de precio te paga una buena cena.</li>
+      <li><strong>Paneles con tensi&oacute;n adaptada.</strong> Si la tensi&oacute;n Vmp de tu panel ya est&aacute; cerca de la de la bater&iacute;a (ej.: panel 12V nominal a 18V Vmp), la ventaja del MPPT se reduce al 10&ndash;15 %.</li>
+      <li><strong>Instalaciones temporales.</strong> Un kit para festivales o un panel port&aacute;til donde el coste y la simplicidad importan m&aacute;s que el rendimiento m&aacute;ximo.</li>
+    </ul>
+    <p>Si tu potencia solar total est&aacute; por debajo de 100W con paneles de 12V nominales, un PWM de calidad como el Victron BlueSolar PWM es una elecci&oacute;n perfectamente razonable a una cuarta parte del precio de un MPPT.</p>
+
+    <h2 id="cuando-mppt">6. Cu&aacute;ndo el MPPT se amortiza</h2>
+    <p>Para la mayor&iacute;a de instalaciones de autocaravana, el MPPT es la mejor inversi&oacute;n. He aqu&iacute; por qu&eacute;:</p>
+    <ul>
+      <li><strong>Sistemas de 200W+.</strong> Con 300W, una ganancia de rendimiento del 25 % supone unos 75W m&aacute;s de potencia entregada &mdash; es como conseguir un panel gratis.</li>
+      <li><strong>Paneles de alto voltaje.</strong> Los paneles de 24V o 36V (habituales en m&oacute;dulos residenciales, m&aacute;s baratos por vatio) son in&uacute;tiles con PWM, pero el MPPT los gestiona perfectamente.</li>
+      <li><strong>Viajes en invierno o nublado.</strong> El MPPT extrae m&aacute;s energ&iacute;a con poca luz al reajustar constantemente el punto de funcionamiento &oacute;ptimo. En condiciones invernales, la ganancia puede alcanzar el 30 %.</li>
+      <li><strong>Vida n&oacute;mada a tiempo completo.</strong> Cuando cada amperio-hora cuenta, la diferencia de cosecha a largo plazo cubre de sobra el sobrecoste de 100&ndash;150 &euro; en combustible de generador o noches en camping.</li>
+    </ul>
+    <div class="callout"><i class="ti ti-calculator"></i> &iquest;Quieres ver la ganancia MPPT en <em>tu</em> instalaci&oacute;n? <a href="https://app.offroadwatt.com">OffroadWatt</a> modela el rendimiento MPPT en 41 zonas de insolaci&oacute;n y muestra tu balance diario en Ah en tiempo real.</div>
+
+    <h2 id="dimensionamiento">7. Dimensionar tu regulador</h2>
+    <p>Los reguladores se clasifican por su <strong>corriente de salida</strong> (los amperios que inyectan en la bater&iacute;a). Para dimensionar correctamente:</p>
+    <div class="formula">Corriente de carga (A) = Potencia total paneles Wp &divide; Tensi&oacute;n bater&iacute;a</div>
+    <p>A&ntilde;ade despu&eacute;s un <strong>margen del 25 %</strong> para la sobreproducci&oacute;n en fr&iacute;o (los paneles producen m&aacute;s tensi&oacute;n &mdash; y por tanto m&aacute;s vatios a trav&eacute;s del MPPT &mdash; cuando hace fr&iacute;o).</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Solar total (Wp)</th><th>Sistema 12V</th><th>Sistema 24V</th><th>MPPT recomendado</th></tr></thead>
+        <tbody>
+          <tr><td>100&ndash;200W</td><td>8&ndash;17A</td><td>4&ndash;8A</td><td>75/15</td></tr>
+          <tr><td>200&ndash;300W</td><td>17&ndash;25A</td><td>8&ndash;13A</td><td>100/20</td></tr>
+          <tr><td>300&ndash;440W</td><td>25&ndash;37A</td><td>13&ndash;18A</td><td>100/30 o 150/35</td></tr>
+          <tr><td>440&ndash;600W</td><td>37&ndash;50A</td><td>18&ndash;25A</td><td>150/45 o 150/60</td></tr>
+          <tr><td>600&ndash;1000W</td><td>50&ndash;83A</td><td>25&ndash;42A</td><td>150/70 o 150/100</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>La notaci&oacute;n &laquo;100/20&raquo; significa que el regulador acepta hasta 100V de tensi&oacute;n de circuito abierto del panel (Voc) y entrega hasta 20A de corriente de carga. Verifica siempre la Voc de tu panel contra la tensi&oacute;n m&aacute;xima de entrada del regulador &mdash; superarla destruye el regulador instant&aacute;neamente.</p>
+
+    <div class="cta-box">
+      <h3>Dimensiona tu regulador solar en 3 minutos</h3>
+      <p>Introduce tus paneles y bater&iacute;a &mdash; OffroadWatt calcula el calibre MPPT necesario y tu producci&oacute;n diaria en Ah, en 41 zonas de insolaci&oacute;n en todo el mundo.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Abrir la calculadora gratuita</a>
+    </div>
+
+    <h2 id="modelos">8. Modelos populares</h2>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Regulador</th><th>Tipo</th><th>Calibre</th><th>Bluetooth</th><th>Precio orientativo</th><th>Ideal para</th></tr></thead>
+        <tbody>
+          <tr><td>Victron SmartSolar 75/15</td><td>MPPT</td><td>15A / 75V</td><td>Integrado</td><td>100&ndash;130 &euro;</td><td>Furgoneta peque&ntilde;a, 100&ndash;200W</td></tr>
+          <tr><td>Victron SmartSolar 100/20</td><td>MPPT</td><td>20A / 100V</td><td>Integrado</td><td>130&ndash;160 &euro;</td><td>Tama&ntilde;o medio, 200&ndash;280W</td></tr>
+          <tr><td>Victron SmartSolar 150/35</td><td>MPPT</td><td>35A / 150V</td><td>Integrado</td><td>200&ndash;250 &euro;</td><td>Tiempo completo, 300&ndash;500W</td></tr>
+          <tr><td>Renogy Rover 40A</td><td>MPPT</td><td>40A / 100V</td><td>Opcional</td><td>130&ndash;170 &euro;</td><td>Econ&oacute;mico, 300&ndash;500W</td></tr>
+          <tr><td>EPEver Tracer 3210AN</td><td>MPPT</td><td>30A / 100V</td><td>Opcional</td><td>80&ndash;110 &euro;</td><td>Econ&oacute;mico, 200&ndash;400W</td></tr>
+          <tr><td>Victron BlueSolar PWM 30A</td><td>PWM</td><td>30A</td><td>No</td><td>25&ndash;40 &euro;</td><td>Sistema peque&ntilde;o, &le; 100W</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Victron domina el mercado de autocaravanas por buenas razones: excelente calidad de construcci&oacute;n, monitorizaci&oacute;n Bluetooth mediante la app VictronConnect y una amplia gama de calibres. Renogy ofrece buena relaci&oacute;n calidad-precio si no necesitas el ecosistema Victron, y EPEver es la opci&oacute;n econ&oacute;mica con un rendimiento aceptable.</p>
+
+    <h2 id="errores">9. Errores comunes</h2>
+    <ul>
+      <li><strong>Superar la Voc m&aacute;xima.</strong> La tensi&oacute;n de circuito abierto (Voc) de tu panel debe estar por debajo de la tensi&oacute;n m&aacute;xima de entrada del regulador &mdash; incluyendo en fr&iacute;o, cuando la Voc sube. A&ntilde;ade un 10 % de margen a la Voc de la ficha t&eacute;cnica.</li>
+      <li><strong>Subdimensionar el regulador.</strong> Un regulador de 20A en un sistema de 400W/12V (33A) limitar&aacute; la producci&oacute;n y se sobrecalentar&aacute;. Dimensiona para la instalaci&oacute;n completa m&aacute;s un 25 % de margen.</li>
+      <li><strong>Usar PWM con paneles de alto voltaje.</strong> Un panel de 24V o 36V con un PWM en una bater&iacute;a de 12V desperdicia del 40 al 60 % de la potencia. Si tus paneles tienen un voltaje superior al de la bater&iacute;a, necesitas MPPT.</li>
+      <li><strong>Saltarse el sensor de temperatura.</strong> La mayor&iacute;a de los MPPT ajustan la tensi&oacute;n de carga seg&uacute;n la temperatura de la bater&iacute;a. Sin el sensor, el regulador asume 25 &deg;C, lo que provoca sobrecarga en verano e infracarga en invierno.</li>
+      <li><strong>Ignorar las p&eacute;rdidas en cables.</strong> Cables gruesos y cortos entre paneles y regulador son esenciales. Una ca&iacute;da de tensi&oacute;n del 2 % en 300W son 6W perdidos permanentemente antes de que el regulador vea la corriente.</li>
+    </ul>
+
+    <section class="faq">
+      <h2 id="faq">Preguntas frecuentes</h2>
+      <div class="faq-item"><h3>&iquest;Merece la pena un MPPT para una autocaravana?</h3><p>S&iacute;, para la mayor&iacute;a de instalaciones por encima de 100W. Un regulador MPPT aprovecha entre un 20 y un 30 % m&aacute;s de energ&iacute;a que un PWM en las mismas condiciones, especialmente con paneles de mayor voltaje. El sobrecoste (unos 80&ndash;150 &euro;) se amortiza generalmente en menos de un a&ntilde;o.</p></div>
+      <div class="faq-item"><h3>&iquest;Puedo usar un PWM con un panel de 24V en una bater&iacute;a de 12V?</h3><p>T&eacute;cnicamente s&iacute;, pero perder&aacute;s aproximadamente la mitad de la potencia del panel. El PWM solo puede inyectar corriente a la tensi&oacute;n de la bater&iacute;a: el voltaje excedente de un panel de 24V se disipa en calor. Usa un MPPT que convierte ese voltaje extra en corriente adicional.</p></div>
+      <div class="faq-item"><h3>&iquest;Qu&eacute; tama&ntilde;o de regulador MPPT necesito?</h3><p>Divide la potencia total de tus paneles entre el voltaje de la bater&iacute;a (12V o 24V), luego a&ntilde;ade un 25 % de margen. Ejemplo: 400W en 12V = 33A, +25 % = unos 42A &rarr; elige un regulador de 45A o 50A.</p></div>
+      <div class="faq-item"><h3>&iquest;Cu&aacute;nto dura un regulador de carga solar?</h3><p>Los MPPT de calidad como la gama Victron SmartSolar duran entre 10 y 15 a&ntilde;os. Los PWM tienen una vida &uacute;til similar pero suelen reemplazarse antes cuando los usuarios migran a MPPT al ampliar su instalaci&oacute;n.</p></div>
+    </section>
+
+    <div class="share">
+      <span>Compartir</span>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana" target="_blank" rel="noopener" aria-label="Compartir en Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="https://twitter.com/intent/tweet?url=https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana&text=MPPT%20vs%20PWM%20regulador%20solar%20autocaravana" target="_blank" rel="noopener" aria-label="Compartir en X"><i class="ti ti-brand-x"></i></a>
+      <a href="https://api.whatsapp.com/send?text=MPPT%20vs%20PWM%20regulador%20solar%20autocaravana%20https://offroadwatt.com/blog/es/regulador-solar-mppt-vs-pwm-autocaravana" target="_blank" rel="noopener" aria-label="Compartir en WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Inicio</a> &middot; <a href="/blog">Blog</a> &middot; <a href="https://app.offroadwatt.com" target="_blank">Abrir la app</a></p>
+  <p style="margin-top:10px">&copy; 2026 OffroadWatt. La calculadora de autonom&iacute;a el&eacute;ctrica para autocaravanas, caravanas y furgonetas.</p>
+</footer>
+
+</body>
+</html>
