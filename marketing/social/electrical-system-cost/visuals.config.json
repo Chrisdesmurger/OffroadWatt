@@ -1,0 +1,21 @@
+{
+  "slug": "electrical-system-cost",
+  "product": "marketing/social/electrical-system-cost/_src/battery-product.png",
+  "heroBase": "landing/blog/assets/electrical-system-cost-hero",
+  "socialDir": "marketing/social/electrical-system-cost",
+  "eyebrow": {
+    "en": "Budget &middot; Planning",
+    "fr": "Budget &middot; Planification",
+    "es": "Presupuesto &middot; Planificación"
+  },
+  "tag": {
+    "en": "Campervan electrical guide",
+    "fr": "Guide électrique camping-car",
+    "es": "Guía eléctrica autocaravana"
+  },
+  "title": {
+    "en": "How Much Does\na Campervan\nElectrical System Cost?",
+    "fr": "Combien Coûte\nl'Électrique d'un\nCamping-Car ?",
+    "es": "¿Cuánto Cuesta\nla Instalación\nEléctrica?"
+  }
+}

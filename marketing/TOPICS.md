@@ -13,7 +13,7 @@ Keep topics distinct from everything already shipped.
 - [x] How to wire a DC-DC (B2B) alternator charger in a van *(EN/FR/ES — 2026-06-14)*
 - [x] What size inverter do I need for my campervan? *(EN/FR/ES — 2026-06-17)*
 - [x] MPPT vs PWM solar controller for camper vans *(EN/FR/ES — 2026-06-19)*
-- [ ] How much does a campervan electrical system cost? (budget breakdown)
+- [x] How much does a campervan electrical system cost? (budget breakdown) *(EN/FR/ES — 2026-06-20)*
 - [ ] Campervan fridge power consumption: compressor vs absorption
 - [ ] How to keep your leisure battery charged in winter
 - [ ] Lithium battery sizing for full-time van life (200Ah vs 300Ah)
