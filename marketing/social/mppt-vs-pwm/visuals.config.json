@@ -1,0 +1,21 @@
+{
+  "slug": "mppt-vs-pwm",
+  "product": "marketing/social/mppt-vs-pwm/_src/mppt-product.png",
+  "heroBase": "landing/blog/assets/mppt-vs-pwm-hero",
+  "socialDir": "marketing/social/mppt-vs-pwm",
+  "eyebrow": {
+    "en": "Solar &middot; Off-grid",
+    "fr": "Solaire &middot; Autonome",
+    "es": "Solar &middot; Autónomo"
+  },
+  "tag": {
+    "en": "Solar charging guide",
+    "fr": "Guide de charge solaire",
+    "es": "Guía de carga solar"
+  },
+  "title": {
+    "en": "MPPT vs PWM:\nWhich Solar\nController Wins?",
+    "fr": "MPPT ou PWM :\nQuel Régulateur\nSolaire Choisir ?",
+    "es": "MPPT o PWM:\n¿Qué Regulador\nSolar Elegir?"
+  }
+}
