@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>MPPT vs PWM Solar Controller for Campervans (2026)</title>
+<meta name="description" content="MPPT vs PWM solar charge controllers compared for campervans. Efficiency gains, real-world tests, sizing rules and the best models for van life in 2026.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="OffroadWatt">
+<meta name="keywords" content="MPPT vs PWM campervan, solar charge controller van, MPPT solar controller camper, PWM vs MPPT efficiency, best solar controller campervan, Victron MPPT, Renogy MPPT, solar panel charge controller van life">
+<link rel="canonical" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan">
+
+<link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan">
+<link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/regulateur-solaire-mppt-pwm-camping-car">
+<link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/regulador-solar-mppt-pwm-autocaravana">
+<link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="MPPT vs PWM Solar Controller for Campervans (2026)">
+<meta property="og:description" content="MPPT vs PWM solar charge controllers compared for campervans. Efficiency, real-world gains, sizing rules and the best models for van life.">
+<meta property="og:url" content="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan">
+<meta property="og:image" content="https://offroadwatt.com/blog/assets/mppt-pwm-hero.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-06-20">
+<meta property="article:modified_time" content="2026-06-20">
+<meta property="article:section" content="Guides">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MPPT vs PWM Solar Controller for Campervans (2026)">
+<meta name="twitter:description" content="MPPT vs PWM solar charge controllers compared. Efficiency, sizing rules and the best models for van life.">
+<meta name="twitter:image" content="https://offroadwatt.com/blog/assets/mppt-pwm-hero.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "MPPT vs PWM Solar Controller for Campervans (2026)",
+  "description": "MPPT vs PWM solar charge controllers compared for campervans. Efficiency gains, real-world tests, sizing rules and the best models for van life in 2026.",
+  "image": "https://offroadwatt.com/blog/assets/mppt-pwm-hero.png",
+  "author": { "@type": "Organization", "name": "OffroadWatt", "url": "https://offroadwatt.com" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "logo": { "@type": "ImageObject", "url": "https://offroadwatt.com/og-image.png" }
+  },
+  "datePublished": "2026-06-20",
+  "dateModified": "2026-06-20",
+  "inLanguage": "en",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://offroadwatt.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://offroadwatt.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "MPPT vs PWM", "item": "https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is an MPPT controller worth it for a small campervan solar setup?", "acceptedAnswer": { "@type": "Answer", "text": "If you have a single 100W panel and a 12V battery, a PWM controller works fine and costs under 30 EUR. The MPPT advantage only becomes significant above 200W of panel capacity, or when using higher-voltage panels (e.g., 24V or 36V nominal). Below that threshold, the 10-25% efficiency gain translates to just 10-25 extra watt-hours per day, which rarely justifies the 80-150 EUR price difference." } },
+    { "@type": "Question", "name": "Can I use a 24V solar panel with a 12V battery?", "acceptedAnswer": { "@type": "Answer", "text": "Only with an MPPT controller. An MPPT charge controller can step down the higher panel voltage to the correct battery voltage while converting the excess voltage into additional charging current. A PWM controller cannot do this conversion; it simply clamps the panel voltage to the battery voltage, wasting everything above 14-15V as heat. If your panel's Vmp is above 18V, you need MPPT." } },
+    { "@type": "Question", "name": "What size MPPT controller do I need for 400W of solar?", "acceptedAnswer": { "@type": "Answer", "text": "Divide your total panel wattage by the battery voltage and add a 25% safety margin. For 400W on a 12V system: 400 / 12 = 33.3A, times 1.25 = 41.7A. A 40A MPPT controller is the minimum; a 50A unit gives comfortable headroom. Also check that the controller's maximum input voltage exceeds your panels' open-circuit voltage (Voc) in cold conditions, which can be 10-15% higher than the rated Voc." } },
+    { "@type": "Question", "name": "Do MPPT controllers work better in cloudy weather?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. In low-light conditions, a solar panel's voltage stays relatively stable while current drops. An MPPT controller continuously tracks the panel's maximum power point and converts available voltage into usable current. A PWM controller simply passes whatever current the panel produces at battery voltage. In overcast conditions, MPPT can harvest 15-30% more energy than PWM from the same panel." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Features</a>
+    <div class="lang-sel">
+      <a href="/blog/mppt-vs-pwm-solar-controller-campervan" class="lang-btn on">EN</a>
+      <a href="/blog/fr/regulateur-solaire-mppt-pwm-camping-car" class="lang-btn">FR</a>
+      <a href="/blog/es/regulador-solar-mppt-pwm-autocaravana" class="lang-btn">ES</a>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Try free</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>MPPT vs PWM</span>
+  </nav>
+
+  <article>
+    <span class="eyebrow"><i class="ti ti-solar-panel-2"></i> Solar guide</span>
+    <h1>MPPT vs PWM Solar Controller for Campervans</h1>
+    <div class="article-meta">
+      <span>By OffroadWatt</span><span class="dot"></span>
+      <time datetime="2026-06-20">June 20, 2026</time><span class="dot"></span>
+      <span>11 min read</span>
+    </div>
+
+    <p class="lede">Your solar panels produce power, your battery stores it, and between them sits the charge controller &mdash; the device that decides how much of that solar energy actually makes it into your battery. Pick the wrong type and you could be leaving 25&ndash;40% of your harvest on the roof. This guide explains the real difference between MPPT and PWM controllers, when the upgrade matters, and which models are worth buying for a campervan in 2026.</p>
+
+    <div class="toc">
+      <div class="toc-title">In this guide</div>
+      <ol>
+        <li><a href="#what-does">What does a solar charge controller do?</a></li>
+        <li><a href="#pwm">How PWM controllers work</a></li>
+        <li><a href="#mppt">How MPPT controllers work</a></li>
+        <li><a href="#comparison">Side-by-side comparison</a></li>
+        <li><a href="#efficiency">Real-world efficiency gains</a></li>
+        <li><a href="#when-pwm">When PWM is good enough</a></li>
+        <li><a href="#sizing">How to size your charge controller</a></li>
+        <li><a href="#models">Best models for campervans in 2026</a></li>
+        <li><a href="#mistakes">Common mistakes to avoid</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="what-does">1. What does a solar charge controller do?</h2>
+    <p>A solar charge controller sits between your solar panels and your leisure battery. Its job is deceptively simple: regulate the voltage and current coming from the panels so the battery charges safely and efficiently. Without it, a solar panel connected directly to a battery would overcharge it on sunny days, boil the electrolyte in lead-acid cells, or push a lithium battery past its upper voltage limit &mdash; all of which shorten battery life or create a safety hazard.</p>
+    <p>Every controller performs three core functions:</p>
+    <ul>
+      <li><strong>Bulk charging:</strong> pushes maximum available current into the battery until it reaches the absorption voltage (typically 14.4&ndash;14.6V for 12V lead-acid, 14.2&ndash;14.6V for LiFePO4).</li>
+      <li><strong>Absorption charging:</strong> holds the voltage constant while the current tapers, topping off the last 10&ndash;20% of capacity.</li>
+      <li><strong>Float / maintenance:</strong> once the battery is full, the controller drops to a lower voltage (13.5&ndash;13.8V) to keep it topped up without overcharging.</li>
+    </ul>
+    <p>The difference between PWM and MPPT lies in <em>how</em> they transfer energy from panel to battery &mdash; and how much gets lost in the process.</p>
+
+    <h2 id="pwm">2. How PWM controllers work</h2>
+    <p><strong>PWM</strong> stands for Pulse Width Modulation. A PWM controller is essentially a fast-switching electronic switch between the panel and the battery. It rapidly toggles on and off (hundreds of times per second), effectively clamping the panel voltage down to match the battery voltage.</p>
+    <p>A typical 12V-nominal solar panel has a voltage at maximum power (Vmp) around 17&ndash;18V. When connected to a 12V battery sitting at 12.8V through a PWM controller, the panel is forced to operate at 12.8V instead of its optimal 17V. The current stays roughly the same, but the voltage drop is wasted &mdash; converted to heat inside the controller. That means the panel produces only about 70&ndash;75% of its rated power.</p>
+    <p>Despite this inefficiency, PWM controllers are:</p>
+    <ul>
+      <li><strong>Cheap:</strong> basic models cost 10&ndash;30 EUR.</li>
+      <li><strong>Simple:</strong> no complex electronics, very few failure points.</li>
+      <li><strong>Compact:</strong> small enough to mount anywhere.</li>
+      <li><strong>Adequate</strong> for small, matched systems (one or two 12V-nominal panels on a 12V battery).</li>
+    </ul>
+    <p>The key limitation: a PWM controller <strong>requires the panel's nominal voltage to match the battery voltage</strong>. You cannot use a 24V or 36V panel on a 12V battery with a PWM controller &mdash; most of the panel's power would be wasted.</p>
+
+    <h2 id="mppt">3. How MPPT controllers work</h2>
+    <p><strong>MPPT</strong> stands for Maximum Power Point Tracking. An MPPT controller is a DC-to-DC converter. It continuously monitors the panel's voltage and current, calculates the combination that produces the most power (the "maximum power point"), and then converts that power down to the battery's voltage at a higher current.</p>
+    <p>Think of it like a transformer for DC electricity. If the panel produces 200W at 36V (5.56A), the MPPT controller converts that to roughly 200W at 14.4V (13.9A), minus a small conversion loss of 2&ndash;5%. The battery sees nearly the full panel power, regardless of the voltage mismatch.</p>
+    <p>This conversion is what makes MPPT controllers fundamentally more efficient:</p>
+    <ul>
+      <li><strong>They harvest 15&ndash;30% more energy</strong> than PWM from the same panels, because the panel always operates at its optimal voltage.</li>
+      <li><strong>They accept higher-voltage panels.</strong> You can wire two 12V panels in series (producing 36V) into a single MPPT controller, which reduces cable losses and allows thinner cables for the roof-to-controller run.</li>
+      <li><strong>They perform better in cold weather.</strong> Cold panels produce higher voltage (up to 10&ndash;15% above rated Voc at 0&deg;C). An MPPT controller converts that bonus voltage into extra charging current. A PWM controller throws it away.</li>
+      <li><strong>They perform better in low light.</strong> The MPPT algorithm continuously re-tracks the power point as clouds pass, squeezing the maximum from whatever light is available.</li>
+    </ul>
+    <p>The downside: MPPT controllers cost 3&ndash;5x more than PWM units of comparable amperage, and they are physically larger due to the converter electronics and heat sinks.</p>
+
+    <h2 id="comparison">4. Side-by-side comparison</h2>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Feature</th><th>PWM</th><th>MPPT</th></tr></thead>
+        <tbody>
+          <tr><td>Full name</td><td>Pulse Width Modulation</td><td>Maximum Power Point Tracking</td></tr>
+          <tr><td>How it works</td><td>Clamps panel voltage to battery voltage</td><td>DC-DC converter, tracks optimal power point</td></tr>
+          <tr><td>Efficiency</td><td>65&ndash;80%</td><td>93&ndash;99%</td></tr>
+          <tr><td>Panel voltage must match battery?</td><td>Yes (12V panel &rarr; 12V battery)</td><td>No &mdash; accepts higher panel voltage</td></tr>
+          <tr><td>Performance in low light</td><td>Adequate</td><td>Significantly better</td></tr>
+          <tr><td>Performance in cold weather</td><td>No voltage bonus harvested</td><td>Converts extra Voc into current</td></tr>
+          <tr><td>Typical cost (20A)</td><td>15&ndash;30 EUR</td><td>80&ndash;180 EUR</td></tr>
+          <tr><td>Typical cost (30&ndash;50A)</td><td>25&ndash;50 EUR</td><td>120&ndash;350 EUR</td></tr>
+          <tr><td>Panel wiring flexibility</td><td>Parallel only (for 12V batteries)</td><td>Series, parallel, or series-parallel</td></tr>
+          <tr><td>Best for</td><td>Small setups &lt; 200W, 12V panels, tight budget</td><td>200W+ setups, mixed voltages, maximum harvest</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="efficiency">5. Real-world efficiency gains</h2>
+    <p>The headline number &mdash; "MPPT is 25&ndash;30% more efficient" &mdash; needs context. The actual gain depends on your specific panels, battery voltage, temperature and weather.</p>
+
+    <h3>Where the gain comes from</h3>
+    <p>A 12V-nominal panel with Vmp of 18V connected to a 12.8V battery through PWM operates at 12.8V. The lost voltage (18 &minus; 12.8 = 5.2V) represents wasted power:</p>
+    <div class="formula">Power loss = (Vmp &minus; Vbat) / Vmp = (18 &minus; 12.8) / 18 = 28.9%</div>
+    <p>An MPPT controller converts the full 18V output into battery-level current, losing only 2&ndash;5% in the conversion. Net gain vs PWM: <strong>24&ndash;27%</strong>.</p>
+    <p>If the panel is a higher-voltage "grid-tied" type with Vmp of 30&ndash;40V (common in larger rigid panels), the PWM waste climbs to 55&ndash;70%, making it essentially useless. With MPPT, you harvest the full panel power minus conversion loss.</p>
+
+    <h3>Seasonal variation</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Condition</th><th>PWM harvest (200W panel)</th><th>MPPT harvest (200W panel)</th><th>MPPT advantage</th></tr></thead>
+        <tbody>
+          <tr><td>Full sun, summer, warm roof (50&deg;C cell)</td><td>~135W</td><td>~175W</td><td>+30%</td></tr>
+          <tr><td>Full sun, winter, cold panel (10&deg;C cell)</td><td>~140W</td><td>~190W</td><td>+36%</td></tr>
+          <tr><td>Partly cloudy, summer</td><td>~65W</td><td>~82W</td><td>+26%</td></tr>
+          <tr><td>Heavy overcast</td><td>~18W</td><td>~23W</td><td>+28%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The advantage is largest in cold conditions, because cold panels produce higher voltage &mdash; which MPPT converts into current, while PWM discards. This matters especially for campervans travelling in Scandinavia, the Alps or during winter.</p>
+
+    <h3>Annual energy difference</h3>
+    <p>For a typical 400W campervan setup in southern Europe (5 peak sun hours average), the annual difference is substantial:</p>
+    <div class="formula">PWM: 400W &times; 0.70 &times; 5h = 1400 Wh/day &asymp; 511 kWh/year<br>MPPT: 400W &times; 0.92 &times; 5h = 1840 Wh/day &asymp; 672 kWh/year<br>Difference: ~161 kWh/year &mdash; enough to run a compressor fridge for 3+ extra months</div>
+
+    <h2 id="when-pwm">6. When PWM is good enough</h2>
+    <p>Despite MPPT&rsquo;s clear efficiency advantage, PWM controllers still have a place in certain setups:</p>
+    <ul>
+      <li><strong>Single small panel (50&ndash;100W) on a 12V battery.</strong> The absolute energy gain from MPPT is only 15&ndash;30 Wh/day &mdash; about 1.2&ndash;2.5 Ah on a 12V system. If you spend 80&ndash;150 EUR more on an MPPT controller, the payback period is measured in years.</li>
+      <li><strong>Matching 12V-nominal panels.</strong> If your panel&rsquo;s Vmp is close to the battery voltage (e.g., a panel with Vmp of 17V on a 12.8V battery), the PWM waste is only 25%. On a 100W panel, that&rsquo;s 25W lost &mdash; noticeable but not catastrophic.</li>
+      <li><strong>Backup or portable panels.</strong> A folding suitcase panel used occasionally doesn&rsquo;t justify an expensive controller. A 15 EUR PWM unit gets the job done.</li>
+      <li><strong>Very tight budget.</strong> If the alternative is no solar at all, a 20 EUR PWM controller with a 100W panel is far better than nothing.</li>
+    </ul>
+    <div class="callout"><i class="ti ti-bulb"></i> <strong>Rule of thumb:</strong> if your total solar capacity is under 200W and all panels are 12V-nominal, PWM is acceptable. Above 200W, or with any non-12V panel, MPPT pays for itself within 6&ndash;12 months of daily use.</div>
+
+    <h2 id="sizing">7. How to size your charge controller</h2>
+    <p>Whether you pick PWM or MPPT, the controller must be rated to handle the current and voltage your panels can produce.</p>
+
+    <h3>Sizing a PWM controller</h3>
+    <p>With PWM, the panel current passes directly to the battery. The controller&rsquo;s rated current (in amps) must exceed the short-circuit current (Isc) of your panel array.</p>
+    <div class="formula">Min PWM amps = Total Isc &times; 1.25 (safety margin)</div>
+    <p>Example: two 100W panels in parallel, each with Isc of 6.2A. Total Isc = 12.4A. You need at least a 15A PWM controller. A 20A unit gives comfortable margin.</p>
+
+    <h3>Sizing an MPPT controller</h3>
+    <p>With MPPT, the output current to the battery can be <em>higher</em> than the panel current (because the controller converts voltage into current). Size by dividing total panel wattage by battery voltage:</p>
+    <div class="formula">Min MPPT amps = Total panel watts / Battery voltage &times; 1.25</div>
+    <p>Example: 400W of panels on a 12V system. 400 / 12 = 33.3A. With safety margin: 33.3 &times; 1.25 = 41.7A. You need at least a 40A MPPT controller; a 50A model is ideal.</p>
+    <p>You must also check that the controller&rsquo;s <strong>maximum input voltage (Voc)</strong> exceeds your panels&rsquo; open-circuit voltage &mdash; especially in cold weather, when Voc rises. Add 10&ndash;15% to the nameplate Voc to account for cold temperatures.</p>
+    <div class="formula">Required max Voc = Panel Voc (series string) &times; 1.15</div>
+    <p>Example: two panels in series, each with Voc of 22.5V. Series Voc = 45V. Cold-adjusted: 45 &times; 1.15 = 51.75V. You need a controller rated for at least 52V input. Most 100V-rated MPPT controllers handle this easily.</p>
+
+    <h3>Quick sizing table</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Total solar (Wp)</th><th>Battery voltage</th><th>Min MPPT controller</th><th>Recommended MPPT</th></tr></thead>
+        <tbody>
+          <tr><td>100&ndash;200W</td><td>12V</td><td>15A</td><td>20A (e.g., Victron 75/15)</td></tr>
+          <tr><td>200&ndash;300W</td><td>12V</td><td>20A</td><td>30A (e.g., Victron 100/30)</td></tr>
+          <tr><td>300&ndash;400W</td><td>12V</td><td>30A</td><td>40A (e.g., Renogy Rover 40A)</td></tr>
+          <tr><td>400&ndash;600W</td><td>12V</td><td>40A</td><td>50A (e.g., Victron 150/45)</td></tr>
+          <tr><td>200&ndash;400W</td><td>24V</td><td>15A</td><td>20A</td></tr>
+          <tr><td>400&ndash;800W</td><td>24V</td><td>20A</td><td>30&ndash;40A</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="models">8. Best models for campervans in 2026</h2>
+    <p>These controllers are widely used and well-reviewed in the campervan community. Prices are approximate street prices at time of writing.</p>
+
+    <h3>MPPT controllers</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Model</th><th>Amps</th><th>Max Voc</th><th>Price</th><th>Highlights</th></tr></thead>
+        <tbody>
+          <tr><td>Victron SmartSolar 75/15</td><td>15A</td><td>75V</td><td>~95 EUR</td><td>Bluetooth built-in, ultra-compact, perfect for 100&ndash;200W</td></tr>
+          <tr><td>Victron SmartSolar 100/30</td><td>30A</td><td>100V</td><td>~170 EUR</td><td>The van-life standard, handles up to 400W on 12V</td></tr>
+          <tr><td>Victron SmartSolar 100/50</td><td>50A</td><td>100V</td><td>~280 EUR</td><td>For 500W+ setups, optional VE.Direct display</td></tr>
+          <tr><td>Victron SmartSolar 150/35</td><td>35A</td><td>150V</td><td>~230 EUR</td><td>High Voc for long series strings</td></tr>
+          <tr><td>Renogy Rover 20A MPPT</td><td>20A</td><td>100V</td><td>~90 EUR</td><td>LCD screen, good value, RS232 data port</td></tr>
+          <tr><td>Renogy Rover 40A MPPT</td><td>40A</td><td>100V</td><td>~160 EUR</td><td>Handles 520W at 12V, LCD + Bluetooth optional</td></tr>
+          <tr><td>EPEver Tracer 3210AN</td><td>30A</td><td>100V</td><td>~65 EUR</td><td>Budget-friendly, solid performance, MT50 display optional</td></tr>
+          <tr><td>EPEver Tracer 4210AN</td><td>40A</td><td>100V</td><td>~85 EUR</td><td>Best budget option for 400W+ systems</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>PWM controllers (for small/budget setups)</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Model</th><th>Amps</th><th>Price</th><th>Highlights</th></tr></thead>
+        <tbody>
+          <tr><td>Victron BlueSolar PWM-Light 12/24V 10A</td><td>10A</td><td>~20 EUR</td><td>Tiny, reliable, no screen</td></tr>
+          <tr><td>Renogy Wanderer 10A PWM</td><td>10A</td><td>~15 EUR</td><td>LCD screen, lowest-cost decent option</td></tr>
+          <tr><td>Renogy Wanderer 30A PWM</td><td>30A</td><td>~25 EUR</td><td>For larger 12V arrays on a budget</td></tr>
+          <tr><td>EPEver LandStar 1024EU</td><td>10A</td><td>~12 EUR</td><td>Ultra-cheap, proven reliability</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Victron SmartSolar</strong> is the go-to choice for serious campervan installations. Built-in Bluetooth monitoring via the VictronConnect app, adjustable charge profiles for lithium and lead-acid batteries, and rock-solid reliability. The 100/30 model handles 90% of van setups. The premium price buys a controller you can trust for 10+ years.</p>
+    <p><strong>Renogy Rover</strong> delivers strong MPPT performance at a lower price point. The LCD screen shows real-time charging data without needing a phone, and the build quality has improved significantly in recent years. A great mid-range choice.</p>
+    <p><strong>EPEver Tracer</strong> is the budget king. The 3210AN and 4210AN use genuine MPPT tracking (not relabelled PWM, which plagues some cheap models) and deliver solid harvest. The downsides: no built-in Bluetooth, slightly noisier cooling fans on the larger models, and less polished software. For the price, they're hard to beat.</p>
+    <div class="callout"><i class="ti ti-alert-triangle"></i> <strong>Warning:</strong> many cheap controllers sold on Amazon and AliExpress advertise "MPPT" but are actually PWM with a misleading label. Genuine MPPT controllers contain a DC-DC converter and cost at least 50&ndash;60 EUR for a 20A model. If the price seems too good to be true, check independent reviews before buying.</div>
+
+    <h2 id="mistakes">9. Common mistakes to avoid</h2>
+    <ul>
+      <li><strong>Buying a fake "MPPT" controller.</strong> Dozens of cheap controllers claim MPPT but are PWM inside. A real MPPT controller has a DC-DC converter, is noticeably heavier than a PWM, and costs at least 50&ndash;60 EUR. Check independent teardowns and reviews.</li>
+      <li><strong>Using a 24V panel on a PWM controller with a 12V battery.</strong> The PWM controller clamps the panel at battery voltage. A 24V panel forced to operate at 12.8V loses over 60% of its power. This is the single most common wiring mistake in DIY campervan builds.</li>
+      <li><strong>Undersizing the controller for your array.</strong> Running a controller at 100% rated current causes overheating and premature failure. Always add 25% margin above your calculated maximum current.</li>
+      <li><strong>Ignoring cold-weather Voc.</strong> Panel Voc rises in cold weather. If your series string Voc exceeds the controller's maximum input voltage, the controller shuts down or is permanently damaged. Size for the cold Voc (nameplate Voc &times; 1.15).</li>
+      <li><strong>Running long cable runs between panel and controller with thin wire.</strong> Voltage drop in undersized cables reduces the power reaching the controller. With MPPT, you can wire panels in series to increase voltage and reduce current, allowing thinner cables for the same power &mdash; this is one of MPPT's key advantages.</li>
+      <li><strong>Not setting the correct battery type in the controller.</strong> LiFePO4, AGM and GEL batteries have different charge voltages. A controller set to the wrong profile will undercharge or overcharge the battery. Always configure the battery type during installation.</li>
+      <li><strong>Mounting the controller in a sealed compartment.</strong> MPPT controllers generate heat, especially at high loads. Mount them with ventilation space above and below. Some controllers derate (reduce output) at high temperatures &mdash; poor airflow means less charging power on hot days.</li>
+    </ul>
+
+    <div class="cta-box">
+      <h3>See your real solar harvest in the calculator</h3>
+      <p>OffroadWatt factors in your solar panel wattage, MPPT efficiency, geographic zone and peak sun hours to calculate exactly how many Ah per day your panels deliver &mdash; and how many days of autonomy that gives you.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Open the free calculator</a>
+    </div>
+
+    <section class="faq">
+      <h2 id="faq">Frequently asked questions</h2>
+      <div class="faq-item"><h3>Is an MPPT controller worth it for a small campervan solar setup?</h3><p>If you have a single 100W panel and a 12V battery, a PWM controller works fine and costs under 30 EUR. The MPPT advantage only becomes significant above 200W of panel capacity, or when using higher-voltage panels. Below that threshold, the 10&ndash;25 Wh/day gain rarely justifies the 80&ndash;150 EUR price difference.</p></div>
+      <div class="faq-item"><h3>Can I use a 24V solar panel with a 12V battery?</h3><p>Only with an MPPT controller. An MPPT charge controller steps down the higher panel voltage to the correct battery voltage while converting the excess voltage into additional charging current. A PWM controller cannot do this conversion &mdash; it clamps the panel voltage to battery level, wasting everything above ~14V as heat.</p></div>
+      <div class="faq-item"><h3>What size MPPT controller do I need for 400W of solar?</h3><p>Divide your total panel wattage by the battery voltage and add a 25% safety margin. For 400W on a 12V system: 400 / 12 = 33.3A, times 1.25 = 41.7A. A 40A MPPT controller is the minimum; a 50A unit gives comfortable headroom. Also check that the controller's max input voltage exceeds your panels' cold-weather Voc.</p></div>
+      <div class="faq-item"><h3>Do MPPT controllers work better in cloudy weather?</h3><p>Yes. In low-light conditions, a panel's voltage stays relatively stable while current drops. An MPPT controller continuously tracks the maximum power point and converts available voltage into usable current. In overcast conditions, MPPT can harvest 15&ndash;30% more energy than PWM from the same panel.</p></div>
+    </section>
+
+    <div class="share">
+      <span>Share</span>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="https://twitter.com/intent/tweet?url=https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan&text=MPPT%20vs%20PWM%20Solar%20Controller%20for%20Campervans" target="_blank" rel="noopener" aria-label="Share on X"><i class="ti ti-brand-x"></i></a>
+      <a href="https://api.whatsapp.com/send?text=MPPT%20vs%20PWM%20Solar%20Controller%20for%20Campervans%20https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Home</a> &middot; <a href="/blog">Blog</a> &middot; <a href="https://app.offroadwatt.com" target="_blank">Open the app</a></p>
+  <p style="margin-top:10px">&copy; 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.</p>
+</footer>
+
+</body>
+</html>
