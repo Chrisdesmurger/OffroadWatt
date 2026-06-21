@@ -1,0 +1,21 @@
+{
+  "slug": "campervan-fridge-power-consumption",
+  "product": "marketing/social/campervan-fridge-power-consumption/_src/dometic-cfx3.png",
+  "heroBase": "landing/blog/assets/fridge-consumption-hero",
+  "socialDir": "marketing/social/campervan-fridge-power-consumption",
+  "eyebrow": {
+    "en": "Consumption &middot; Off-grid",
+    "fr": "Consommation &middot; Autonome",
+    "es": "Consumo &middot; Autónomo"
+  },
+  "tag": {
+    "en": "Fridge consumption guide",
+    "fr": "Guide consommation frigo",
+    "es": "Guía de consumo nevera"
+  },
+  "title": {
+    "en": "Compressor vs\nAbsorption Fridge:\nReal Power Draw",
+    "fr": "Compresseur ou\nAbsorption : Quelle\nConsommation Réelle ?",
+    "es": "Compresor vs\nAbsorción: Consumo\nReal en Ah/día"
+  }
+}

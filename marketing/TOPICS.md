@@ -14,7 +14,7 @@ Keep topics distinct from everything already shipped.
 - [x] What size inverter do I need for my campervan? *(EN/FR/ES — 2026-06-17)*
 - [x] MPPT vs PWM solar controller for camper vans *(EN/FR/ES — 2026-06-19)*
 - [x] How much does a campervan electrical system cost? (budget breakdown) *(EN/FR/ES — 2026-06-20)*
-- [ ] Campervan fridge power consumption: compressor vs absorption
+- [x] Campervan fridge power consumption: compressor vs absorption *(EN/FR/ES — 2026-06-21)*
 - [ ] How to keep your leisure battery charged in winter
 - [ ] Lithium battery sizing for full-time van life (200Ah vs 300Ah)
 - [ ] Do I need a battery monitor (shunt) in my campervan?
