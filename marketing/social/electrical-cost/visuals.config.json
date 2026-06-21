@@ -1,0 +1,21 @@
+{
+  "slug": "electrical-cost",
+  "product": "marketing/social/electrical-cost/_src/battery-product.png",
+  "heroBase": "landing/blog/assets/electrical-cost-hero",
+  "socialDir": "marketing/social/electrical-cost",
+  "eyebrow": {
+    "en": "Budget &middot; Electrical",
+    "fr": "Budget &middot; &Eacute;lectrique",
+    "es": "Presupuesto &middot; El&eacute;ctrico"
+  },
+  "tag": {
+    "en": "Budget breakdown guide",
+    "fr": "Guide budget complet",
+    "es": "Guía de presupuesto"
+  },
+  "title": {
+    "en": "How Much Does\na Campervan\nElectrical Cost?",
+    "fr": "Coût Électrique\nCamping-Car :\nBudget Complet",
+    "es": "¿Cuánto Cuesta\nla Instalación\nEléctrica?"
+  }
+}
