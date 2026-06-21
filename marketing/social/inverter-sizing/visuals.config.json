@@ -1,0 +1,21 @@
+{
+  "slug": "inverter-sizing",
+  "product": "marketing/social/inverter-sizing/_src/inverter-product.png",
+  "heroBase": "landing/blog/assets/inverter-sizing-hero",
+  "socialDir": "marketing/social/inverter-sizing",
+  "eyebrow": {
+    "en": "Inverter &middot; 230V",
+    "fr": "Convertisseur &middot; 230V",
+    "es": "Inversor &middot; 230V"
+  },
+  "tag": {
+    "en": "Inverter sizing guide",
+    "fr": "Guide de dimensionnement",
+    "es": "Guía de dimensionado"
+  },
+  "title": {
+    "en": "What Size\nInverter Does\nYour Van Need?",
+    "fr": "Quelle Puissance\nde Convertisseur\npour un Van ?",
+    "es": "¿Qué Inversor\nNecesita Tu\nFurgoneta?"
+  }
+}
