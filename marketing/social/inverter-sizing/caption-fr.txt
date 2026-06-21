@@ -1,0 +1,24 @@
+IDÉE 1 — Carrousel "Quelle puissance de convertisseur ?" (6 slides, 1080x1350)
+Article : https://offroadwatt.com/blog/fr/quelle-puissance-convertisseur-camping-car
+Créneau conseillé : mardi 19h-21h
+
+--- LÉGENDE (à copier-coller) ---
+
+⚡ 1200 W de cafetière = 111 A tirés de ta batterie. Tu savais ? 😅
+
+Choisir son convertisseur, c'est pas prendre le plus gros chiffre — c'est calculer ce que tu fais tourner EN MÊME TEMPS × 1,25.
+
+👉 Onde pure ou modifiée ? Quelle puissance continue ? Combien d'Ah ça vide ?
+On t'explique tout, slide par slide 👆 Garde le post, tu le ressortiras avant ton install. 📌
+
+🔋 Calcule ton autonomie réelle → lien en bio
+
+#vanlife #campingcar #fourgonamenage #autonomieelectrique #convertisseur
+
+--- ORDRE DES SLIDES ---
+1. carousel-01.png — Cover : Quelle puissance de convertisseur pour ton van ?
+2. carousel-02.png — C'est quoi un convertisseur ? (12V → 230V)
+3. carousel-03.png — Sinus pur vs modifié → choisis le pur
+4. carousel-04.png — La formule : appareils simultanés × 1,25
+5. carousel-05.png — Le piège batterie : 1 café = 111 A = 5,5 Ah → ~200 Ah lithium mini
+6. carousel-06.png — 1500 W = le bon choix + CTA app.offroadwatt.com
