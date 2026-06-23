@@ -10,7 +10,7 @@
  * Suit : pages vues (auto), clics CTA blog→app, intention d'inscription.
  * ────────────────────────────────────────────────────────────────────────────── */
 (function () {
-  var GA_ID = 'G-XXXXXXXXXX'
+  var GA_ID = 'G-N42S3VLH9W'
   if (!GA_ID || GA_ID === 'G-XXXXXXXXXX') return // pas encore configuré
 
   var CONSENT_KEY = 'ow_consent' // partagé avec l'app ('granted' | 'denied')

@@ -12,7 +12,7 @@
 
 import { getLang } from './i18n.js'
 
-const GA_ID = import.meta.env.VITE_GA_ID || ''
+const GA_ID = import.meta.env.VITE_GA_ID || 'G-N42S3VLH9W'
 const CONSENT_KEY = 'ow_consent' // 'granted' | 'denied'
 
 window.dataLayer = window.dataLayer || []
