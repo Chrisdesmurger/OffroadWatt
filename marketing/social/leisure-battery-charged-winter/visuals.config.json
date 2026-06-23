@@ -1,0 +1,21 @@
+{
+  "slug": "leisure-battery-charged-winter",
+  "product": "marketing/social/leisure-battery-charged-winter/_src/battery-product.png",
+  "heroBase": "landing/blog/assets/winter-battery-hero",
+  "socialDir": "marketing/social/leisure-battery-charged-winter",
+  "eyebrow": {
+    "en": "Battery &middot; Winter",
+    "fr": "Batterie &middot; Hiver",
+    "es": "Batería &middot; Invierno"
+  },
+  "tag": {
+    "en": "Winter battery guide",
+    "fr": "Guide batterie hiver",
+    "es": "Guía batería invierno"
+  },
+  "title": {
+    "en": "Keep Your Battery\nCharged Through\nWinter",
+    "fr": "Garder Sa Batterie\nChargée Tout\nL'Hiver",
+    "es": "Mantener Tu Batería\nCargada Todo\nEl Invierno"
+  }
+}

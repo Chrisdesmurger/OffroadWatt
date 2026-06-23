@@ -168,6 +168,36 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan"/>
   </url>
   <url>
+    <loc>https://offroadwatt.com/blog/leisure-battery-charged-winter</loc>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/leisure-battery-charged-winter"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/recharger-batterie-auxiliaire-hiver"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/mantener-bateria-auxiliar-cargada-invierno"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/leisure-battery-charged-winter"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/fr/recharger-batterie-auxiliaire-hiver</loc>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/leisure-battery-charged-winter"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/recharger-batterie-auxiliaire-hiver"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/mantener-bateria-auxiliar-cargada-invierno"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/leisure-battery-charged-winter"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/es/mantener-bateria-auxiliar-cargada-invierno</loc>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/leisure-battery-charged-winter"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/recharger-batterie-auxiliaire-hiver"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/mantener-bateria-auxiliar-cargada-invierno"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/leisure-battery-charged-winter"/>
+  </url>
+  <url>
     <loc>https://offroadwatt.com/blog/campervan-fridge-power-consumption</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>monthly</changefreq>
