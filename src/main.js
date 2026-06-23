@@ -2,6 +2,7 @@
 // Vanilla JS / Vite
 import { createClient } from '@supabase/supabase-js'
 import { t, ta, getLang, setLang, initLang, localeCode, LANGS } from './i18n.js'
+import { initGA, gaEvent, gaIdentify } from './analytics.js'
 
 // Traduction des catégories et régions (les clés internes restent en français)
 const tcat = (c) => t('cat.' + c)
@@ -323,6 +324,8 @@ function track(event, props = {}) {
       region: SUN_ZONES[S?.sunIdx ?? 0]?.r || null,
     }).then(() => {}, () => {})
   } catch (_) {}
+  // Forward vers Google Analytics 4 (no-op si VITE_GA_ID n'est pas défini).
+  gaEvent(event, props)
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
@@ -340,6 +343,7 @@ async function initAuth() {
 async function onSignIn(user) {
   const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single()
   const plan = profile?.plan || 'free'
+  gaIdentify(user.id)
   track('auth_signed_in', { plan, provider: user.app_metadata?.provider || 'email' })
   set({ user: { id: user.id, email: user.email, plan }, modal: null, authLoading: false })
   loadUserConfigs()
@@ -2494,6 +2498,7 @@ try {
   }
 } catch (_) {}
 render()
+initGA()
 track('session_started', {
   isNewUser: !localStorage.getItem(ONBOARDED_KEY),
   fromShare: sharedLoaded || hasShortParam,
