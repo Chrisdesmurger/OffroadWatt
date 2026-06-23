@@ -168,6 +168,36 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/mppt-vs-pwm-solar-controller-campervan"/>
   </url>
   <url>
+    <loc>https://offroadwatt.com/blog/campervan-fridge-power-consumption</loc>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/campervan-fridge-power-consumption"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/consommation-frigo-camping-car"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/consumo-frigorifico-autocaravana"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/campervan-fridge-power-consumption"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/fr/consommation-frigo-camping-car</loc>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/campervan-fridge-power-consumption"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/consommation-frigo-camping-car"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/consumo-frigorifico-autocaravana"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/campervan-fridge-power-consumption"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/blog/es/consumo-frigorifico-autocaravana</loc>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/campervan-fridge-power-consumption"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/consommation-frigo-camping-car"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/consumo-frigorifico-autocaravana"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/campervan-fridge-power-consumption"/>
+  </url>
+  <url>
     <loc>https://offroadwatt.com/blog/campervan-electrical-system-cost</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>

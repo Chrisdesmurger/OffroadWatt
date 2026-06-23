@@ -1,0 +1,32 @@
+{
+  "slug": "campervan-fridge-power-consumption",
+  "productLeft": "marketing/social/campervan-fridge-power-consumption/_src/fridge-product.png",
+  "productRight": "marketing/social/campervan-fridge-power-consumption/_src/absorption-fridge.png",
+  "heroBase": "landing/blog/assets/fridge-power-hero",
+  "socialDir": "marketing/social/campervan-fridge-power-consumption",
+  "labelLeft": {
+    "en": "Compressor",
+    "fr": "Compresseur",
+    "es": "Compresor"
+  },
+  "labelRight": {
+    "en": "Absorption",
+    "fr": "Absorption",
+    "es": "Absorción"
+  },
+  "eyebrow": {
+    "en": "Appliance · Off-grid",
+    "fr": "Équipement · Autonome",
+    "es": "Equipamiento · Autónomo"
+  },
+  "tag": {
+    "en": "Appliance power guide",
+    "fr": "Guide consommation",
+    "es": "Guía de consumo"
+  },
+  "title": {
+    "en": "Campervan Fridge:\nCompressor vs\nAbsorption",
+    "fr": "Frigo Camping-car :\nCompresseur vs\nAbsorption",
+    "es": "Nevera Camper:\nCompresor vs\nAbsorción"
+  }
+}
