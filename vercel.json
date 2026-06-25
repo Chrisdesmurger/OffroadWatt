@@ -7,7 +7,8 @@
     "api/refine.js":        { "maxDuration": 15 },
     "api/send-summary.js":  { "maxDuration": 10 },
     "api/cron-catalog.js":  { "maxDuration": 60 },
-    "api/admin-search.js":  { "maxDuration": 60 }
+    "api/admin-search.js":  { "maxDuration": 60 },
+    "api/pvgis.js":         { "maxDuration": 10 }
   },
   "crons": [
     { "path": "/api/cron-catalog", "schedule": "0 6 * * 1" }

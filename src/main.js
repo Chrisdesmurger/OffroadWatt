@@ -708,8 +708,7 @@ const sunH = () => sunHOf(S)
 async function fetchPVGIS(lat, lon) {
   set({ pvgisLoading: true, pvgisError: null })
   try {
-    const url = `https://re.jrc.ec.europa.eu/api/v5_3/PVcalc?lat=${lat}&lon=${lon}&peakpower=1&loss=14&outputformat=json`
-    const res = await fetch(url)
+    const res = await fetch(`/api/pvgis?lat=${lat}&lon=${lon}`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     const yearly = data.outputs?.totals?.fixed?.E_y
