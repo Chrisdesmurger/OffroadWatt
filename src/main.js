@@ -441,6 +441,7 @@ let S = {
   ],
   bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
   solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
+  pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisLoading: false, pvgisError: null,
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false, shoppingLoading: false,
@@ -462,6 +463,7 @@ function persistState() {
       batType: S.batType,
       solOn: S.solOn,
       solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+      pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH,
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
       hookupCost: S.hookupCost,
@@ -490,6 +492,9 @@ function loadPersistedState() {
       solEff: p.solEff ?? S.solEff,
       sunIdx: p.sunIdx ?? S.sunIdx,
       customSunH: p.customSunH ?? S.customSunH,
+      pvgisLat: p.pvgisLat ?? S.pvgisLat,
+      pvgisLon: p.pvgisLon ?? S.pvgisLon,
+      pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
       altOn: p.altOn ?? S.altOn,
       altAmps: p.altAmps ?? S.altAmps,
       altHours: p.altHours ?? S.altHours,
@@ -513,6 +518,7 @@ function shareSnapshot() {
     batType: S.batType,
     solOn: S.solOn,
     solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
     hookupCost: S.hookupCost,
   }
@@ -545,6 +551,9 @@ function applyDecodedState(p) {
     solEff: p.solEff ?? S.solEff,
     sunIdx: p.sunIdx ?? S.sunIdx,
     customSunH: p.customSunH ?? S.customSunH,
+    pvgisLat: p.pvgisLat ?? S.pvgisLat,
+    pvgisLon: p.pvgisLon ?? S.pvgisLon,
+    pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
     altOn: p.altOn ?? S.altOn,
     altAmps: p.altAmps ?? S.altAmps,
     altHours: p.altHours ?? S.altHours,
@@ -689,8 +698,43 @@ async function loadShortLink() {
 // ─── CORE ────────────────────────────────────────────────────────────────────
 
 const set = (u) => { Object.assign(S, u); persistState(); render() }
-const sunHOf = (st) => st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
+const sunHOf = (st) => {
+  if (st.pvgisSunH != null) return st.pvgisSunH
+  return st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
+}
 const sunH = () => sunHOf(S)
+
+// PVGIS API — real solar data from EU Commission (free, no key)
+async function fetchPVGIS(lat, lon) {
+  set({ pvgisLoading: true, pvgisError: null })
+  try {
+    const url = `https://re.jrc.ec.europa.eu/api/v5_3/PVcalc?lat=${lat}&lon=${lon}&peakpower=1&loss=14&outputformat=json`
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    const yearly = data.outputs?.totals?.fixed?.E_y
+    if (!yearly) throw new Error('No data')
+    const avgH = +(yearly / 365).toFixed(2)
+    set({ pvgisLat: lat, pvgisLon: lon, pvgisSunH: avgH, pvgisLoading: false, pvgisError: null })
+  } catch (_) {
+    set({ pvgisLoading: false, pvgisError: true, pvgisSunH: null })
+  }
+}
+
+function requestGeolocation() {
+  if (!navigator.geolocation) {
+    showToast(t('solar.geoError'))
+    return
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = +pos.coords.latitude.toFixed(4)
+      const lon = +pos.coords.longitude.toFixed(4)
+      fetchPVGIS(lat, lon)
+    },
+    () => showToast(t('solar.geoBlocked'))
+  )
+}
 
 const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
 
@@ -1061,20 +1105,40 @@ function buildEnergyTab() {
             <input id="sol-eff" type="number" min="60" max="98" value="${Math.round(S.solEff * 100)}">
           </div>
         </div>
-        <div class="scf">
-          <label>${t('solar.zone')}</label>
-          <select id="sun-zone">${sunOpts}</select>
+        <div class="scf" ${S.pvgisSunH != null ? 'style="opacity:.5"' : ''}>
+          <label>${t('solar.zone')}${S.pvgisSunH != null ? ' ⏸' : ''}</label>
+          <select id="sun-zone" ${S.pvgisSunH != null ? 'disabled' : ''}>${sunOpts}</select>
         </div>
-        ${S.sunIdx === SUN_ZONES.length - 1 ? `
+        ${S.sunIdx === SUN_ZONES.length - 1 && S.pvgisSunH == null ? `
           <div style="margin-top:5px;display:flex;align-items:center;gap:6px">
             <input id="custom-sun" type="number" min="1" max="12" step="0.5" placeholder="${t('unit.hday')}" value="${S.customSunH}"
               style="width:70px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-family:var(--mono);font-size:11px;padding:4px 7px">
             <span style="font-size:11px;color:var(--t3)">${t('solar.customHours')}</span>
           </div>` : ''}
+        <div class="pvgis-section">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <i class="ti ti-map-pin" style="color:var(--te);font-size:14px"></i>
+            <span style="font-size:11px;font-weight:600;color:var(--t1)">${t('solar.pvgis')}</span>
+          </div>
+          <div style="font-size:10px;color:var(--t3);margin-bottom:8px">${t('solar.pvgisDesc')}</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <button id="pvgis-geo" class="pvgis-btn"><i class="ti ti-current-location"></i> ${t('solar.myPosition')}</button>
+            <input id="pvgis-lat" type="number" step="0.01" min="-90" max="90" placeholder="${t('solar.lat')}" value="${S.pvgisLat ?? ''}"
+              class="pvgis-input" style="width:90px">
+            <input id="pvgis-lon" type="number" step="0.01" min="-180" max="180" placeholder="${t('solar.lon')}" value="${S.pvgisLon ?? ''}"
+              class="pvgis-input" style="width:90px">
+            <button id="pvgis-fetch" class="pvgis-btn pvgis-go" ${S.pvgisLoading ? 'disabled' : ''}><i class="ti ti-search"></i></button>
+            ${S.pvgisSunH != null || S.pvgisError ? `<button id="pvgis-clear" class="pvgis-btn pvgis-clear">${t('solar.pvgisClear')}</button>` : ''}
+          </div>
+          ${S.pvgisLoading ? `<div class="pvgis-status loading"><i class="ti ti-loader-2 spin"></i> ${t('solar.pvgisLoading')}</div>` : ''}
+          ${S.pvgisSunH != null ? `<div class="pvgis-status ok"><i class="ti ti-circle-check"></i> ${t('solar.pvgisResult', { h: S.pvgisSunH })}
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">${t('solar.pvgisSource')} — ${S.pvgisLat}°, ${S.pvgisLon}°</div></div>` : ''}
+          ${S.pvgisError ? `<div class="pvgis-status err"><i class="ti ti-alert-triangle"></i> ${t('solar.pvgisError')}</div>` : ''}
+        </div>
         <div class="sol-summary">
           <div class="ss-item"><div class="ssn">${S.solW * S.solNb} Wc</div><div class="ssl">${t('solar.installed')}</div></div>
           <div style="width:1px;background:var(--b1)"></div>
-          <div class="ss-item"><div class="ssn">${sunH()} h</div><div class="ssl">${t('solar.sunPerDay')}</div></div>
+          <div class="ss-item"><div class="ssn">${sunH()} h${S.pvgisSunH != null ? ' <i class="ti ti-map-pin" style="font-size:10px;color:var(--te)"></i>' : ''}</div><div class="ssl">${t('solar.sunPerDay')}</div></div>
           <div style="width:1px;background:var(--b1)"></div>
           <div class="ss-item"><div class="ssn">${toAh(solar)} Ah</div><div class="ssl">${t('solar.production')}</div></div>
         </div>`}
@@ -1177,7 +1241,8 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
   const dateStr = now.toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
   const vtypeLabel = t('vt.' + S.vtype)
   const zone = SUN_ZONES[S.sunIdx]
-  const sunHours = S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 0) : zone.h
+  const sunHours = S.pvgisSunH != null ? S.pvgisSunH : (S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 0) : zone.h)
+  const sunSource = S.pvgisSunH != null ? `PVGIS (${S.pvgisLat}°, ${S.pvgisLon}°)` : (zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n)
 
   return `
   <div class="pr-header">
@@ -1229,7 +1294,7 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
         <tr><td>${t('pr.panelCount')}</td><td>${S.solNb}</td></tr>
         <tr><td>${t('pr.totalPower')}</td><td>${S.solW * S.solNb} Wc</td></tr>
         <tr><td>${t('pr.mpptEff')}</td><td>${Math.round(S.solEff * 100)} %</td></tr>
-        <tr><td>${t('pr.zoneSun')}</td><td>${zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n} — ${sunHours} h/j</td></tr>
+        <tr><td>${t('pr.zoneSun')}</td><td>${sunSource} — ${sunHours} h/j</td></tr>
         <tr class="pr-hi"><td>${t('pr.dailyProduction')}</td><td>${toAh(solar)} Ah/j</td></tr>
       </table>
     </div>` : ''}
@@ -1358,7 +1423,7 @@ function buildEmailSummaryHtml() {
       ${S.solOn ? `<td style="padding:16px 20px;vertical-align:top">
         <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:8px">${t('email.solarSection')}</div>
         <div style="font-size:13px;font-weight:700;color:#2a2925">${S.solW * S.solNb} Wc (${S.solNb}×${S.solW})</div>
-        <div style="font-size:11px;color:#7a7770;margin-top:4px">${zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n} · <strong style="color:#f59e0b">${toAh(solar)} Ah/j</strong></div>
+        <div style="font-size:11px;color:#7a7770;margin-top:4px">${S.pvgisSunH != null ? `PVGIS (${S.pvgisLat}°, ${S.pvgisLon}°)` : (zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n)} · <strong style="color:#f59e0b">${toAh(solar)} Ah/j</strong></div>
       </td>` : ''}
     </tr>
     ${S.altOn ? `<tr><td colspan="2" style="padding:12px 20px;border-top:1px solid #ebe9e5">
@@ -2271,6 +2336,14 @@ function bindEvents() {
   document.getElementById('sol-eff')?.addEventListener('change', e => set({ solEff: Math.min(0.98, Math.max(0.6, (parseInt(e.target.value) || 85) / 100)) }))
   document.getElementById('sun-zone')?.addEventListener('change', e => set({ sunIdx: parseInt(e.target.value) }))
   document.getElementById('custom-sun')?.addEventListener('input', e => { S.customSunH = e.target.value; render() })
+  // PVGIS geolocation
+  document.getElementById('pvgis-geo')?.addEventListener('click', requestGeolocation)
+  document.getElementById('pvgis-fetch')?.addEventListener('click', () => {
+    const lat = parseFloat(document.getElementById('pvgis-lat')?.value)
+    const lon = parseFloat(document.getElementById('pvgis-lon')?.value)
+    if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) fetchPVGIS(lat, lon)
+  })
+  document.getElementById('pvgis-clear')?.addEventListener('click', () => set({ pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisError: null }))
   // Mode switch on appliance card
   document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
     const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)

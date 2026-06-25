@@ -109,6 +109,17 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .sol-summary{background:rgba(251,191,36,.06);border:1px solid var(--so3);border-radius:var(--r);padding:8px 10px;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
 .ss-item .ssn{font-family:var(--mono);font-size:15px;color:var(--so);font-weight:700}
 .ss-item .ssl{font-size:10px;color:var(--t3)}
+.pvgis-section{margin:8px 0 2px;padding:8px 10px;background:rgba(94,234,212,.04);border:1px solid rgba(94,234,212,.15);border-radius:var(--r)}
+.pvgis-btn{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-size:11px;padding:4px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .12s}
+.pvgis-btn:hover{border-color:var(--te)}
+.pvgis-go{background:rgba(94,234,212,.1);border-color:rgba(94,234,212,.3);color:var(--te)}
+.pvgis-go:hover{background:rgba(94,234,212,.2)}
+.pvgis-clear{color:var(--t3);font-size:10px}
+.pvgis-input{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-family:var(--mono);font-size:11px;padding:4px 7px}
+.pvgis-input:focus{outline:none;border-color:var(--te)}
+.pvgis-status{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:5px}
+.pvgis-status.ok{color:var(--te)}.pvgis-status.err{color:var(--rd)}.pvgis-status.loading{color:var(--t3)}
+@keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .8s linear infinite;display:inline-block}
 .energy-panel{display:flex;flex-direction:column;gap:10px}
 .ef-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:2px}
 .ef-grid-4{grid-template-columns:repeat(4,1fr)}
