@@ -441,7 +441,7 @@ let S = {
   ],
   bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
   solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
-  pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisLoading: false, pvgisError: null,
+  pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisPlace: null, pvgisLoading: false, pvgisError: null,
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
   user: null, userConfigs: [], authLoading: false, saveLoading: false, summaryLoading: false, shoppingLoading: false,
@@ -463,7 +463,7 @@ function persistState() {
       batType: S.batType,
       solOn: S.solOn,
       solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
-      pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH,
+      pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH, pvgisPlace: S.pvgisPlace,
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
       hookupCost: S.hookupCost,
@@ -495,6 +495,7 @@ function loadPersistedState() {
       pvgisLat: p.pvgisLat ?? S.pvgisLat,
       pvgisLon: p.pvgisLon ?? S.pvgisLon,
       pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
+      pvgisPlace: p.pvgisPlace ?? S.pvgisPlace,
       altOn: p.altOn ?? S.altOn,
       altAmps: p.altAmps ?? S.altAmps,
       altHours: p.altHours ?? S.altHours,
@@ -518,7 +519,7 @@ function shareSnapshot() {
     batType: S.batType,
     solOn: S.solOn,
     solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
-    pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH,
+    pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH, pvgisPlace: S.pvgisPlace,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
     hookupCost: S.hookupCost,
   }
@@ -554,6 +555,7 @@ function applyDecodedState(p) {
     pvgisLat: p.pvgisLat ?? S.pvgisLat,
     pvgisLon: p.pvgisLon ?? S.pvgisLon,
     pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
+    pvgisPlace: p.pvgisPlace ?? S.pvgisPlace,
     altOn: p.altOn ?? S.altOn,
     altAmps: p.altAmps ?? S.altAmps,
     altHours: p.altHours ?? S.altHours,
@@ -714,9 +716,21 @@ async function fetchPVGIS(lat, lon) {
     const yearly = data.outputs?.totals?.fixed?.E_y
     if (!yearly) throw new Error('No data')
     const avgH = +(yearly / 365).toFixed(2)
-    set({ pvgisLat: lat, pvgisLon: lon, pvgisSunH: avgH, pvgisLoading: false, pvgisError: null })
+    let place = null
+    try {
+      const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${getLang()}`, {
+        headers: { 'User-Agent': 'OffroadWatt/1.0' }
+      })
+      if (geo.ok) {
+        const g = await geo.json()
+        const city = g.address?.city || g.address?.town || g.address?.village || g.address?.municipality || ''
+        const country = g.address?.country || ''
+        place = [city, country].filter(Boolean).join(', ') || null
+      }
+    } catch (_) {}
+    set({ pvgisLat: lat, pvgisLon: lon, pvgisSunH: avgH, pvgisPlace: place, pvgisLoading: false, pvgisError: null })
   } catch (_) {
-    set({ pvgisLoading: false, pvgisError: true, pvgisSunH: null })
+    set({ pvgisLoading: false, pvgisError: true, pvgisSunH: null, pvgisPlace: null })
   }
 }
 
@@ -1131,7 +1145,7 @@ function buildEnergyTab() {
           </div>
           ${S.pvgisLoading ? `<div class="pvgis-status loading"><i class="ti ti-loader-2 spin"></i> ${t('solar.pvgisLoading')}</div>` : ''}
           ${S.pvgisSunH != null ? `<div class="pvgis-status ok"><i class="ti ti-circle-check"></i> ${t('solar.pvgisResult', { h: S.pvgisSunH })}
-            <div style="font-size:9px;color:var(--t3);margin-top:2px">${t('solar.pvgisSource')} — ${S.pvgisLat}°, ${S.pvgisLon}°</div></div>` : ''}
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">${S.pvgisPlace ? `<i class="ti ti-map-pin" style="font-size:10px"></i> ${S.pvgisPlace} — ` : ''}${S.pvgisLat}°, ${S.pvgisLon}°</div></div>` : ''}
           ${S.pvgisError ? `<div class="pvgis-status err"><i class="ti ti-alert-triangle"></i> ${t('solar.pvgisError')}</div>` : ''}
         </div>
         <div class="sol-summary">
@@ -1241,7 +1255,7 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
   const vtypeLabel = t('vt.' + S.vtype)
   const zone = SUN_ZONES[S.sunIdx]
   const sunHours = S.pvgisSunH != null ? S.pvgisSunH : (S.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(S.customSunH) || 0) : zone.h)
-  const sunSource = S.pvgisSunH != null ? `PVGIS (${S.pvgisLat}°, ${S.pvgisLon}°)` : (zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n)
+  const sunSource = S.pvgisSunH != null ? `PVGIS${S.pvgisPlace ? ` — ${S.pvgisPlace}` : ''} (${S.pvgisLat}°, ${S.pvgisLon}°)` : (zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n)
 
   return `
   <div class="pr-header">
@@ -1422,7 +1436,7 @@ function buildEmailSummaryHtml() {
       ${S.solOn ? `<td style="padding:16px 20px;vertical-align:top">
         <div style="font-size:9px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:2px;color:#a0a09a;margin-bottom:8px">${t('email.solarSection')}</div>
         <div style="font-size:13px;font-weight:700;color:#2a2925">${S.solW * S.solNb} Wc (${S.solNb}×${S.solW})</div>
-        <div style="font-size:11px;color:#7a7770;margin-top:4px">${S.pvgisSunH != null ? `PVGIS (${S.pvgisLat}°, ${S.pvgisLon}°)` : (zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n)} · <strong style="color:#f59e0b">${toAh(solar)} Ah/j</strong></div>
+        <div style="font-size:11px;color:#7a7770;margin-top:4px">${S.pvgisSunH != null ? `PVGIS${S.pvgisPlace ? ` — ${S.pvgisPlace}` : ''} (${S.pvgisLat}°, ${S.pvgisLon}°)` : (zone.r === 'Personnalisé' ? t('region.Personnalisé') : zone.n)} · <strong style="color:#f59e0b">${toAh(solar)} Ah/j</strong></div>
       </td>` : ''}
     </tr>
     ${S.altOn ? `<tr><td colspan="2" style="padding:12px 20px;border-top:1px solid #ebe9e5">
@@ -2342,7 +2356,7 @@ function bindEvents() {
     const lon = parseFloat(document.getElementById('pvgis-lon')?.value)
     if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) fetchPVGIS(lat, lon)
   })
-  document.getElementById('pvgis-clear')?.addEventListener('click', () => set({ pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisError: null }))
+  document.getElementById('pvgis-clear')?.addEventListener('click', () => set({ pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisPlace: null, pvgisError: null }))
   // Mode switch on appliance card
   document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
     const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)
