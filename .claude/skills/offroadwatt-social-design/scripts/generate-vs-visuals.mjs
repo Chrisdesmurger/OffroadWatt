@@ -2,12 +2,29 @@
 // Two products side by side with a large orange "VS" in the center.
 
 import puppeteer from 'puppeteer-core';
-import { readFileSync, mkdirSync } from 'fs';
+import { readFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname, resolve, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = process.argv[3] || process.cwd();
+
+// Prefer locally cached brand fonts (embedded as base64) so rendering never
+// depends on a live CDN — Chromium in sandboxed runs can't always reach
+// fonts.gstatic.com and would hang on networkidle. Falls back to the CDN import.
+const FONT_DIR = join(__dirname, '..', '.fonts');
+function fontFaceCSS() {
+  const reg = join(FONT_DIR, 'SpaceMono-Regular.ttf');
+  if (!existsSync(reg)) {
+    return `@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap');`;
+  }
+  const data = (file) =>
+    `data:font/ttf;base64,${readFileSync(join(FONT_DIR, file)).toString('base64')}`;
+  return `
+@font-face{font-family:'Space Mono';font-weight:400;font-style:normal;src:url('${data('SpaceMono-Regular.ttf')}') format('truetype');}
+@font-face{font-family:'Space Mono';font-weight:700;font-style:normal;src:url('${data('SpaceMono-Bold.ttf')}') format('truetype');}
+@font-face{font-family:'DM Sans';font-weight:400 700;font-style:normal;src:url('${data('DMSans.ttf')}') format('truetype');}`;
+}
 
 const CHROME =
   process.env.CHROME_PATH ||
@@ -29,7 +46,7 @@ const img2Bytes = readFileSync(abs(cfg.productRight));
 const img2Base64 = `data:image/png;base64,${img2Bytes.toString('base64')}`;
 
 const CHROME_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap');
+${fontFaceCSS()}
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:'Space Mono', monospace; background:#090b0a; position:relative; overflow:hidden; }
 .panel { background:#4abe4f; border-radius:6px; z-index:10; }
@@ -199,6 +216,7 @@ function buildVisualList() {
   }
 
   const S = cfg.socialDir;
+  const socialSuffix = { en: '', fr: '-fr', es: '-es' };
   list.push(
     { file: `${S}/og-1280x720.png`, kind: 'h', w: 1280, h: 720,
       eyebrow: cfg.eyebrow.en, title: cfg.title.en, tag: cfg.tag.en,
@@ -206,13 +224,18 @@ function buildVisualList() {
     { file: `${S}/x-1200x675.png`, kind: 'h', w: 1200, h: 675,
       eyebrow: cfg.eyebrow.en, title: cfg.title.en, tag: cfg.tag.en,
       labelLeft: labelLeft.en || '', labelRight: labelRight.en || '' },
-    { file: `${S}/instagram-1080x1350.png`, kind: 'v', w: 1080, h: 1350, titleSize: 52,
-      eyebrow: cfg.eyebrow.en, title: cfg.title.en, tag: cfg.tag.en,
-      labelLeft: labelLeft.en || '', labelRight: labelRight.en || '' },
-    { file: `${S}/story-1080x1920.png`, kind: 'v', w: 1080, h: 1920, titleSize: 56,
-      eyebrow: cfg.eyebrow.en, title: cfg.title.en, tag: cfg.tag.en,
-      labelLeft: labelLeft.en || '', labelRight: labelRight.en || '' },
   );
+  // Instagram (4:5) + story (9:16) per language so each market gets a native cover.
+  for (const lng of langs) {
+    list.push(
+      { file: `${S}/instagram-1080x1350${socialSuffix[lng]}.png`, kind: 'v', w: 1080, h: 1350, titleSize: 52,
+        eyebrow: cfg.eyebrow[lng], title: cfg.title[lng], tag: cfg.tag[lng],
+        labelLeft: labelLeft[lng] || '', labelRight: labelRight[lng] || '' },
+      { file: `${S}/story-1080x1920${socialSuffix[lng]}.png`, kind: 'v', w: 1080, h: 1920, titleSize: 56,
+        eyebrow: cfg.eyebrow[lng], title: cfg.title[lng], tag: cfg.tag[lng],
+        labelLeft: labelLeft[lng] || '', labelRight: labelRight[lng] || '' },
+    );
+  }
   return list;
 }
 
@@ -227,7 +250,8 @@ async function main() {
     const page = await browser.newPage();
     await page.setViewport({ width: v.w, height: v.h, deviceScaleFactor: 1 });
     const html = v.kind === 'v' ? buildVerticalVS(v) : buildHorizontalVS(v);
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'load' });
+    await page.evaluate(() => document.fonts.ready);
     const outPath = abs(v.file);
     mkdirSync(dirname(outPath), { recursive: true });
     await page.screenshot({ path: outPath, type: 'png' });
