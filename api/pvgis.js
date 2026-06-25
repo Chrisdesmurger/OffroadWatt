@@ -19,7 +19,12 @@ export default async function handler(req) {
 
   try {
     const pvgisUrl = `https://re.jrc.ec.europa.eu/api/v5_3/PVcalc?lat=${lat}&lon=${lon}&peakpower=1&loss=14&outputformat=json`
-    const res = await fetch(pvgisUrl)
+    const res = await fetch(pvgisUrl, {
+      headers: {
+        'User-Agent': 'OffroadWatt/1.0 (solar calculator; +https://offroadwatt.com)',
+        'Accept': 'application/json',
+      },
+    })
     if (!res.ok) {
       return new Response(JSON.stringify({ error: `PVGIS returned ${res.status}` }), { status: 502, headers: { ...CORS, 'Content-Type': 'application/json' } })
     }
