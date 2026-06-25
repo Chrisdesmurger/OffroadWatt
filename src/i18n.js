@@ -112,6 +112,12 @@ const DICT = {
     'solar.pvgisSource': 'Source: EU Commission PVGIS',
     'solar.geoError': 'Geolocation unavailable',
     'solar.geoBlocked': 'Geolocation blocked by browser',
+    'solar.season': 'Season',
+    'solar.annual': 'Year',
+    'solar.seasonHint': '{month}: ~{hours} h sun/day for this zone',
+    'month.jan': 'Jan', 'month.feb': 'Feb', 'month.mar': 'Mar', 'month.apr': 'Apr',
+    'month.may': 'May', 'month.jun': 'Jun', 'month.jul': 'Jul', 'month.aug': 'Aug',
+    'month.sep': 'Sep', 'month.oct': 'Oct', 'month.nov': 'Nov', 'month.dec': 'Dec',
 
     // Energy balance
     'balance.title': 'Daily energy balance',
@@ -513,6 +519,12 @@ const DICT = {
     'solar.pvgisSource': 'Fuente: Comisión Europea PVGIS',
     'solar.geoError': 'Geolocalización no disponible',
     'solar.geoBlocked': 'Geolocalización bloqueada por el navegador',
+    'solar.season': 'Temporada',
+    'solar.annual': 'Año',
+    'solar.seasonHint': '{month}: ~{hours} h sol/día para esta zona',
+    'month.jan': 'Ene', 'month.feb': 'Feb', 'month.mar': 'Mar', 'month.apr': 'Abr',
+    'month.may': 'May', 'month.jun': 'Jun', 'month.jul': 'Jul', 'month.aug': 'Ago',
+    'month.sep': 'Sep', 'month.oct': 'Oct', 'month.nov': 'Nov', 'month.dec': 'Dic',
 
     'balance.title': 'Balance energético diario',
     'balance.whSolar': 'Ah solar / día',
@@ -895,6 +907,12 @@ const DICT = {
     'solar.pvgisSource': 'Source : Commission Européenne PVGIS',
     'solar.geoError': 'Géolocalisation indisponible',
     'solar.geoBlocked': 'Géolocalisation bloquée par le navigateur',
+    'solar.season': 'Saison',
+    'solar.annual': 'Année',
+    'solar.seasonHint': '{month} : ~{hours} h soleil/jour pour cette zone',
+    'month.jan': 'Jan', 'month.feb': 'Fév', 'month.mar': 'Mar', 'month.apr': 'Avr',
+    'month.may': 'Mai', 'month.jun': 'Jun', 'month.jul': 'Jul', 'month.aug': 'Aoû',
+    'month.sep': 'Sep', 'month.oct': 'Oct', 'month.nov': 'Nov', 'month.dec': 'Déc',
 
     'balance.title': 'Bilan énergétique journalier',
     'balance.whSolar': 'Ah solaire / jour',
