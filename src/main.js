@@ -881,6 +881,7 @@ function buildHTML() {
     ${buildTabs()}
     ${S.tab === 'apps'    ? buildAppsTab()    : ''}
     ${S.tab === 'energy'  ? buildEnergyTab()  : ''}
+    ${S.tab === 'cables'  ? buildCablesTab()  : ''}
     ${S.tab === 'compare' ? buildCompareTab() : ''}
   `
 }
@@ -952,8 +953,8 @@ function buildPwaIosBanner() {
 function buildTabs() {
   return `
   <div class="tabs">
-    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['compare','ti-arrows-diff','Comparer']].map(([k,ic,lb]) => `
-      <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${lb}</div>`).join('')}
+    ${[['energy','ti-bolt','Dashboard'],['apps','ti-plug','Appareils'],['cables','ti-plug-connected','cables'],['compare','ti-arrows-diff','Comparer']].map(([k,ic,lb]) => `
+      <div class="tab${S.tab === k ? ' on' : ''}" data-tab="${k}"><i class="ti ${ic}"></i>${t('tab.' + k) || lb}</div>`).join('')}
   </div>`
 }
 
@@ -1506,6 +1507,170 @@ function buildEmailSummaryHtml() {
 </div>
 </body>
 </html>`
+}
+
+// ── CABLES & FUSES TAB ──────────────────────────────────────────────────────
+
+const WIRE_GAUGES = [
+  { mm2: 0.75, maxA: 6,   awg: '18' },
+  { mm2: 1.0,  maxA: 10,  awg: '17' },
+  { mm2: 1.5,  maxA: 15,  awg: '16' },
+  { mm2: 2.5,  maxA: 20,  awg: '14' },
+  { mm2: 4.0,  maxA: 25,  awg: '12' },
+  { mm2: 6.0,  maxA: 35,  awg: '10' },
+  { mm2: 10.0, maxA: 50,  awg: '8'  },
+  { mm2: 16.0, maxA: 70,  awg: '6'  },
+  { mm2: 25.0, maxA: 90,  awg: '4'  },
+  { mm2: 35.0, maxA: 120, awg: '2'  },
+  { mm2: 50.0, maxA: 160, awg: '1/0' },
+  { mm2: 70.0, maxA: 200, awg: '2/0' },
+]
+
+const FUSE_SIZES = [1, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 100, 125, 150, 175, 200]
+const COPPER_CONDUCTIVITY = 56 // S·m/mm²
+
+function calcCableSection(watts, voltage, lengthM, maxDropPct) {
+  const current = watts / voltage
+  const maxDropV = voltage * (maxDropPct / 100)
+  if (maxDropV <= 0 || current <= 0) return { section: 0, current: 0, vdrop: 0, recommended: null, fuse: null, awg: '-' }
+  const section = (2 * lengthM * current) / (COPPER_CONDUCTIVITY * maxDropV)
+  const rec = WIRE_GAUGES.find(g => g.mm2 >= section) || WIRE_GAUGES[WIRE_GAUGES.length - 1]
+  const actualDropV = (2 * lengthM * current) / (COPPER_CONDUCTIVITY * rec.mm2)
+  const actualDropPct = (actualDropV / voltage) * 100
+  const fuseCurrent = current * 1.25
+  const fuse = FUSE_SIZES.find(f => f >= fuseCurrent) || FUSE_SIZES[FUSE_SIZES.length - 1]
+  return { section: +section.toFixed(2), current: +current.toFixed(1), vdrop: +actualDropPct.toFixed(1), recommended: rec, fuse, awg: rec.awg }
+}
+
+function buildCablesTab() {
+  const v = S.bat?.v || 12
+  const maxDrop = S.cableMaxDrop || 3
+  const defaultLen = S.cableDefaultLen || 2
+  const active = S.apps.filter(a => a.on)
+
+  const rows = active.map(a => {
+    const len = a.cableLen || defaultLen
+    const c = calcCableSection(a.w, v, len, maxDrop)
+    return { app: a, ...c, len }
+  })
+
+  const totalCurrent = rows.reduce((s, r) => s + r.current, 0)
+  const mainFuse = FUSE_SIZES.find(f => f >= totalCurrent * 1.25) || FUSE_SIZES[FUSE_SIZES.length - 1]
+  const mainSection = (2 * 1 * totalCurrent) / (COPPER_CONDUCTIVITY * (v * maxDrop / 100))
+  const mainRec = WIRE_GAUGES.find(g => g.mm2 >= mainSection) || WIRE_GAUGES[WIRE_GAUGES.length - 1]
+
+  const tableRows = rows.map(r => {
+    const dropColor = r.vdrop > maxDrop ? 'var(--rd)' : r.vdrop > maxDrop * 0.7 ? 'var(--so)' : 'var(--gr)'
+    return `
+    <tr class="cable-row">
+      <td class="cable-name"><i class="ti ${r.app.icon}" style="font-size:12px;color:var(--t3);margin-right:3px"></i>${ta(r.app.n)}</td>
+      <td class="cable-val">${r.app.w} W</td>
+      <td class="cable-val">${r.current} A</td>
+      <td class="cable-val"><input type="number" class="cable-len-input" data-cable-len="${r.app.id}" value="${r.len}" min="0.5" max="30" step="0.5"></td>
+      <td class="cable-val" style="color:${dropColor}">${r.vdrop} %</td>
+      <td class="cable-val cable-rec">${r.recommended.mm2} mm²</td>
+      <td class="cable-val">${r.fuse} A</td>
+      <td class="cable-val cable-awg">${r.awg}</td>
+    </tr>`
+  }).join('')
+
+  const refRows = WIRE_GAUGES.map(g => `
+    <tr>
+      <td class="cable-val">${g.mm2}</td>
+      <td class="cable-val">${g.maxA} A</td>
+      <td class="cable-val">${g.awg}</td>
+    </tr>`).join('')
+
+  return `
+  <div class="col2">
+    <div>
+      <div class="card">
+        <div class="ct"><i class="ti ti-plug-connected"></i>${t('cables.title')}</div>
+        <p style="font-size:11px;color:var(--t2);margin-bottom:12px">${t('cables.subtitle')}</p>
+
+        <div class="cable-config">
+          <div class="cable-cfg-row">
+            <label>${t('cables.voltage')}</label>
+            <span class="cable-cfg-val">${v} V</span>
+          </div>
+          <div class="cable-cfg-row">
+            <label>${t('cables.maxDrop')}</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="range" id="cable-max-drop" min="1" max="10" step="0.5" value="${maxDrop}" style="flex:1;accent-color:var(--am)">
+              <span class="cable-cfg-val" style="min-width:32px">${maxDrop} %</span>
+            </div>
+          </div>
+          <div class="cable-cfg-row">
+            <label>${t('cables.defaultLength')}</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="range" id="cable-default-len" min="0.5" max="15" step="0.5" value="${defaultLen}" style="flex:1;accent-color:var(--am)">
+              <span class="cable-cfg-val" style="min-width:32px">${defaultLen} m</span>
+            </div>
+          </div>
+        </div>
+
+        ${active.length === 0 ? `
+        <div style="text-align:center;padding:20px 0;color:var(--t3);font-size:12px">
+          <i class="ti ti-plug-connected-x" style="font-size:24px;display:block;margin-bottom:6px;opacity:.4"></i>
+          ${t('cables.noAppliances')}
+        </div>` : `
+        <div class="cable-table-wrap">
+          <table class="cable-table">
+            <thead>
+              <tr>
+                <th>${t('cables.appliance')}</th>
+                <th>${t('cables.power')}</th>
+                <th>${t('cables.current')}</th>
+                <th>${t('cables.length')}</th>
+                <th>${t('cables.vdrop')}</th>
+                <th>${t('cables.section')}</th>
+                <th>${t('cables.fuse')}</th>
+                <th>${t('cables.awg')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cable-summary">
+          <div class="cable-sum-item">
+            <div class="cable-sum-label">${t('cables.totalCurrent')}</div>
+            <div class="cable-sum-val">${totalCurrent.toFixed(1)} A</div>
+          </div>
+          <div class="cable-sum-item">
+            <div class="cable-sum-label">${t('cables.mainFuse')}</div>
+            <div class="cable-sum-val">${mainFuse} A</div>
+          </div>
+          <div class="cable-sum-item">
+            <div class="cable-sum-label">${t('cables.mainCable')}</div>
+            <div class="cable-sum-val">${mainRec.mm2} mm² (AWG ${mainRec.awg})</div>
+          </div>
+        </div>
+        `}
+
+        <p style="font-size:9px;color:var(--t3);margin-top:8px;font-family:var(--mono)">${t('cables.formula')}</p>
+        <p style="font-size:9px;color:var(--t3);margin-top:2px">${t('cables.safetyMargin')}</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="ct"><i class="ti ti-table"></i>${t('cables.standards')}</div>
+        <table class="cable-ref-table">
+          <thead>
+            <tr>
+              <th>${t('cables.sectionMm')}</th>
+              <th>${t('cables.maxAmps')}</th>
+              <th>${t('cables.awgEquiv')}</th>
+            </tr>
+          </thead>
+          <tbody>${refRows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`
 }
 
 // ── COMPARE TAB ──────────────────────────────────────────────────────────────
@@ -2317,6 +2482,13 @@ function bindEvents() {
   document.querySelectorAll('[data-tab]').forEach(el => el.addEventListener('click', () => {
     track('tab_viewed', { tab: el.dataset.tab })
     set({ tab: el.dataset.tab })
+  }))
+  // Cable tab controls
+  document.getElementById('cable-max-drop')?.addEventListener('input', e => set({ cableMaxDrop: parseFloat(e.target.value) || 3 }))
+  document.getElementById('cable-default-len')?.addEventListener('input', e => set({ cableDefaultLen: parseFloat(e.target.value) || 2 }))
+  document.querySelectorAll('.cable-len-input').forEach(inp => inp.addEventListener('change', e => {
+    const id = parseInt(e.target.dataset.cableLen), val = parseFloat(e.target.value) || 2
+    set({ apps: S.apps.map(a => a.id === id ? { ...a, cableLen: val } : a) })
   }))
   // Categories filter
   document.querySelectorAll('[data-cat]').forEach(el => el.addEventListener('click', () => set({ catFilter: el.dataset.cat })))

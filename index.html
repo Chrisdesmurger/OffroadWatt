@@ -175,6 +175,30 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .mo-cancel{background:transparent;border:1px solid var(--b1);color:var(--t2)}
 .mo-ok{background:var(--am3);border:1px solid var(--am2);color:var(--am)}.mo-ok:hover{background:var(--am2);color:#fff}
 .mo-ok:disabled{opacity:.4;cursor:not-allowed}
+/* ── Cables & Fuses tab ── */
+.cable-config{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.cable-cfg-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cable-cfg-row label{font-size:11px;color:var(--t2);min-width:140px;flex-shrink:0}
+.cable-cfg-row input[type=range]{min-width:80px}
+.cable-cfg-val{font-family:var(--mono);font-size:12px;color:var(--am);font-weight:700;text-align:right}
+.cable-table-wrap{overflow-x:auto;margin-bottom:10px}
+.cable-table{width:100%;border-collapse:collapse;font-size:11px}
+.cable-table thead th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);padding:5px 6px;text-align:left;border-bottom:1px solid var(--b1);white-space:nowrap}
+.cable-table tbody td{padding:5px 6px;border-bottom:1px solid var(--b1)}
+.cable-name{color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.cable-val{font-family:var(--mono);color:var(--t2);text-align:center;white-space:nowrap}
+.cable-rec{color:var(--am);font-weight:700}
+.cable-awg{color:var(--t3)}
+.cable-len-input{width:48px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;color:var(--t1);font-family:var(--mono);font-size:11px;padding:2px 4px;text-align:center}
+.cable-len-input:focus{outline:none;border-color:var(--am2)}
+.cable-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:rgba(240,160,48,.06);border:1px solid var(--am3);border-radius:var(--r);padding:10px 12px;margin-top:10px}
+.cable-sum-item{text-align:center}
+.cable-sum-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.cable-sum-val{font-family:var(--mono);font-size:14px;color:var(--am);font-weight:700}
+.cable-ref-table{width:100%;border-collapse:collapse;font-size:11px}
+.cable-ref-table thead th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);padding:5px 8px;text-align:left;border-bottom:1px solid var(--b1)}
+.cable-ref-table tbody td{padding:5px 8px;border-bottom:1px solid var(--b1);font-family:var(--mono);color:var(--t2)}
+@media(max-width:660px){.cable-summary{grid-template-columns:1fr}.cable-name{max-width:100px}}
 /* ── Wizard onboarding ── */
 .wiz .wiz-sub{font-size:12px;color:var(--t2);margin:-6px 0 16px;line-height:1.5}
 .wiz-progress{display:flex;gap:6px;margin-bottom:16px}
