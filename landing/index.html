@@ -294,6 +294,22 @@ section{padding:100px 24px}
 .pricing-feats li.off{color:var(--t3)}
 .pricing-feats li.off i{color:var(--t3)}
 
+/* ── BLOG SECTION ───────────────────────────────────── */
+.blog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.blog-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.blog-grid{grid-template-columns:1fr}}
+.blog-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);overflow:hidden;
+  transition:all .3s;text-decoration:none;display:block;
+}
+.blog-card:hover{border-color:var(--amber);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.blog-card-img{width:100%;height:140px;object-fit:cover;display:block}
+.blog-card-body{padding:16px}
+.blog-card-title{font-size:14px;font-weight:600;color:var(--t1);line-height:1.4;margin-bottom:8px}
+.blog-card-meta{font-size:11px;color:var(--t3);font-family:var(--mono)}
+.blog-cta-row{text-align:center;margin-top:32px}
+
 /* ── SIGNUP ──────────────────────────────────────────── */
 .signup-section{background:var(--bg2);position:relative;overflow:hidden}
 .signup-glow{
@@ -696,6 +712,24 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
   </div>
 </section>
 
+<!-- ── BLOG ───────────────────────────────────────────────── -->
+<section id="blog">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-badge reveal"><i class="ti ti-article"></i> <span data-i18n="blog.badge">Guides pratiques</span></div>
+      <h2 class="section-title reveal" data-i18n="blog.title">Nos derniers articles</h2>
+      <p class="section-sub reveal" data-i18n="blog.sub">Des guides complets pour dimensionner et optimiser votre installation électrique off-road.</p>
+    </div>
+    <div class="blog-grid" id="blog-grid"></div>
+    <div class="blog-cta-row reveal">
+      <a href="/blog" class="btn btn-outline" id="blog-all-link">
+        <i class="ti ti-arrow-right"></i>
+        <span data-i18n="blog.cta">Voir tous les articles</span>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ── SIGNUP ─────────────────────────────────────────────── -->
 <section class="signup-section" id="signup">
   <div class="signup-glow"></div>
@@ -857,6 +891,9 @@ fr:{
 'footer.h1':'Application','footer.open':'Ouvrir l\'app','footer.feat':'Fonctionnalités','footer.price':'Tarifs','footer.signup':'S\'inscrire',
 'footer.h2':'Liens','footer.blog':'Blog','footer.privacy':'Confidentialité','footer.terms':'Conditions',
 'footer.copy':'© 2025 OffroadWatt. Tous droits réservés.',
+'blog.badge':'Guides pratiques','blog.title':'Nos derniers articles','blog.sub':'Des guides complets pour dimensionner et optimiser votre installation électrique off-road.','blog.cta':'Voir tous les articles',
+'blog.1':'Combien de panneaux solaires pour un camping-car ?','blog.2':'Calculer l\'autonomie batterie d\'un camping-car','blog.3':'AGM vs GEL vs Lithium : quelle batterie choisir ?','blog.4':'Brancher un chargeur DC-DC en camping-car',
+'blog.5':'Régulateur solaire MPPT vs PWM','blog.6':'Consommation d\'un frigo en camping-car','blog.7':'Coût d\'une installation électrique camping-car','blog.8':'Quelle puissance de convertisseur choisir ?',
 },
 en:{
 'nav.features':'Features','nav.hiw':'How it works','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Sign in','nav.cta':'Try for free',
@@ -917,6 +954,9 @@ en:{
 'footer.h1':'App','footer.open':'Open app','footer.feat':'Features','footer.price':'Pricing','footer.signup':'Sign up',
 'footer.h2':'Links','footer.blog':'Blog','footer.privacy':'Privacy','footer.terms':'Terms',
 'footer.copy':'© 2025 OffroadWatt. All rights reserved.',
+'blog.badge':'Practical guides','blog.title':'Latest articles','blog.sub':'Complete guides to size and optimize your off-road electrical installation.','blog.cta':'View all articles',
+'blog.1':'How many solar panels for a campervan?','blog.2':'Calculate campervan battery autonomy','blog.3':'AGM vs GEL vs Lithium: which battery?','blog.4':'How to wire a DC-DC charger',
+'blog.5':'MPPT vs PWM solar controller','blog.6':'Campervan fridge power consumption','blog.7':'Campervan electrical system cost','blog.8':'What size inverter for a campervan?',
 },
 es:{
 'nav.features':'Características','nav.hiw':'Cómo funciona','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
@@ -977,6 +1017,9 @@ es:{
 'footer.h1':'Aplicación','footer.open':'Abrir app','footer.feat':'Características','footer.price':'Precios','footer.signup':'Registrarse',
 'footer.h2':'Enlaces','footer.blog':'Blog','footer.privacy':'Privacidad','footer.terms':'Términos',
 'footer.copy':'© 2025 OffroadWatt. Todos los derechos reservados.',
+'blog.badge':'Guías prácticas','blog.title':'Últimos artículos','blog.sub':'Guías completas para dimensionar y optimizar tu instalación eléctrica off-road.','blog.cta':'Ver todos los artículos',
+'blog.1':'¿Cuántos paneles solares para una autocaravana?','blog.2':'Calcular autonomía de batería','blog.3':'AGM vs GEL vs Litio: ¿qué batería elegir?','blog.4':'Instalar un cargador DC-DC',
+'blog.5':'Regulador solar MPPT vs PWM','blog.6':'Consumo de frigorífico en autocaravana','blog.7':'Coste de instalación eléctrica','blog.8':'¿Qué tamaño de inversor elegir?',
 }
 }
 
@@ -1006,12 +1049,39 @@ function toggleFaq(idx){
   if(!wasOpen) item.classList.add('open')
 }
 
+const BLOG_ARTICLES = [
+  {id:1, en:'how-many-solar-panels-campervan', fr:'fr/combien-panneaux-solaires-camping-car', es:'es/cuantos-paneles-solares-autocaravana', img:'/blog/assets/solar-panels-hero.png', imgFr:'/blog/assets/solar-panels-hero-fr.png', imgEs:'/blog/assets/solar-panels-hero-es.png'},
+  {id:2, en:'how-to-calculate-campervan-battery-autonomy', fr:'fr/calculer-autonomie-batterie-camping-car', es:'es/calcular-autonomia-bateria-autocaravana', img:'/blog/assets/battery-autonomy-hero.png', imgFr:'/blog/assets/battery-autonomy-hero.png', imgEs:'/blog/assets/battery-autonomy-hero.png'},
+  {id:3, en:'agm-vs-gel-vs-lithium-campervan-battery', fr:'fr/agm-gel-lithium-batterie-camping-car', es:'es/agm-gel-litio-bateria-autocaravana', img:'/blog/assets/agm-gel-lithium-hero.png', imgFr:'/blog/assets/agm-gel-lithium-hero-fr.png', imgEs:'/blog/assets/agm-gel-lithium-hero-es.png'},
+  {id:4, en:'how-to-wire-dc-dc-charger-campervan', fr:'fr/brancher-chargeur-dc-dc-camping-car', es:'es/instalar-cargador-dc-dc-furgoneta-camper', img:'/blog/assets/dc-dc-charger-hero.png', imgFr:'/blog/assets/dc-dc-charger-hero-fr.png', imgEs:'/blog/assets/dc-dc-charger-hero-es.png'},
+  {id:5, en:'mppt-vs-pwm-solar-controller-campervan', fr:'fr/regulateur-solaire-mppt-vs-pwm-camping-car', es:'es/regulador-solar-mppt-vs-pwm-autocaravana', img:'/blog/assets/mppt-vs-pwm-hero.png', imgFr:'/blog/assets/mppt-vs-pwm-hero-fr.png', imgEs:'/blog/assets/mppt-vs-pwm-hero-es.png'},
+  {id:6, en:'campervan-fridge-power-consumption', fr:'fr/consommation-frigo-camping-car', es:'es/consumo-frigorifico-autocaravana', img:'/blog/assets/fridge-power-hero.png', imgFr:'/blog/assets/fridge-power-hero-fr.png', imgEs:'/blog/assets/fridge-power-hero-es.png'},
+  {id:7, en:'campervan-electrical-system-cost', fr:'fr/cout-installation-electrique-camping-car', es:'es/cuanto-cuesta-instalacion-electrica-autocaravana', img:'/blog/assets/electrical-cost-hero.png', imgFr:'/blog/assets/electrical-cost-hero-fr.png', imgEs:'/blog/assets/electrical-cost-hero-es.png'},
+  {id:8, en:'what-size-inverter-campervan', fr:'fr/quelle-puissance-convertisseur-camping-car', es:'es/que-tamano-inversor-autocaravana', img:'/blog/assets/inverter-sizing-hero.png', imgFr:'/blog/assets/inverter-sizing-hero-fr.png', imgEs:'/blog/assets/inverter-sizing-hero-es.png'},
+]
+
+function buildBlog(){
+  const grid = document.getElementById('blog-grid')
+  if(!grid) return
+  grid.innerHTML = BLOG_ARTICLES.map(a => {
+    const slug = a[_lang] || a.en
+    const img = _lang==='fr' ? (a.imgFr||a.img) : _lang==='es' ? (a.imgEs||a.img) : a.img
+    return `<a href="/blog/${slug}" class="blog-card reveal">
+      <img class="blog-card-img" src="${img}" alt="" loading="lazy">
+      <div class="blog-card-body">
+        <div class="blog-card-title">${t('blog.'+a.id)}</div>
+      </div>
+    </a>`
+  }).join('')
+}
+
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n) })
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder) })
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === _lang))
   document.documentElement.lang = _lang
   buildFaq()
+  buildBlog()
 }
 
 document.querySelectorAll('.lang-btn').forEach(b => {
