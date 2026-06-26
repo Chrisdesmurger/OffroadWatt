@@ -78,7 +78,10 @@ const SEASON_COEFF = {
   southern: [1.30, 1.20, 1.05, 0.85, 0.65, 0.55, 0.60, 0.75, 0.95, 1.10, 1.25, 1.35], // Southern hemisphere
 }
 
-const MONTH_LABELS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+const SEASON_AGG = Object.fromEntries(Object.entries(SEASON_COEFF).map(([k, v]) => {
+  const s = [...v].sort((a, b) => a - b)
+  return [k, { winter: +(s.slice(0, 3).reduce((a, b) => a + b, 0) / 3).toFixed(2), summer: +(s.slice(-3).reduce((a, b) => a + b, 0) / 3).toFixed(2) }]
+}))
 
 const SUN_ZONES = [
   { r: 'Europe', n: 'Scandinavie', h: 2.5, eg: 'Oslo, Helsinki, Stockholm', sz: 'high' },
@@ -395,7 +398,7 @@ async function saveCurrentConfig(name) {
 
   const stateToSave = {
     vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
-    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solMonth: S.solMonth,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }
 
@@ -453,7 +456,7 @@ let S = {
     { id: 1780115206090, n: 'BMS batterie Lithium',    icon: 'ti-battery-charging',w: 3,   h: 24,   on: true, cat: 'Système'   },
   ],
   bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
-  solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '', solMonth: 0,
+  solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '', solSeason: 'winter',
   pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisPlace: null, pvgisLoading: false, pvgisError: null,
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
@@ -475,7 +478,7 @@ function persistState() {
       dod: S.dod,
       batType: S.batType,
       solOn: S.solOn,
-      solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solMonth: S.solMonth,
+      solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
       pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH, pvgisPlace: S.pvgisPlace,
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
@@ -505,7 +508,7 @@ function loadPersistedState() {
       solEff: p.solEff ?? S.solEff,
       sunIdx: p.sunIdx ?? S.sunIdx,
       customSunH: p.customSunH ?? S.customSunH,
-      solMonth: p.solMonth ?? S.solMonth,
+      solSeason: p.solSeason ?? S.solSeason,
       pvgisLat: p.pvgisLat ?? S.pvgisLat,
       pvgisLon: p.pvgisLon ?? S.pvgisLon,
       pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
@@ -532,7 +535,7 @@ function shareSnapshot() {
     dod: S.dod,
     batType: S.batType,
     solOn: S.solOn,
-    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solMonth: S.solMonth,
+    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
     pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH, pvgisPlace: S.pvgisPlace,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
     hookupCost: S.hookupCost,
@@ -566,7 +569,7 @@ function applyDecodedState(p) {
     solEff: p.solEff ?? S.solEff,
     sunIdx: p.sunIdx ?? S.sunIdx,
     customSunH: p.customSunH ?? S.customSunH,
-    solMonth: p.solMonth ?? S.solMonth,
+    solSeason: p.solSeason ?? S.solSeason,
     pvgisLat: p.pvgisLat ?? S.pvgisLat,
     pvgisLon: p.pvgisLon ?? S.pvgisLon,
     pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
@@ -719,11 +722,11 @@ const sunHOf = (st) => {
   const base = st.pvgisSunH != null
     ? st.pvgisSunH
     : st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
-  const month = st.solMonth || 0
-  if (month === 0) return base
+  const season = st.solSeason || 'annual'
+  if (season === 'annual') return base
   const zone = SUN_ZONES[st.sunIdx]
-  const band = SEASON_COEFF[zone?.sz || 'mid']
-  return +(base * band[month - 1]).toFixed(1)
+  const agg = SEASON_AGG[zone?.sz || 'mid']
+  return +(base * agg[season]).toFixed(1)
 }
 const sunH = () => sunHOf(S)
 
@@ -799,7 +802,7 @@ function systemCost(st = S) {
 function snapshotState(label) {
   const snap = JSON.parse(JSON.stringify({
     vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
-    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solMonth: S.solMonth,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }))
   snap.label = label
@@ -1172,10 +1175,11 @@ function buildEnergyTab() {
         <div class="scf" style="margin-top:6px">
           <label><i class="ti ti-calendar" style="font-size:13px;margin-right:3px"></i>${t('solar.season')}</label>
           <div class="month-btns">
-            <div class="mbb${S.solMonth === 0 ? ' on' : ''}" data-month="0">${t('solar.annual')}</div>
-            ${MONTH_LABELS.map((m, i) => `<div class="mbb${S.solMonth === i + 1 ? ' on' : ''}" data-month="${i + 1}">${t('month.' + m)}</div>`).join('')}
+            <div class="mbb${S.solSeason === 'winter' ? ' on' : ''}" data-season="winter"><i class="ti ti-snowflake" style="font-size:12px"></i> ${t('solar.winter')}</div>
+            <div class="mbb${S.solSeason === 'summer' ? ' on' : ''}" data-season="summer"><i class="ti ti-sun" style="font-size:12px"></i> ${t('solar.summer')}</div>
+            <div class="mbb${S.solSeason === 'annual' ? ' on' : ''}" data-season="annual">${t('solar.annual')}</div>
           </div>
-          ${S.solMonth > 0 ? `<div style="font-size:10px;color:var(--am);margin-top:3px"><i class="ti ti-info-circle" style="font-size:11px"></i> ${t('solar.seasonHint', { month: t('month.' + MONTH_LABELS[S.solMonth - 1]), hours: sunH() })}</div>` : ''}
+          ${S.solSeason !== 'annual' ? `<div style="font-size:10px;color:var(--am);margin-top:3px"><i class="ti ti-info-circle" style="font-size:11px"></i> ${t('solar.seasonHint', { season: t('solar.' + S.solSeason), hours: sunH() })}</div>` : ''}
         </div>
         <div class="sol-summary">
           <div class="ss-item"><div class="ssn">${S.solW * S.solNb} Wc</div><div class="ssl">${t('solar.installed')}</div></div>
@@ -1337,7 +1341,7 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
         <tr><td>${t('pr.totalPower')}</td><td>${S.solW * S.solNb} Wc</td></tr>
         <tr><td>${t('pr.mpptEff')}</td><td>${Math.round(S.solEff * 100)} %</td></tr>
         <tr><td>${t('pr.zoneSun')}</td><td>${sunSource} — ${sunHours} h/j</td></tr>
-        ${S.solMonth > 0 ? `<tr><td>${t('solar.season')}</td><td>${t('month.' + MONTH_LABELS[S.solMonth - 1])}</td></tr>` : ''}
+        ${S.solSeason !== 'annual' ? `<tr><td>${t('solar.season')}</td><td>${t('solar.' + S.solSeason)}</td></tr>` : ''}
         <tr class="pr-hi"><td>${t('pr.dailyProduction')}</td><td>${toAh(solar)} Ah/j</td></tr>
       </table>
     </div>` : ''}
@@ -2387,7 +2391,7 @@ function bindEvents() {
     if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) fetchPVGIS(lat, lon)
   })
   document.getElementById('pvgis-clear')?.addEventListener('click', () => set({ pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisPlace: null, pvgisError: null }))
-  document.querySelectorAll('[data-month]').forEach(el => el.addEventListener('click', () => set({ solMonth: parseInt(el.dataset.month) })))
+  document.querySelectorAll('[data-season]').forEach(el => el.addEventListener('click', () => set({ solSeason: el.dataset.season })))
   // Mode switch on appliance card
   document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
     const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)
