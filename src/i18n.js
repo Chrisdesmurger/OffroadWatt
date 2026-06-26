@@ -112,6 +112,11 @@ const DICT = {
     'solar.pvgisSource': 'Source: EU Commission PVGIS',
     'solar.geoError': 'Geolocation unavailable',
     'solar.geoBlocked': 'Geolocation blocked by browser',
+    'solar.season': 'Season',
+    'solar.annual': 'Year',
+    'solar.winter': 'Winter',
+    'solar.summer': 'Summer',
+    'solar.seasonHint': '{season}: ~{hours} h sun/day for this zone',
 
     // Energy balance
     'balance.title': 'Daily energy balance',
@@ -513,6 +518,11 @@ const DICT = {
     'solar.pvgisSource': 'Fuente: Comisión Europea PVGIS',
     'solar.geoError': 'Geolocalización no disponible',
     'solar.geoBlocked': 'Geolocalización bloqueada por el navegador',
+    'solar.season': 'Temporada',
+    'solar.annual': 'Año',
+    'solar.winter': 'Invierno',
+    'solar.summer': 'Verano',
+    'solar.seasonHint': '{season}: ~{hours} h sol/día para esta zona',
 
     'balance.title': 'Balance energético diario',
     'balance.whSolar': 'Ah solar / día',
@@ -895,6 +905,11 @@ const DICT = {
     'solar.pvgisSource': 'Source : Commission Européenne PVGIS',
     'solar.geoError': 'Géolocalisation indisponible',
     'solar.geoBlocked': 'Géolocalisation bloquée par le navigateur',
+    'solar.season': 'Saison',
+    'solar.annual': 'Année',
+    'solar.winter': 'Hiver',
+    'solar.summer': 'Été',
+    'solar.seasonHint': '{season} : ~{hours} h soleil/jour pour cette zone',
 
     'balance.title': 'Bilan énergétique journalier',
     'balance.whSolar': 'Ah solaire / jour',

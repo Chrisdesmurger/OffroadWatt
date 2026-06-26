@@ -67,48 +67,64 @@ const BAT_TYPES = [
 const DOD = { AGM: 0.5, GEL: 0.5, LI: 0.8 }
 const PANELS = [80, 100, 150, 200, 250, 300, 400, 500]
 
+// Seasonal solar coefficients by latitude band (ratio vs annual average)
+// Index 0 = Jan, 11 = Dec. Values derived from PVGIS monthly irradiance data.
+const SEASON_COEFF = {
+  high:     [0.15, 0.30, 0.60, 0.90, 1.20, 1.40, 1.35, 1.15, 0.80, 0.45, 0.20, 0.10], // >55° (Scandinavia, Canada, Alaska)
+  midHigh:  [0.35, 0.50, 0.75, 1.00, 1.25, 1.35, 1.30, 1.15, 0.90, 0.60, 0.40, 0.30], // 45-55° (UK, N.France, Germany)
+  mid:      [0.55, 0.65, 0.85, 1.05, 1.20, 1.30, 1.35, 1.20, 1.00, 0.75, 0.55, 0.45], // 35-45° (S.France, Spain N, Italy)
+  midLow:   [0.70, 0.75, 0.90, 1.05, 1.15, 1.25, 1.30, 1.20, 1.05, 0.85, 0.70, 0.65], // 25-35° (S.Spain, Morocco, Florida)
+  low:      [0.85, 0.85, 0.95, 1.00, 1.05, 1.10, 1.10, 1.05, 1.00, 0.95, 0.90, 0.85], // 0-25° (tropics)
+  southern: [1.30, 1.20, 1.05, 0.85, 0.65, 0.55, 0.60, 0.75, 0.95, 1.10, 1.25, 1.35], // Southern hemisphere
+}
+
+const SEASON_AGG = Object.fromEntries(Object.entries(SEASON_COEFF).map(([k, v]) => {
+  const s = [...v].sort((a, b) => a - b)
+  return [k, { winter: +(s.slice(0, 3).reduce((a, b) => a + b, 0) / 3).toFixed(2), summer: +(s.slice(-3).reduce((a, b) => a + b, 0) / 3).toFixed(2) }]
+}))
+
 const SUN_ZONES = [
-  { r: 'Europe', n: 'Scandinavie', h: 2.5, eg: 'Oslo, Helsinki, Stockholm' },
-  { r: 'Europe', n: 'Royaume-Uni', h: 3.0, eg: 'Londres, Dublin, Édimbourg' },
-  { r: 'Europe', n: 'Bretagne / Normandie', h: 3.5, eg: 'Rennes, Caen, Nantes' },
-  { r: 'Europe', n: 'Paris / Île-de-France', h: 4.0, eg: 'Paris, Reims, Orléans' },
-  { r: 'Europe', n: 'Alsace / Suisse', h: 4.2, eg: 'Strasbourg, Bâle, Zurich' },
-  { r: 'Europe', n: 'Bordeaux / Sud-Ouest', h: 4.8, eg: 'Bordeaux, Toulouse, Pau' },
-  { r: 'Europe', n: 'Provence / PACA', h: 5.3, eg: 'Marseille, Nice, Toulon' },
-  { r: 'Europe', n: 'Espagne Nord', h: 4.8, eg: 'Barcelone, Bilbao, Saragosse' },
-  { r: 'Europe', n: 'Espagne Centre/Sud', h: 5.8, eg: 'Madrid, Séville, Grenade' },
-  { r: 'Europe', n: 'Portugal', h: 5.5, eg: 'Lisbonne, Porto, Faro' },
-  { r: 'Europe', n: 'Italie Centre', h: 5.0, eg: 'Rome, Florence, Bologne' },
-  { r: 'Europe', n: 'Italie Sud / Sicile', h: 5.8, eg: 'Naples, Palerme, Catane' },
-  { r: 'Europe', n: 'Grèce / Crète', h: 6.0, eg: 'Athènes, Thessalonique, Héraklion' },
-  { r: 'Europe', n: 'Croatie / Balkans', h: 5.5, eg: 'Split, Dubrovnik, Sarajevo' },
-  { r: 'Afrique & Moyen-Orient', n: 'Maroc Nord', h: 5.5, eg: 'Tanger, Fès, Casablanca' },
-  { r: 'Afrique & Moyen-Orient', n: 'Maroc Sud', h: 6.5, eg: 'Marrakech, Agadir, Dakhla' },
-  { r: 'Afrique & Moyen-Orient', n: 'Tunisie', h: 6.0, eg: 'Tunis, Djerba, Sfax' },
-  { r: 'Afrique & Moyen-Orient', n: 'Algérie', h: 6.2, eg: 'Alger, Oran, Tamanrasset' },
-  { r: 'Afrique & Moyen-Orient', n: 'Égypte', h: 7.0, eg: 'Le Caire, Louxor, Assouan' },
-  { r: 'Afrique & Moyen-Orient', n: 'Sénégal / Mali', h: 6.5, eg: 'Dakar, Bamako, Saint-Louis' },
-  { r: 'Afrique & Moyen-Orient', n: "Afrique de l'Est", h: 6.0, eg: 'Nairobi, Dar es Salaam' },
-  { r: 'Afrique & Moyen-Orient', n: 'Afrique du Sud', h: 5.5, eg: 'Le Cap, Johannesburg, Durban' },
-  { r: 'Afrique & Moyen-Orient', n: 'Émirats / Qatar', h: 7.0, eg: 'Dubaï, Abu Dhabi, Doha' },
-  { r: 'Afrique & Moyen-Orient', n: 'Israël / Jordanie', h: 6.5, eg: 'Tel Aviv, Jérusalem, Aqaba' },
-  { r: 'Amériques', n: 'Canada / Alaska', h: 3.0, eg: 'Montréal, Vancouver, Québec' },
-  { r: 'Amériques', n: 'USA Nord-Est', h: 3.8, eg: 'New York, Boston, Philadelphie' },
-  { r: 'Amériques', n: 'USA Sud-Est', h: 5.0, eg: 'Miami, Orlando, Atlanta' },
-  { r: 'Amériques', n: 'USA Midwest', h: 4.5, eg: 'Chicago, Minneapolis, Denver' },
-  { r: 'Amériques', n: 'USA Sud-Ouest', h: 6.5, eg: 'Phoenix, Las Vegas, Los Angeles' },
-  { r: 'Amériques', n: 'Mexique', h: 6.0, eg: 'Cancún, Mexico, Oaxaca' },
-  { r: 'Amériques', n: 'Colombie / Équateur', h: 5.0, eg: 'Bogotá, Medellín, Quito' },
-  { r: 'Amériques', n: 'Brésil', h: 5.5, eg: 'Rio de Janeiro, São Paulo, Bahia' },
-  { r: 'Amériques', n: 'Argentine / Chili', h: 4.5, eg: 'Buenos Aires, Santiago, Mendoza' },
-  { r: 'Asie-Pacifique', n: 'Australie Sud-Est', h: 5.0, eg: 'Sydney, Melbourne, Brisbane' },
-  { r: 'Asie-Pacifique', n: 'Australie Nord', h: 7.0, eg: 'Darwin, Cairns, Alice Springs' },
-  { r: 'Asie-Pacifique', n: 'Nouvelle-Zélande', h: 4.5, eg: 'Auckland, Wellington, Christchurch' },
-  { r: 'Asie-Pacifique', n: 'Thaïlande / Vietnam', h: 5.5, eg: 'Bangkok, Chiang Mai, Hô Chi Minh' },
-  { r: 'Asie-Pacifique', n: 'Japon / Corée', h: 3.8, eg: 'Tokyo, Osaka, Séoul' },
-  { r: 'Asie-Pacifique', n: 'Inde du Nord', h: 5.5, eg: 'New Delhi, Rajasthan, Jaipur' },
-  { r: 'Asie-Pacifique', n: 'Inde du Sud', h: 6.0, eg: 'Mumbai, Goa, Bangalore' },
-  { r: 'Personnalisé', n: 'Personnalisé', h: 0, eg: '' },
+  { r: 'Europe', n: 'Scandinavie', h: 2.5, eg: 'Oslo, Helsinki, Stockholm', sz: 'high' },
+  { r: 'Europe', n: 'Royaume-Uni', h: 3.0, eg: 'Londres, Dublin, Édimbourg', sz: 'midHigh' },
+  { r: 'Europe', n: 'Bretagne / Normandie', h: 3.5, eg: 'Rennes, Caen, Nantes', sz: 'midHigh' },
+  { r: 'Europe', n: 'Paris / Île-de-France', h: 4.0, eg: 'Paris, Reims, Orléans', sz: 'midHigh' },
+  { r: 'Europe', n: 'Alsace / Suisse', h: 4.2, eg: 'Strasbourg, Bâle, Zurich', sz: 'midHigh' },
+  { r: 'Europe', n: 'Bordeaux / Sud-Ouest', h: 4.8, eg: 'Bordeaux, Toulouse, Pau', sz: 'mid' },
+  { r: 'Europe', n: 'Provence / PACA', h: 5.3, eg: 'Marseille, Nice, Toulon', sz: 'mid' },
+  { r: 'Europe', n: 'Espagne Nord', h: 4.8, eg: 'Barcelone, Bilbao, Saragosse', sz: 'mid' },
+  { r: 'Europe', n: 'Espagne Centre/Sud', h: 5.8, eg: 'Madrid, Séville, Grenade', sz: 'midLow' },
+  { r: 'Europe', n: 'Portugal', h: 5.5, eg: 'Lisbonne, Porto, Faro', sz: 'midLow' },
+  { r: 'Europe', n: 'Italie Centre', h: 5.0, eg: 'Rome, Florence, Bologne', sz: 'mid' },
+  { r: 'Europe', n: 'Italie Sud / Sicile', h: 5.8, eg: 'Naples, Palerme, Catane', sz: 'midLow' },
+  { r: 'Europe', n: 'Grèce / Crète', h: 6.0, eg: 'Athènes, Thessalonique, Héraklion', sz: 'midLow' },
+  { r: 'Europe', n: 'Croatie / Balkans', h: 5.5, eg: 'Split, Dubrovnik, Sarajevo', sz: 'mid' },
+  { r: 'Afrique & Moyen-Orient', n: 'Maroc Nord', h: 5.5, eg: 'Tanger, Fès, Casablanca', sz: 'midLow' },
+  { r: 'Afrique & Moyen-Orient', n: 'Maroc Sud', h: 6.5, eg: 'Marrakech, Agadir, Dakhla', sz: 'low' },
+  { r: 'Afrique & Moyen-Orient', n: 'Tunisie', h: 6.0, eg: 'Tunis, Djerba, Sfax', sz: 'midLow' },
+  { r: 'Afrique & Moyen-Orient', n: 'Algérie', h: 6.2, eg: 'Alger, Oran, Tamanrasset', sz: 'midLow' },
+  { r: 'Afrique & Moyen-Orient', n: 'Égypte', h: 7.0, eg: 'Le Caire, Louxor, Assouan', sz: 'low' },
+  { r: 'Afrique & Moyen-Orient', n: 'Sénégal / Mali', h: 6.5, eg: 'Dakar, Bamako, Saint-Louis', sz: 'low' },
+  { r: 'Afrique & Moyen-Orient', n: "Afrique de l'Est", h: 6.0, eg: 'Nairobi, Dar es Salaam', sz: 'low' },
+  { r: 'Afrique & Moyen-Orient', n: 'Afrique du Sud', h: 5.5, eg: 'Le Cap, Johannesburg, Durban', sz: 'southern' },
+  { r: 'Afrique & Moyen-Orient', n: 'Émirats / Qatar', h: 7.0, eg: 'Dubaï, Abu Dhabi, Doha', sz: 'low' },
+  { r: 'Afrique & Moyen-Orient', n: 'Israël / Jordanie', h: 6.5, eg: 'Tel Aviv, Jérusalem, Aqaba', sz: 'midLow' },
+  { r: 'Amériques', n: 'Canada / Alaska', h: 3.0, eg: 'Montréal, Vancouver, Québec', sz: 'high' },
+  { r: 'Amériques', n: 'USA Nord-Est', h: 3.8, eg: 'New York, Boston, Philadelphie', sz: 'midHigh' },
+  { r: 'Amériques', n: 'USA Sud-Est', h: 5.0, eg: 'Miami, Orlando, Atlanta', sz: 'midLow' },
+  { r: 'Amériques', n: 'USA Midwest', h: 4.5, eg: 'Chicago, Minneapolis, Denver', sz: 'midHigh' },
+  { r: 'Amériques', n: 'USA Sud-Ouest', h: 6.5, eg: 'Phoenix, Las Vegas, Los Angeles', sz: 'midLow' },
+  { r: 'Amériques', n: 'Mexique', h: 6.0, eg: 'Cancún, Mexico, Oaxaca', sz: 'low' },
+  { r: 'Amériques', n: 'Colombie / Équateur', h: 5.0, eg: 'Bogotá, Medellín, Quito', sz: 'low' },
+  { r: 'Amériques', n: 'Brésil', h: 5.5, eg: 'Rio de Janeiro, São Paulo, Bahia', sz: 'southern' },
+  { r: 'Amériques', n: 'Argentine / Chili', h: 4.5, eg: 'Buenos Aires, Santiago, Mendoza', sz: 'southern' },
+  { r: 'Asie-Pacifique', n: 'Australie Sud-Est', h: 5.0, eg: 'Sydney, Melbourne, Brisbane', sz: 'southern' },
+  { r: 'Asie-Pacifique', n: 'Australie Nord', h: 7.0, eg: 'Darwin, Cairns, Alice Springs', sz: 'low' },
+  { r: 'Asie-Pacifique', n: 'Nouvelle-Zélande', h: 4.5, eg: 'Auckland, Wellington, Christchurch', sz: 'southern' },
+  { r: 'Asie-Pacifique', n: 'Thaïlande / Vietnam', h: 5.5, eg: 'Bangkok, Chiang Mai, Hô Chi Minh', sz: 'low' },
+  { r: 'Asie-Pacifique', n: 'Japon / Corée', h: 3.8, eg: 'Tokyo, Osaka, Séoul', sz: 'mid' },
+  { r: 'Asie-Pacifique', n: 'Inde du Nord', h: 5.5, eg: 'New Delhi, Rajasthan, Jaipur', sz: 'midLow' },
+  { r: 'Asie-Pacifique', n: 'Inde du Sud', h: 6.0, eg: 'Mumbai, Goa, Bangalore', sz: 'low' },
+  { r: 'Personnalisé', n: 'Personnalisé', h: 0, eg: '', sz: 'mid' },
 ]
 
 let CATALOG = []  // chargé 100% depuis Supabase au boot (loadCatalogFromDB)
@@ -382,7 +398,7 @@ async function saveCurrentConfig(name) {
 
   const stateToSave = {
     vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
-    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }
 
@@ -440,7 +456,7 @@ let S = {
     { id: 1780115206090, n: 'BMS batterie Lithium',    icon: 'ti-battery-charging',w: 3,   h: 24,   on: true, cat: 'Système'   },
   ],
   bat: BATS[1], batNb: 1, dod: 0.8, batType: 'AGM',
-  solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '',
+  solOn: true, solW: 200, solNb: 2, solEff: 0.85, sunIdx: 35, customSunH: '', solSeason: 'winter',
   pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisPlace: null, pvgisLoading: false, pvgisError: null,
   altOn: true, altAmps: 20, altHours: 2,
   modal: null, tab: 'energy', catFilter: 'Tout',
@@ -462,7 +478,7 @@ function persistState() {
       dod: S.dod,
       batType: S.batType,
       solOn: S.solOn,
-      solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+      solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
       pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH, pvgisPlace: S.pvgisPlace,
       altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
       catFilter: S.catFilter,
@@ -492,6 +508,7 @@ function loadPersistedState() {
       solEff: p.solEff ?? S.solEff,
       sunIdx: p.sunIdx ?? S.sunIdx,
       customSunH: p.customSunH ?? S.customSunH,
+      solSeason: p.solSeason ?? S.solSeason,
       pvgisLat: p.pvgisLat ?? S.pvgisLat,
       pvgisLon: p.pvgisLon ?? S.pvgisLon,
       pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
@@ -518,7 +535,7 @@ function shareSnapshot() {
     dod: S.dod,
     batType: S.batType,
     solOn: S.solOn,
-    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
     pvgisLat: S.pvgisLat, pvgisLon: S.pvgisLon, pvgisSunH: S.pvgisSunH, pvgisPlace: S.pvgisPlace,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
     hookupCost: S.hookupCost,
@@ -552,6 +569,7 @@ function applyDecodedState(p) {
     solEff: p.solEff ?? S.solEff,
     sunIdx: p.sunIdx ?? S.sunIdx,
     customSunH: p.customSunH ?? S.customSunH,
+    solSeason: p.solSeason ?? S.solSeason,
     pvgisLat: p.pvgisLat ?? S.pvgisLat,
     pvgisLon: p.pvgisLon ?? S.pvgisLon,
     pvgisSunH: p.pvgisSunH ?? S.pvgisSunH,
@@ -701,8 +719,14 @@ async function loadShortLink() {
 
 const set = (u) => { Object.assign(S, u); persistState(); render() }
 const sunHOf = (st) => {
-  if (st.pvgisSunH != null) return st.pvgisSunH
-  return st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
+  const base = st.pvgisSunH != null
+    ? st.pvgisSunH
+    : st.sunIdx === SUN_ZONES.length - 1 ? (parseFloat(st.customSunH) || 4.5) : SUN_ZONES[st.sunIdx].h
+  const season = st.solSeason || 'annual'
+  if (season === 'annual') return base
+  const zone = SUN_ZONES[st.sunIdx]
+  const agg = SEASON_AGG[zone?.sz || 'mid']
+  return +(base * agg[season]).toFixed(1)
 }
 const sunH = () => sunHOf(S)
 
@@ -778,7 +802,7 @@ function systemCost(st = S) {
 function snapshotState(label) {
   const snap = JSON.parse(JSON.stringify({
     vtype: S.vtype, apps: S.apps, bat: S.bat, batNb: S.batNb, dod: S.dod, batType: S.batType,
-    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH,
+    solOn: S.solOn, solW: S.solW, solNb: S.solNb, solEff: S.solEff, sunIdx: S.sunIdx, customSunH: S.customSunH, solSeason: S.solSeason,
     altOn: S.altOn, altAmps: S.altAmps, altHours: S.altHours,
   }))
   snap.label = label
@@ -1148,6 +1172,15 @@ function buildEnergyTab() {
             <div style="font-size:9px;color:var(--t3);margin-top:2px">${S.pvgisPlace ? `<i class="ti ti-map-pin" style="font-size:10px"></i> ${S.pvgisPlace} — ` : ''}${S.pvgisLat}°, ${S.pvgisLon}°</div></div>` : ''}
           ${S.pvgisError ? `<div class="pvgis-status err"><i class="ti ti-alert-triangle"></i> ${t('solar.pvgisError')}</div>` : ''}
         </div>
+        <div class="scf" style="margin-top:6px">
+          <label><i class="ti ti-calendar" style="font-size:13px;margin-right:3px"></i>${t('solar.season')}</label>
+          <div class="month-btns">
+            <div class="mbb${S.solSeason === 'winter' ? ' on' : ''}" data-season="winter"><i class="ti ti-snowflake" style="font-size:12px"></i> ${t('solar.winter')}</div>
+            <div class="mbb${S.solSeason === 'summer' ? ' on' : ''}" data-season="summer"><i class="ti ti-sun" style="font-size:12px"></i> ${t('solar.summer')}</div>
+            <div class="mbb${S.solSeason === 'annual' ? ' on' : ''}" data-season="annual">${t('solar.annual')}</div>
+          </div>
+          ${S.solSeason !== 'annual' ? `<div style="font-size:10px;color:var(--am);margin-top:3px"><i class="ti ti-info-circle" style="font-size:11px"></i> ${t('solar.seasonHint', { season: t('solar.' + S.solSeason), hours: sunH() })}</div>` : ''}
+        </div>
         <div class="sol-summary">
           <div class="ss-item"><div class="ssn">${S.solW * S.solNb} Wc</div><div class="ssl">${t('solar.installed')}</div></div>
           <div style="width:1px;background:var(--b1)"></div>
@@ -1308,6 +1341,7 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
         <tr><td>${t('pr.totalPower')}</td><td>${S.solW * S.solNb} Wc</td></tr>
         <tr><td>${t('pr.mpptEff')}</td><td>${Math.round(S.solEff * 100)} %</td></tr>
         <tr><td>${t('pr.zoneSun')}</td><td>${sunSource} — ${sunHours} h/j</td></tr>
+        ${S.solSeason !== 'annual' ? `<tr><td>${t('solar.season')}</td><td>${t('solar.' + S.solSeason)}</td></tr>` : ''}
         <tr class="pr-hi"><td>${t('pr.dailyProduction')}</td><td>${toAh(solar)} Ah/j</td></tr>
       </table>
     </div>` : ''}
@@ -2357,6 +2391,7 @@ function bindEvents() {
     if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) fetchPVGIS(lat, lon)
   })
   document.getElementById('pvgis-clear')?.addEventListener('click', () => set({ pvgisLat: null, pvgisLon: null, pvgisSunH: null, pvgisPlace: null, pvgisError: null }))
+  document.querySelectorAll('[data-season]').forEach(el => el.addEventListener('click', () => set({ solSeason: el.dataset.season })))
   // Mode switch on appliance card
   document.querySelectorAll('[data-mode-id]').forEach(el => el.addEventListener('click', () => {
     const id = parseInt(el.dataset.modeId), mi = parseInt(el.dataset.modeIdx)
