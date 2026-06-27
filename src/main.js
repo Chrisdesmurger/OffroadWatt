@@ -1043,8 +1043,10 @@ const CAT_COLORS = {
   Eau: '#38bdf8', Éclairage: '#fbbf24', Système: '#f87171',
 }
 
-function buildDonutChart(breakdown) {
-  if (!breakdown.length) return `<div class="card"><div class="ct te"><i class="ti ti-chart-donut-3"></i>${t('chart.donut.title')}</div><div style="font-size:12px;color:var(--t3);padding:10px 0;text-align:center">${t('chart.donut.noAppliance')}</div></div>`
+// Consumption breakdown donut — print-safe (dark text on white), used only in
+// the PDF report sent to the user, not on the live dashboard.
+function buildDonutReport(breakdown) {
+  if (!breakdown.length) return ''
 
   const byCat = {}
   breakdown.forEach(a => {
@@ -1068,24 +1070,26 @@ function buildDonutChart(breakdown) {
     const x2i = cx + ir * Math.cos(endAngle), y2i = cy + ir * Math.sin(endAngle)
     const large = sweep > Math.PI ? 1 : 0
     const color = CAT_COLORS[cat] || '#5a7068'
-    paths.push(`<path d="M${x1o},${y1o} A${r},${r} 0 ${large} 1 ${x2o},${y2o} L${x2i},${y2i} A${ir},${ir} 0 ${large} 0 ${x1i},${y1i} Z" fill="${color}" opacity="0.85"/>`)
+    paths.push(`<path d="M${x1o},${y1o} A${r},${r} 0 ${large} 1 ${x2o},${y2o} L${x2i},${y2i} A${ir},${ir} 0 ${large} 0 ${x1i},${y1i} Z" fill="${color}"/>`)
     angle = endAngle
   })
 
   const legend = entries.map(([cat, wh]) => {
     const color = CAT_COLORS[cat] || '#5a7068'
     const pct = Math.round(wh / total * 100)
-    return `<div class="donut-legend-item"><div class="donut-legend-dot" style="background:${color}"></div>${tcat(cat)} <span class="donut-legend-val">${toAh(wh)} Ah (${pct}%)</span></div>`
+    return `<div style="display:flex;align-items:center;gap:5pt;color:#444;font-size:8.5pt">
+      <span style="width:8pt;height:8pt;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
+      ${tcat(cat)} <span style="font-family:'Space Mono',monospace;color:#1a1a1a">${toAh(wh)} Ah (${pct}%)</span></div>`
   }).join('')
 
-  return `<div class="card">
-    <div class="ct te"><i class="ti ti-chart-donut-3"></i>${t('chart.donut.title')}</div>
-    <div class="chart-wrap">
-      <svg viewBox="0 0 120 120" width="140" height="140" aria-label="${t('chart.donut.title')}">${paths.join('')}
-        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="var(--t1)" font-family="var(--mono)" font-size="11" font-weight="700">${toAh(total)}</text>
-        <text x="${cx}" y="${cy + 8}" text-anchor="middle" fill="var(--t3)" font-size="6.5">${t('unit.ahday')}</text>
+  return `<div class="pr-section">
+    <div class="pr-sh">${t('chart.donut.title')}</div>
+    <div style="display:flex;align-items:center;gap:18pt">
+      <svg viewBox="0 0 120 120" width="120" height="120" aria-label="${t('chart.donut.title')}">${paths.join('')}
+        <text x="${cx}" y="${cy - 2}" text-anchor="middle" fill="#1a1a1a" font-family="'Space Mono',monospace" font-size="13" font-weight="700">${toAh(total)}</text>
+        <text x="${cx}" y="${cy + 9}" text-anchor="middle" fill="#888" font-size="7">${t('unit.ahday')}</text>
       </svg>
-      <div class="donut-legend">${legend}</div>
+      <div style="display:flex;flex-direction:column;gap:4pt">${legend}</div>
     </div>
   </div>`
 }
@@ -1097,7 +1101,7 @@ function buildDischargeChart(usable, net, recharge, cons) {
   if (batTotal <= 0) return ''
 
   const reservePct = (1 - S.dod) * 100
-  const maxDays = Math.min(net > 0 ? Math.ceil(usable / net) + 1 : 14, 30)
+  const maxDays = 7
   const xScale = gW / Math.max(maxDays, 1)
 
   const battOnlyPts = []
@@ -1349,7 +1353,6 @@ function buildEnergyTab() {
         </div>
       </div>
 
-      ${buildDonutChart(breakdown)}
       ${buildDischargeChart(usable, net, recharge, cons)}
 
       <div class="card">
@@ -1435,6 +1438,8 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
       </tbody>
     </table>
   </div>
+
+  ${buildDonutReport(breakdown)}
 
   <div class="pr-grid">
     <div class="pr-section">
