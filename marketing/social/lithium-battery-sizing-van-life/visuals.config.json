@@ -1,0 +1,21 @@
+{
+  "slug": "lithium-battery-sizing-van-life",
+  "product": "marketing/social/lithium-battery-sizing-van-life/_src/battery-product.png",
+  "heroBase": "landing/blog/assets/lithium-sizing-hero",
+  "socialDir": "marketing/social/lithium-battery-sizing-van-life",
+  "eyebrow": {
+    "en": "Battery &middot; Van Life",
+    "fr": "Batterie &middot; Van Life",
+    "es": "Batería &middot; Van Life"
+  },
+  "tag": {
+    "en": "Battery sizing guide",
+    "fr": "Guide dimensionnement batterie",
+    "es": "Guía dimensionamiento batería"
+  },
+  "title": {
+    "en": "200Ah vs 300Ah:\nLithium Battery\nSizing for Van Life",
+    "fr": "200Ah ou 300Ah :\nDimensionner Sa\nBatterie Lithium",
+    "es": "200Ah vs 300Ah:\nDimensionar Tu\nBatería de Litio"
+  }
+}
