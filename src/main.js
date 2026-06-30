@@ -1094,6 +1094,59 @@ function buildDonutReport(breakdown) {
   </div>`
 }
 
+function buildDonutChart(breakdown) {
+  if (!breakdown.length) return `<div class="card">
+    <div class="ct te"><i class="ti ti-chart-pie"></i>${t('chart.donut.title')}</div>
+    <div style="font-size:12px;color:var(--t3);padding:12px 0;text-align:center">${t('chart.donut.noAppliance')}</div>
+  </div>`
+
+  const byCat = {}
+  breakdown.forEach(a => {
+    const cat = a.cat || 'Système'
+    byCat[cat] = (byCat[cat] || 0) + a.wh
+  })
+  const total = Object.values(byCat).reduce((s, v) => s + v, 0)
+  if (total <= 0) return ''
+  const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1])
+
+  const cx = 60, cy = 60, r = 50, ir = 30
+  let angle = -Math.PI / 2
+  const paths = []
+  entries.forEach(([cat, wh]) => {
+    const frac = wh / total
+    const sweep = frac * Math.PI * 2
+    const x1o = cx + r * Math.cos(angle), y1o = cy + r * Math.sin(angle)
+    const x1i = cx + ir * Math.cos(angle), y1i = cy + ir * Math.sin(angle)
+    const endAngle = angle + sweep
+    const x2o = cx + r * Math.cos(endAngle), y2o = cy + r * Math.sin(endAngle)
+    const x2i = cx + ir * Math.cos(endAngle), y2i = cy + ir * Math.sin(endAngle)
+    const large = sweep > Math.PI ? 1 : 0
+    const color = CAT_COLORS[cat] || '#5a7068'
+    paths.push(`<path d="M${x1o},${y1o} A${r},${r} 0 ${large} 1 ${x2o},${y2o} L${x2i},${y2i} A${ir},${ir} 0 ${large} 0 ${x1i},${y1i} Z" fill="${color}" opacity="0.85"/>`)
+    angle = endAngle
+  })
+
+  const legend = entries.map(([cat, wh]) => {
+    const color = CAT_COLORS[cat] || '#5a7068'
+    const pct = Math.round(wh / total * 100)
+    return `<div class="donut-legend-item">
+      <div class="donut-legend-dot" style="background:${color}"></div>
+      ${tcat(cat)} <span class="donut-legend-val">${toAh(wh)} Ah (${pct}%)</span>
+    </div>`
+  }).join('')
+
+  return `<div class="card">
+    <div class="ct te"><i class="ti ti-chart-pie"></i>${t('chart.donut.title')}</div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center">
+      <svg viewBox="0 0 120 120" width="120" height="120" aria-label="${t('chart.donut.title')}">${paths.join('')}
+        <text x="${cx}" y="${cy - 2}" text-anchor="middle" fill="var(--t1)" font-family="var(--mono)" font-size="13" font-weight="700">${toAh(total)}</text>
+        <text x="${cx}" y="${cy + 9}" text-anchor="middle" fill="var(--t3)" font-size="7">${t('unit.ahday')}</text>
+      </svg>
+      <div class="donut-legend">${legend}</div>
+    </div>
+  </div>`
+}
+
 function buildDischargeChart(usable, net, recharge, cons) {
   const W = 280, H = 140, pad = { t: 10, r: 10, b: 24, l: 32 }
   const gW = W - pad.l - pad.r, gH = H - pad.t - pad.b
@@ -1354,6 +1407,8 @@ function buildEnergyTab() {
       </div>
 
       ${buildDischargeChart(usable, net, recharge, cons)}
+
+      ${buildDonutChart(breakdown)}
 
       <div class="card">
         <div class="ct"><i class="ti ti-list"></i>${t('detail.title')}</div>
