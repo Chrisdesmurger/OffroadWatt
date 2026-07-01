@@ -16,6 +16,6 @@ Keep topics distinct from everything already shipped.
 - [x] How much does a campervan electrical system cost? (budget breakdown) *(EN/FR/ES — 2026-06-20)*
 - [x] Campervan fridge power consumption: compressor vs absorption *(EN/FR/ES — 2026-06-22)*
 - [x] How to keep your leisure battery charged in winter *(EN/FR/ES — 2026-06-23)*
-- [ ] Lithium battery sizing for full-time van life (200Ah vs 300Ah)
+- [x] Lithium battery sizing for full-time van life (200Ah vs 300Ah) *(EN/FR/ES — 2026-07-01)*
 - [ ] Do I need a battery monitor (shunt) in my campervan?
 - [ ] How many amp-hours do I really use per day? (with appliance table)
