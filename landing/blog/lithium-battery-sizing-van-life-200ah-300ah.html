@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>200Ah vs 300Ah Lithium Battery for Van Life (Sizing Guide)</title>
+<meta name="description" content="200Ah vs 300Ah LiFePO4 for full-time van life: daily consumption tables, autonomy scenarios, cost comparison and a sizing formula to pick the right capacity.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="OffroadWatt">
+<meta name="keywords" content="200Ah vs 300Ah lithium battery, lithium battery sizing van life, LiFePO4 battery campervan, best battery size full-time van life, 200Ah LiFePO4 campervan, 300Ah LiFePO4 van life, lithium battery capacity calculator, how many Ah do I need van life">
+<link rel="canonical" href="https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah">
+
+<link rel="alternate" hreflang="en" href="https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah">
+<link rel="alternate" hreflang="fr" href="https://offroadwatt.com/blog/fr/dimensionnement-batterie-lithium-van-life-200ah-300ah">
+<link rel="alternate" hreflang="es" href="https://offroadwatt.com/blog/es/dimensionamiento-bateria-litio-vida-furgoneta-200ah-300ah">
+<link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="200Ah vs 300Ah Lithium Battery for Van Life (Sizing Guide)">
+<meta property="og:description" content="How to choose between 200Ah and 300Ah LiFePO4 for full-time van life. Daily consumption tables, autonomy scenarios and cost-per-day analysis.">
+<meta property="og:url" content="https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah">
+<meta property="og:image" content="https://offroadwatt.com/blog/assets/lithium-sizing-hero.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-07-01">
+<meta property="article:modified_time" content="2026-07-01">
+<meta property="article:section" content="Guides">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="200Ah vs 300Ah Lithium Battery for Van Life (Sizing Guide)">
+<meta name="twitter:description" content="Daily Ah consumption tables, real-world autonomy scenarios and a sizing formula to pick the right LiFePO4 capacity for full-time van life.">
+<meta name="twitter:image" content="https://offroadwatt.com/blog/assets/lithium-sizing-hero.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "200Ah vs 300Ah Lithium Battery for Van Life (Sizing Guide)",
+  "description": "Comprehensive guide to choosing between 200Ah and 300Ah LiFePO4 batteries for full-time van life. Covers daily Ah consumption by appliance, real-world autonomy scenarios, cost analysis and a step-by-step sizing formula.",
+  "image": "https://offroadwatt.com/blog/assets/lithium-sizing-hero.png",
+  "author": { "@type": "Organization", "name": "OffroadWatt", "url": "https://offroadwatt.com" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "logo": { "@type": "ImageObject", "url": "https://offroadwatt.com/og-image.png" }
+  },
+  "datePublished": "2026-07-01",
+  "dateModified": "2026-07-01",
+  "inLanguage": "en",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://offroadwatt.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://offroadwatt.com/blog" },
+    { "@type": "ListItem", "position": 3, "name": "200Ah vs 300Ah lithium battery", "item": "https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is 200Ah enough for full-time van life?", "acceptedAnswer": { "@type": "Answer", "text": "200Ah of LiFePO4 (160 usable Ah at 80% DoD) is enough for a moderate full-time setup: compressor fridge, LED lighting, phone and laptop charging, water pump and a vent fan. That is roughly 70-90 Ah per day. With 200-300W of solar and occasional driving, 200Ah covers most needs. It becomes tight if you add high-draw appliances like a diesel heater on high, an electric kettle via an inverter or an air conditioner." } },
+    { "@type": "Question", "name": "How many Ah do I actually use per day in a campervan?", "acceptedAnswer": { "@type": "Answer", "text": "A typical full-time van lifer uses 60-120 Ah per day at 12V. Weekend warriors with minimal electronics use 30-50 Ah. Heavy users with diesel heaters, inverters and multiple devices can reach 120-160 Ah. The biggest consumers are compressor fridges (25-40 Ah per day), diesel heaters (15-55 Ah depending on mode) and laptops via an inverter (15-25 Ah per session)." } },
+    { "@type": "Question", "name": "What is the real usable capacity of a 200Ah LiFePO4 battery?", "acceptedAnswer": { "@type": "Answer", "text": "At the recommended 80% depth of discharge, a 200Ah LiFePO4 battery provides 160 usable Ah. Some manufacturers rate their batteries at 100% DoD, giving 200 usable Ah, but regularly discharging to 100% shortens cycle life. For long-term daily use, plan on 160 Ah of usable capacity from a 200Ah battery." } },
+    { "@type": "Question", "name": "Is it better to buy one 300Ah battery or two 200Ah batteries in parallel?", "acceptedAnswer": { "@type": "Answer", "text": "Two 200Ah batteries in parallel give you 400Ah total (320 usable), which is more capacity than a single 300Ah. The cost is usually 20-40% higher than a single 300Ah, but you get redundancy: if one battery fails, you still have 200Ah. A single 300Ah battery is simpler to install, takes less space and has fewer connection points. Choose parallel if you need the extra capacity or want redundancy; choose a single unit if space and simplicity matter more." } },
+    { "@type": "Question", "name": "How long will a 300Ah lithium battery last in a van?", "acceptedAnswer": { "@type": "Answer", "text": "In terms of daily autonomy, a 300Ah LiFePO4 battery at 80% DoD gives 240 usable Ah. At a typical full-time consumption of 80-100 Ah per day, that is 2.4-3 days without any recharging. With 300W of solar in a sunny region, you can extend that to 4-6 days. In terms of lifespan, quality LiFePO4 batteries last 3000-5000 cycles at 80% DoD, which means 8-14 years of daily cycling." } },
+    { "@type": "Question", "name": "Do I need a bigger battery or more solar panels?", "acceptedAnswer": { "@type": "Answer", "text": "If you frequently run out of power by evening but your battery is full by midday, you need more battery capacity to store the surplus solar energy. If your battery never fully charges even on sunny days, you need more solar. For most full-time van lifers, a balanced approach works best: enough solar to recharge your battery in 4-5 hours of peak sun, and enough battery to cover 1.5-2 days of consumption without sun." } }
+  ]
+}
+</script>
+<script src="/analytics.js" defer></script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Features</a>
+    <div class="lang-sel">
+      <a href="/blog/lithium-battery-sizing-van-life-200ah-300ah" class="lang-btn on">EN</a>
+      <a href="/blog/fr/dimensionnement-batterie-lithium-van-life-200ah-300ah" class="lang-btn">FR</a>
+      <a href="/blog/es/dimensionamiento-bateria-litio-vida-furgoneta-200ah-300ah" class="lang-btn">ES</a>
+    </div>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Try free</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>200Ah vs 300Ah lithium battery</span>
+  </nav>
+
+  <article>
+    <span class="eyebrow"><i class="ti ti-battery-charging"></i> Battery guide</span>
+    <h1>Lithium Battery Sizing for Full-Time Van Life: 200Ah vs 300Ah</h1>
+    <div class="article-meta">
+      <span>By OffroadWatt</span><span class="dot"></span>
+      <time datetime="2026-07-01">July 1, 2026</time><span class="dot"></span>
+      <span>13 min read</span>
+    </div>
+
+    <p class="lede">The single most common question from people building out a van for full-time living is: <strong>how big should my lithium battery be?</strong> The two most popular capacities &mdash; 200Ah and 300Ah LiFePO4 &mdash; sit at a sweet spot between price, weight and real-world usability. But choosing between them is not as simple as &ldquo;bigger is better.&rdquo; Your actual daily consumption, solar setup, driving habits and budget all feed into the decision. This guide walks through the numbers so you can size your battery with confidence rather than guesswork.</p>
+
+    <div class="toc">
+      <div class="toc-title">In this guide</div>
+      <ol>
+        <li><a href="#why-sizing-matters">Why battery sizing matters</a></li>
+        <li><a href="#usable-capacity">Understanding usable capacity</a></li>
+        <li><a href="#daily-consumption">How to calculate your daily Ah consumption</a></li>
+        <li><a href="#consumption-table">Appliance-by-appliance consumption table</a></li>
+        <li><a href="#200ah-profile">The 200Ah profile: who it suits</a></li>
+        <li><a href="#300ah-profile">The 300Ah profile: who it suits</a></li>
+        <li><a href="#comparison">200Ah vs 300Ah: side-by-side comparison</a></li>
+        <li><a href="#autonomy-scenarios">Real-world autonomy scenarios</a></li>
+        <li><a href="#cost-analysis">Cost analysis: price per usable Ah</a></li>
+        <li><a href="#when-bigger">When to go bigger (400Ah+)</a></li>
+        <li><a href="#sizing-formula">The sizing formula</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </div>
+
+    <h2 id="why-sizing-matters">1. Why battery sizing matters</h2>
+    <p>Oversizing wastes money and adds weight your van does not need. Undersizing means running out of power on cloudy days, cutting usage short, or relying on hookups that defeat the purpose of going off-grid. The goal is to match your battery to your <strong>actual consumption pattern</strong> with enough margin for bad-weather days &mdash; but not so much margin that you are hauling around capacity you never touch.</p>
+    <p>For full-time van lifers, the stakes are higher than for weekend warriors. Your electrical system is not a convenience &mdash; it is infrastructure. A fridge that shuts off overnight because the battery ran low means spoiled food. A diesel heater that cuts out at 3 a.m. in January means a cold, miserable night. Getting the sizing right is one of the highest-impact decisions in a van build.</p>
+
+    <h2 id="usable-capacity">2. Understanding usable capacity</h2>
+    <p>The number on the label is not the number you can use. Every battery chemistry has a recommended <strong>depth of discharge (DoD)</strong> that balances daily usability against long-term cycle life:</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Chemistry</th><th>Recommended DoD</th><th>Usable Ah from 200Ah</th><th>Usable Ah from 300Ah</th></tr></thead>
+        <tbody>
+          <tr><td>LiFePO4</td><td>80%</td><td><strong>160 Ah</strong></td><td><strong>240 Ah</strong></td></tr>
+          <tr><td>LiFePO4 (aggressive)</td><td>90&ndash;100%</td><td>180&ndash;200 Ah</td><td>270&ndash;300 Ah</td></tr>
+          <tr><td>AGM (for reference)</td><td>50%</td><td>100 Ah</td><td>150 Ah</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Throughout this article, we use <strong>80% DoD</strong> for LiFePO4 calculations. This is the industry-standard recommendation that most manufacturers use for their cycle-life ratings (typically 3,000&ndash;5,000 cycles). If you regularly discharge to 100%, expect shorter battery life &mdash; closer to 2,000 cycles on many models.</p>
+    <p>At 80% DoD:</p>
+    <ul>
+      <li><strong>200Ah LiFePO4</strong> = 160 usable Ah = 1,920 Wh</li>
+      <li><strong>300Ah LiFePO4</strong> = 240 usable Ah = 2,880 Wh</li>
+    </ul>
+    <p>That 80 Ah difference &mdash; roughly 960 Wh &mdash; is the real gap you are deciding on. Not 100 Ah, but 80.</p>
+
+    <h2 id="daily-consumption">3. How to calculate your daily Ah consumption</h2>
+    <p>The formula is straightforward:</p>
+    <p><strong>Ah/day = (watts &times; hours/day) &divide; battery voltage</strong></p>
+    <p>For a 12V system, a 60W laptop running for 3 hours consumes 60 &times; 3 &divide; 12 = <strong>15 Ah</strong>. If you run the laptop through an inverter, add 10&ndash;15% for conversion losses: 15 &times; 1.12 &asymp; <strong>16.8 Ah</strong>.</p>
+    <p>Do this for every appliance you run daily, then add them up. The result is your <strong>daily Ah budget</strong> &mdash; the number your battery must cover each day.</p>
+
+    <h2 id="consumption-table">4. Appliance-by-appliance consumption table</h2>
+    <p>These are real-world averages measured from popular campervan appliances. Your numbers may vary by model, but this gives you a reliable planning baseline.</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Appliance</th><th>Watts</th><th>Typical hours/day</th><th>Ah/day (12V)</th></tr></thead>
+        <tbody>
+          <tr><td>Compressor fridge (40L)</td><td>35&ndash;45</td><td>8&ndash;12 (duty cycle)</td><td>25&ndash;40</td></tr>
+          <tr><td>Diesel heater (low mode)</td><td>15&ndash;30</td><td>10&ndash;14</td><td>15&ndash;35</td></tr>
+          <tr><td>Diesel heater (high mode)</td><td>60&ndash;80</td><td>6&ndash;8</td><td>30&ndash;55</td></tr>
+          <tr><td>LED lighting (all fixtures)</td><td>8&ndash;15</td><td>5&ndash;7</td><td>3&ndash;9</td></tr>
+          <tr><td>Laptop (via inverter)</td><td>60&ndash;80</td><td>2&ndash;4</td><td>12&ndash;30</td></tr>
+          <tr><td>Phone charging (&times;2)</td><td>10&ndash;20</td><td>2&ndash;3</td><td>2&ndash;5</td></tr>
+          <tr><td>Water pump</td><td>40&ndash;60</td><td>0.2&ndash;0.5</td><td>1&ndash;3</td></tr>
+          <tr><td>Vent fan (MaxxFan / Fiamma)</td><td>3&ndash;8</td><td>4&ndash;8</td><td>1&ndash;5</td></tr>
+          <tr><td>Starlink (Gen 3 / Mini)</td><td>30&ndash;50</td><td>6&ndash;10</td><td>15&ndash;42</td></tr>
+          <tr><td>TV / monitor (via inverter)</td><td>40&ndash;60</td><td>2&ndash;3</td><td>8&ndash;17</td></tr>
+          <tr><td>Hair dryer (via inverter)</td><td>1,200&ndash;1,800</td><td>0.1</td><td>10&ndash;15</td></tr>
+          <tr><td>Coffee machine (via inverter)</td><td>800&ndash;1,200</td><td>0.05&ndash;0.1</td><td>4&ndash;10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><i class="ti ti-alert-triangle"></i> <strong>Inverter losses matter.</strong> Any 230V appliance running through an inverter adds 10&ndash;15% overhead. A 1,000W coffee machine drawing for 5 minutes uses roughly 8 Ah &mdash; not 7 &mdash; because of conversion losses. Always factor this in.</div>
+
+    <h2 id="200ah-profile">5. The 200Ah profile: who it suits</h2>
+    <p>A 200Ah LiFePO4 battery (160 usable Ah) is the most popular choice in the campervan market, and for good reason. It covers the needs of the majority of van lifers without the cost and weight penalty of a larger bank.</p>
+    <p><strong>200Ah works well for:</strong></p>
+    <ul>
+      <li><strong>Couples or solo travellers</strong> with a moderate electrical setup: fridge, lighting, phone charging, water pump, vent fan. Daily draw: 60&ndash;85 Ah.</li>
+      <li><strong>Solar-supported builds</strong> with 200&ndash;300W of panels. In sunny conditions, 200W of solar can put back 50&ndash;80 Ah per day, making 200Ah more than sufficient for continuous off-grid living.</li>
+      <li><strong>Vans that drive regularly.</strong> A 30A DC-DC charger running for 2 hours of daily driving adds ~42 Ah. Combined with even modest solar, 200Ah rarely bottoms out.</li>
+      <li><strong>Budget-conscious builds.</strong> A quality 200Ah LiFePO4 costs &euro;500&ndash;900 &mdash; a significant saving over 300Ah.</li>
+    </ul>
+    <p><strong>200Ah gets tight if:</strong></p>
+    <ul>
+      <li>You run a diesel heater on high for extended periods (adds 30&ndash;55 Ah/day).</li>
+      <li>You work remotely and run a laptop + Starlink all day (adds 30&ndash;70 Ah/day).</li>
+      <li>You have multiple cloudy days with no driving &mdash; no recharge means one bad day depletes the bank.</li>
+      <li>You regularly use high-draw 230V appliances through an inverter (hair dryer, coffee machine, electric kettle).</li>
+    </ul>
+
+    <h2 id="300ah-profile">6. The 300Ah profile: who it suits</h2>
+    <p>A 300Ah LiFePO4 battery (240 usable Ah) gives you 50% more buffer. That extra 80 Ah is not about running more appliances &mdash; it is about <strong>riding out bad days</strong> without changing your habits.</p>
+    <p><strong>300Ah is the right call if:</strong></p>
+    <ul>
+      <li><strong>You work remotely from the van.</strong> Laptop + Starlink + monitor can draw 50&ndash;90 Ah/day on top of your baseline. With 300Ah, you have room for a full work day plus all your domestic loads without anxiety.</li>
+      <li><strong>You camp in cloudy or northern climates.</strong> Scandinavia, Scotland, Pacific Northwest, UK winter &mdash; where you might get 2&ndash;3 consecutive days with minimal solar yield.</li>
+      <li><strong>You use a diesel heater heavily.</strong> Winter full-timers in cold climates can easily draw 100&ndash;140 Ah/day once the heater runs on medium or high.</li>
+      <li><strong>You prefer longer stays without moving.</strong> 300Ah gives you 2&ndash;3 days of autonomy versus 1.5&ndash;2 for 200Ah, meaning fewer forced drives just to recharge.</li>
+      <li><strong>You run 230V appliances regularly.</strong> A morning coffee ritual through an inverter, occasional use of a hair dryer, charging power tools &mdash; these short bursts add up.</li>
+    </ul>
+    <p><strong>300Ah is overkill if:</strong></p>
+    <ul>
+      <li>You travel in sunny southern Europe and have 300W+ of solar. Your battery will rarely drop below 50%, meaning you are paying for capacity you never use.</li>
+      <li>You drive every day. Regular alternator charging keeps even a 200Ah battery comfortably topped up.</li>
+      <li>You have a minimal electrical setup (no inverter, no heater, basic lighting). A 200Ah or even 100Ah battery would suffice.</li>
+    </ul>
+
+    <h2 id="comparison">7. 200Ah vs 300Ah: side-by-side comparison</h2>
+    <p>This comparison uses mid-range LiFePO4 batteries from reputable European brands. Prices are approximate as of mid-2026.</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>200Ah LiFePO4</th><th>300Ah LiFePO4</th></tr></thead>
+        <tbody>
+          <tr><td>Label capacity</td><td>200 Ah / 2,560 Wh</td><td>300 Ah / 3,840 Wh</td></tr>
+          <tr><td>Usable capacity (80% DoD)</td><td><strong>160 Ah</strong> / 1,920 Wh</td><td><strong>240 Ah</strong> / 2,880 Wh</td></tr>
+          <tr><td>Weight (typical)</td><td>22&ndash;25 kg</td><td>28&ndash;35 kg</td></tr>
+          <tr><td>Dimensions (L&times;W&times;H)</td><td>~520 &times; 240 &times; 220 mm</td><td>~520 &times; 270 &times; 220 mm</td></tr>
+          <tr><td>Price range (mid-range)</td><td>&euro;500&ndash;900</td><td>&euro;750&ndash;1,300</td></tr>
+          <tr><td>Price per usable Ah</td><td>&euro;3.10&ndash;5.60</td><td>&euro;3.10&ndash;5.40</td></tr>
+          <tr><td>Cycle life (80% DoD)</td><td>3,000&ndash;5,000</td><td>3,000&ndash;5,000</td></tr>
+          <tr><td>Max continuous discharge</td><td>100&ndash;200A</td><td>150&ndash;300A</td></tr>
+          <tr><td>BMS</td><td>Integrated</td><td>Integrated</td></tr>
+          <tr><td>Autonomy at 80 Ah/day</td><td><strong>2.0 days</strong></td><td><strong>3.0 days</strong></td></tr>
+          <tr><td>Autonomy at 120 Ah/day</td><td><strong>1.3 days</strong></td><td><strong>2.0 days</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Key takeaway:</strong> the price per usable Ah is roughly the same for both capacities. The decision is not about value for money &mdash; it is about how many days of buffer you need between recharges.</p>
+
+    <h2 id="autonomy-scenarios">8. Real-world autonomy scenarios</h2>
+    <p>Three full-time van life profiles, each with different consumption patterns. All numbers assume 80% DoD on LiFePO4 and a 12V system.</p>
+
+    <h3>Scenario A: Minimalist couple (southern Europe, summer)</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Appliance</th><th>Ah/day</th></tr></thead>
+        <tbody>
+          <tr><td>Compressor fridge</td><td>30</td></tr>
+          <tr><td>LED lighting</td><td>5</td></tr>
+          <tr><td>Phone charging (&times;2)</td><td>4</td></tr>
+          <tr><td>Water pump</td><td>2</td></tr>
+          <tr><td>Vent fan</td><td>3</td></tr>
+          <tr><td><strong>Total</strong></td><td><strong>44 Ah</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>200Ah: 160 &divide; 44 = <strong>3.6 days</strong> without recharge</li>
+      <li>300Ah: 240 &divide; 44 = <strong>5.5 days</strong> without recharge</li>
+      <li>With 200W solar (southern Europe, ~5 peak sun hours): 200 &times; 5 &times; 0.85 &divide; 12 = 71 Ah/day. <strong>Both batteries stay full indefinitely.</strong></li>
+    </ul>
+    <div class="callout"><i class="ti ti-sun"></i> <strong>Verdict:</strong> 200Ah is more than enough. Even 100Ah would work in this scenario with decent solar.</div>
+
+    <h3>Scenario B: Remote worker couple (central Europe, spring/autumn)</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Appliance</th><th>Ah/day</th></tr></thead>
+        <tbody>
+          <tr><td>Compressor fridge</td><td>35</td></tr>
+          <tr><td>Diesel heater (low)</td><td>20</td></tr>
+          <tr><td>LED lighting</td><td>7</td></tr>
+          <tr><td>Laptop (via inverter)</td><td>22</td></tr>
+          <tr><td>Starlink Mini</td><td>25</td></tr>
+          <tr><td>Phone charging (&times;2)</td><td>4</td></tr>
+          <tr><td>Water pump</td><td>2</td></tr>
+          <tr><td>Vent fan</td><td>2</td></tr>
+          <tr><td><strong>Total</strong></td><td><strong>117 Ah</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>200Ah: 160 &divide; 117 = <strong>1.4 days</strong> without recharge</li>
+      <li>300Ah: 240 &divide; 117 = <strong>2.1 days</strong> without recharge</li>
+      <li>With 300W solar (~3 peak sun hours): 300 &times; 3 &times; 0.85 &divide; 12 = 64 Ah/day. Net deficit: 53 Ah/day.</li>
+      <li>200Ah autonomy with solar: <strong>3.0 days</strong>. 300Ah autonomy with solar: <strong>4.5 days</strong>.</li>
+    </ul>
+    <div class="callout"><i class="ti ti-cloud"></i> <strong>Verdict:</strong> 200Ah works if you drive regularly or have hookup access as backup. 300Ah gives meaningful extra breathing room for cloudy stretches.</div>
+
+    <h3>Scenario C: Winter full-timer (Scandinavia / Alps)</h3>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Appliance</th><th>Ah/day</th></tr></thead>
+        <tbody>
+          <tr><td>Compressor fridge</td><td>28</td></tr>
+          <tr><td>Diesel heater (medium&ndash;high)</td><td>45</td></tr>
+          <tr><td>LED lighting</td><td>8</td></tr>
+          <tr><td>Laptop (via inverter)</td><td>22</td></tr>
+          <tr><td>Starlink Mini</td><td>30</td></tr>
+          <tr><td>Phone charging (&times;2)</td><td>4</td></tr>
+          <tr><td>Water pump</td><td>2</td></tr>
+          <tr><td>Vent fan</td><td>1</td></tr>
+          <tr><td><strong>Total</strong></td><td><strong>140 Ah</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>200Ah: 160 &divide; 140 = <strong>1.1 days</strong> &mdash; essentially no buffer at all.</li>
+      <li>300Ah: 240 &divide; 140 = <strong>1.7 days</strong> without recharge.</li>
+      <li>With 300W solar (winter, ~1.5 peak sun hours): 300 &times; 1.5 &times; 0.85 &divide; 12 = 32 Ah/day. Net deficit: 108 Ah/day.</li>
+      <li>200Ah autonomy with solar: <strong>1.5 days</strong>. 300Ah autonomy with solar: <strong>2.2 days</strong>.</li>
+      <li>Add DC-DC alternator (30A, 2h driving): +42 Ah. Net deficit: 66 Ah. 300Ah autonomy: <strong>3.6 days</strong>.</li>
+    </ul>
+    <div class="callout"><i class="ti ti-snowflake"></i> <strong>Verdict:</strong> 200Ah is undersized for this profile. 300Ah is the minimum &mdash; and even then, you need regular driving or hookups. Consider 400Ah if you stay parked for extended periods in winter.</div>
+
+    <h2 id="cost-analysis">9. Cost analysis: price per usable Ah</h2>
+    <p>Battery prices have dropped significantly since 2023. Here is where popular brands land as of mid-2026 for 12V LiFePO4 models with integrated BMS and Bluetooth:</p>
+    <div class="t-wrap">
+      <table>
+        <thead><tr><th>Brand</th><th>200Ah price</th><th>300Ah price</th><th>Cost/usable Ah (200)</th><th>Cost/usable Ah (300)</th></tr></thead>
+        <tbody>
+          <tr><td>LiTime</td><td>&euro;480</td><td>&euro;700</td><td>&euro;3.00</td><td>&euro;2.92</td></tr>
+          <tr><td>Renogy</td><td>&euro;550</td><td>&euro;800</td><td>&euro;3.44</td><td>&euro;3.33</td></tr>
+          <tr><td>Ective (LC series)</td><td>&euro;600</td><td>&euro;850</td><td>&euro;3.75</td><td>&euro;3.54</td></tr>
+          <tr><td>Victron (Smart)</td><td>&euro;900</td><td>&euro;1,300</td><td>&euro;5.63</td><td>&euro;5.42</td></tr>
+          <tr><td>Büttner</td><td>&euro;850</td><td>&euro;1,250</td><td>&euro;5.31</td><td>&euro;5.21</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Two patterns emerge:</p>
+    <ul>
+      <li><strong>The cost per usable Ah is slightly lower on 300Ah models.</strong> Manufacturers spread the fixed cost of the BMS and casing across more cells. The saving is small &mdash; 2&ndash;7% &mdash; but it means you are not paying a premium for going bigger.</li>
+      <li><strong>The absolute price difference is &euro;200&ndash;400.</strong> That is the real question: is the extra buffer worth &euro;200&ndash;400 to you?</li>
+    </ul>
+    <p>For context, a single night on a campsite with hookup costs &euro;15&ndash;30 across Europe. If 300Ah saves you even 10&ndash;15 hookup nights per year because you can stay off-grid longer, it pays for itself in 1&ndash;2 years.</p>
+
+    <h2 id="when-bigger">10. When to go bigger (400Ah+)</h2>
+    <p>If 300Ah still looks tight for your consumption, you have two paths:</p>
+    <ul>
+      <li><strong>Single 400Ah battery.</strong> Brands like LiTime and Ampere Time offer 400Ah 12V LiFePO4 batteries at &euro;900&ndash;1,200. Gives 320 usable Ah at 80% DoD. The trade-off is weight (35&ndash;45 kg) and size.</li>
+      <li><strong>Two batteries in parallel.</strong> Two 200Ah batteries give you 400Ah total (320 usable) with the added benefit of redundancy. If one fails, you still have 200Ah. Cost is typically &euro;1,000&ndash;1,800 for the pair &mdash; more expensive than a single 400Ah, but with a safety net.</li>
+    </ul>
+    <p>Parallel setups work best when both batteries are the same brand, model and age. Mismatched batteries can lead to uneven charging and shortened lifespan. Use identical cable lengths and gauge to each battery to ensure balanced current flow.</p>
+    <p>Going above 400Ah in a 12V system is unusual. At that point, consider whether a <strong>24V system</strong> makes more sense &mdash; it halves the current for the same power, allowing thinner cables and smaller fuses. Several 24V 200Ah LiFePO4 batteries are now available from brands like Ective and Victron.</p>
+
+    <h2 id="sizing-formula">11. The sizing formula</h2>
+    <p>Here is a step-by-step formula to calculate your ideal battery capacity:</p>
+    <ol>
+      <li><strong>List every appliance</strong> with its wattage and daily hours of use.</li>
+      <li><strong>Calculate daily Ah</strong> for each: (watts &times; hours) &divide; 12. Add 12% for inverter loads.</li>
+      <li><strong>Sum the total</strong> &mdash; this is your daily Ah budget.</li>
+      <li><strong>Decide your buffer.</strong> How many days of autonomy do you want without any recharge? For full-time van life, 1.5&ndash;2 days is a practical minimum.</li>
+      <li><strong>Divide by DoD.</strong> Use 0.8 for LiFePO4.</li>
+    </ol>
+    <p><strong>Formula: Battery Ah = (daily Ah &times; days of autonomy) &divide; DoD</strong></p>
+    <p>Example: 90 Ah/day &times; 2 days &divide; 0.8 = <strong>225 Ah</strong>. A 200Ah battery is slightly undersized; a 300Ah gives comfortable headroom.</p>
+    <p>Example: 60 Ah/day &times; 2 days &divide; 0.8 = <strong>150 Ah</strong>. A 200Ah battery is well matched.</p>
+    <div class="callout"><i class="ti ti-calculator"></i> <strong>Skip the manual maths.</strong> Enter your appliances into the OffroadWatt calculator and it computes your daily Ah consumption, solar and alternator yield, and autonomy in days &mdash; instantly.</div>
+
+    <div class="cta-box">
+      <h3>Size your battery in 2 minutes</h3>
+      <p>Add your appliances, pick your battery and solar setup, and see your real autonomy in days. The OffroadWatt calculator does the Ah maths for you &mdash; in real time.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> Open the free calculator</a>
+    </div>
+
+    <section class="faq">
+      <h2 id="faq">Frequently asked questions</h2>
+      <div class="faq-item"><h3>Is 200Ah enough for full-time van life?</h3><p>200Ah of LiFePO4 (160 usable Ah at 80% DoD) is enough for a moderate full-time setup: compressor fridge, LED lighting, phone and laptop charging, water pump and a vent fan. That is roughly 70&ndash;90 Ah per day. With 200&ndash;300W of solar and occasional driving, 200Ah covers most needs. It becomes tight if you add high-draw appliances like a diesel heater on high, an electric kettle via an inverter or Starlink running all day.</p></div>
+      <div class="faq-item"><h3>How many Ah do I actually use per day in a campervan?</h3><p>A typical full-time van lifer uses 60&ndash;120 Ah per day at 12V. Weekend warriors with minimal electronics use 30&ndash;50 Ah. Heavy users with diesel heaters, inverters and multiple devices can reach 120&ndash;160 Ah. The biggest consumers are compressor fridges (25&ndash;40 Ah/day), diesel heaters (15&ndash;55 Ah depending on mode) and laptops via an inverter (15&ndash;25 Ah per session).</p></div>
+      <div class="faq-item"><h3>What is the real usable capacity of a 200Ah LiFePO4 battery?</h3><p>At the recommended 80% depth of discharge, a 200Ah LiFePO4 battery provides 160 usable Ah. Some manufacturers rate their batteries at 100% DoD, giving 200 usable Ah, but regularly discharging to 100% shortens cycle life. For long-term daily use, plan on 160 Ah of usable capacity from a 200Ah battery.</p></div>
+      <div class="faq-item"><h3>Is it better to buy one 300Ah battery or two 200Ah in parallel?</h3><p>Two 200Ah batteries in parallel give you 400Ah total (320 usable), which is more capacity than a single 300Ah. The cost is usually 20&ndash;40% higher, but you get redundancy: if one battery fails, you still have 200Ah. A single 300Ah is simpler to install, takes less space and has fewer connection points. Choose parallel if you need the extra capacity or want redundancy; choose a single unit if space and simplicity matter more.</p></div>
+      <div class="faq-item"><h3>How long will a 300Ah lithium battery last in a van?</h3><p>In terms of daily autonomy, a 300Ah LiFePO4 at 80% DoD gives 240 usable Ah. At a typical full-time consumption of 80&ndash;100 Ah/day, that is 2.4&ndash;3 days without any recharging. With 300W of solar in a sunny region, you can extend that to 4&ndash;6 days. In terms of lifespan, quality LiFePO4 batteries last 3,000&ndash;5,000 cycles at 80% DoD, which means 8&ndash;14 years of daily cycling.</p></div>
+      <div class="faq-item"><h3>Do I need a bigger battery or more solar panels?</h3><p>If you frequently run out of power by evening but your battery is full by midday, you need more battery capacity to store the surplus solar energy. If your battery never fully charges even on sunny days, you need more solar. For most full-time van lifers, a balanced approach works best: enough solar to recharge your battery in 4&ndash;5 hours of peak sun, and enough battery to cover 1.5&ndash;2 days of consumption without sun.</p></div>
+    </section>
+
+    <div class="share">
+      <span>Share</span>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="https://twitter.com/intent/tweet?url=https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah&text=200Ah%20vs%20300Ah%20lithium%20battery%20for%20van%20life%20%E2%80%94%20sizing%20guide" target="_blank" rel="noopener" aria-label="Share on X"><i class="ti ti-brand-x"></i></a>
+      <a href="https://api.whatsapp.com/send?text=200Ah%20vs%20300Ah%20lithium%20battery%20for%20van%20life%20https://offroadwatt.com/blog/lithium-battery-sizing-van-life-200ah-300ah" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+    </div>
+  </article>
+</div>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Home</a> &middot; <a href="/blog">Blog</a> &middot; <a href="https://app.offroadwatt.com" target="_blank">Open the app</a></p>
+  <p style="margin-top:10px">&copy; 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.</p>
+</footer>
+
+</body>
+</html>
