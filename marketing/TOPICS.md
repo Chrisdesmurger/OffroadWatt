@@ -8,6 +8,8 @@ Keep topics distinct from everything already shipped.
 - [x] How to calculate your campervan battery autonomy *(EN/FR/ES — 2026-06-08)*
 - [x] How many solar panels do you need for a campervan? *(EN/FR/ES — 2026-06-08)*
 
+- [x] Evotrex PG5: the first power-generating RV trailer *(EN/FR/ES — 2026-07-02, from veille VE-2026-001)*
+
 ## Backlog (high-intent, ranked)
 - [x] AGM vs GEL vs Lithium: which leisure battery for a campervan? *(EN/FR/ES — 2026-06-10)*
 - [x] How to wire a DC-DC (B2B) alternator charger in a van *(EN/FR/ES — 2026-06-14)*
