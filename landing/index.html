@@ -170,6 +170,11 @@ section{padding:100px 24px}
 .demo-play i{font-size:60px;color:var(--amber);filter:drop-shadow(0 4px 16px rgba(0,0,0,.6));opacity:.9}
 .demo-caption{text-align:center;color:var(--t3);font-size:13px;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
 .demo-caption i{color:var(--teal)}
+/* Mobile: portrait phone recording, centered, no browser chrome */
+.demo-frame.is-mobile-demo{background:transparent;border:none;box-shadow:none;overflow:visible}
+.demo-frame.is-mobile-demo .preview-bar{display:none}
+.demo-frame.is-mobile-demo .demo-stage{display:flex;justify-content:center;background:transparent}
+.demo-frame.is-mobile-demo .demo-video{width:auto;height:auto;max-height:68vh;aspect-ratio:390/844;object-fit:cover;border-radius:26px;border:1px solid var(--border2);box-shadow:0 30px 80px rgba(0,0,0,.6)}
 
 /* ── FEATURES ────────────────────────────────────────── */
 .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -464,7 +469,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
         <div class="preview-url">app.offroadwatt.com</div>
       </div>
       <div class="demo-stage">
-        <video class="demo-video" autoplay muted loop playsinline preload="metadata"
+        <video id="demo-video" class="demo-video" autoplay muted loop playsinline preload="metadata"
                poster="/demo-poster.png" aria-label="Démonstration du calculateur OffroadWatt">
           <source src="/demo.webm" type="video/webm">
           <source src="/demo.mp4" type="video/mp4">
@@ -472,6 +477,23 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
         <div class="demo-play"><i class="ti ti-player-play-filled"></i></div>
       </div>
     </div>
+    <script>
+      /* On mobile, load the portrait (phone) recording instead of the desktop clip. */
+      (function(){
+        try{
+          if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+            var v = document.getElementById('demo-video');
+            if (v) {
+              var frame = v.closest('.demo-frame');
+              if (frame) frame.classList.add('is-mobile-demo');
+              v.setAttribute('poster', '/demo-mobile-poster.png');
+              v.innerHTML = '<source src="/demo-mobile.webm" type="video/webm"><source src="/demo-mobile.mp4" type="video/mp4">';
+              v.load();
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
     <p class="demo-caption"><i class="ti ti-clock"></i> <span data-i18n="demo.caption">Moins de 30 secondes · Aucune installation · Résultat instantané</span></p>
   </div>
 </section>
