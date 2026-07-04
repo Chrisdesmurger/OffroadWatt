@@ -400,7 +400,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
 <nav id="nav">
   <a href="#" class="logo">Offroad<em>Watt</em></a>
   <div class="nav-links">
-    <a href="#demo" class="nav-link" data-i18n="nav.demo">Démo</a>
     <a href="#features" class="nav-link" data-i18n="nav.features">Fonctionnalités</a>
     <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>    <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
     <a href="/blog" class="nav-link" data-i18n="nav.blog">Blog</a>
@@ -455,73 +454,25 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     <span data-i18n="hero.note2">Données confidentielles</span>
   </p>
 
-  <!-- Fake app preview -->
+  <!-- Live demo (real app, recorded) -->
   <div class="hero-preview reveal">
-    <div class="preview-bar">
-      <div class="preview-dot" style="background:#f87171"></div>
-      <div class="preview-dot" style="background:#fbbf24"></div>
-      <div class="preview-dot" style="background:#4ade80"></div>
-      <div class="preview-url">offroad-watt.vercel.app</div>
-    </div>
-    <div class="preview-screen">
-      <div class="fake-app">
-        <div>
-          <div class="fake-card" style="margin-bottom:10px">
-            <div class="fake-lbl"><i class="ti ti-plug"></i> <span data-i18n="preview.apps">Appareils actifs</span> · 5/9</div>
-            <div class="fake-row">
-              <div class="fake-icon">🧊</div>
-              <span class="fake-name" data-i18n="preview.fridge">Réfrigérateur</span>
-              <span class="fake-wh">5.0 Ah</span>
-              <div class="fake-tog"></div>
-            </div>
-            <div class="fake-row">
-              <div class="fake-icon">💡</div>
-              <span class="fake-name" data-i18n="preview.lights">Éclairage LED</span>
-              <span class="fake-wh">1.6 Ah</span>
-              <div class="fake-tog"></div>
-            </div>
-            <div class="fake-row">
-              <div class="fake-icon">📱</div>
-              <span class="fake-name" data-i18n="preview.chargers">Chargeurs USB</span>
-              <span class="fake-wh">0.8 Ah</span>
-              <div class="fake-tog"></div>
-            </div>
-            <div class="fake-row" style="border:none">
-              <div class="fake-icon" style="opacity:.4">🌀</div>
-              <span class="fake-name" style="opacity:.4" data-i18n="preview.fan">Ventilateur</span>
-              <span class="fake-wh" style="opacity:.4">—</span>
-              <div class="fake-tog" style="background:var(--border)"></div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="fake-card" style="margin-bottom:10px">
-            <div class="fake-lbl" style="color:var(--amber)"><i class="ti ti-battery" style="color:var(--amber)"></i> <span data-i18n="preview.balance">Bilan</span></div>
-            <div class="fake-stat">
-              <div class="fake-stat-val">4.2</div>
-              <div class="fake-stat-lbl" data-i18n="preview.days">jours d'autonomie</div>
-            </div>
-            <div style="margin-top:12px">
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
-                <span data-i18n="preview.cons">Consommation</span>
-                <span style="color:var(--t1);font-family:var(--mono)">18 Ah/j</span>
-              </div>
-              <div class="fake-bar"><div class="fake-bar-fill" style="width:45%;background:linear-gradient(90deg,var(--teal),var(--amber))"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin:8px 0 4px">
-                <span data-i18n="preview.solar">Solaire</span>
-                <span style="color:var(--teal);font-family:var(--mono)">+12 Ah/j</span>
-              </div>
-              <div class="fake-bar"><div class="fake-bar-fill" style="width:30%;background:var(--teal)"></div></div>
-            </div>
-          </div>
-          <div class="fake-card" style="background:rgba(240,160,48,.08);border-color:rgba(240,160,48,.3)">
-            <div class="fake-lbl" style="color:var(--amber)"><i class="ti ti-trophy" style="color:var(--amber)"></i> <span data-i18n="preview.rec">Recommandé</span></div>
-            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Lithium 150 Ah 12V</div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--t2)">~520 €</div>
-          </div>
-        </div>
+    <div class="demo-frame">
+      <div class="preview-bar">
+        <div class="preview-dot" style="background:#f87171"></div>
+        <div class="preview-dot" style="background:#fbbf24"></div>
+        <div class="preview-dot" style="background:#4ade80"></div>
+        <div class="preview-url">app.offroadwatt.com</div>
+      </div>
+      <div class="demo-stage">
+        <video class="demo-video" autoplay muted loop playsinline preload="metadata"
+               poster="/demo-poster.png" aria-label="Démonstration du calculateur OffroadWatt">
+          <source src="/demo.webm" type="video/webm">
+          <source src="/demo.mp4" type="video/mp4">
+        </video>
+        <div class="demo-play"><i class="ti ti-player-play-filled"></i></div>
       </div>
     </div>
+    <p class="demo-caption"><i class="ti ti-clock"></i> <span data-i18n="demo.caption">Moins de 30 secondes · Aucune installation · Résultat instantané</span></p>
   </div>
 </section>
 
@@ -529,12 +480,12 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
 <div class="stats-strip">
   <div class="stats-inner">
     <div class="stat reveal">
-      <div class="stat-val">33+</div>
+      <div class="stat-val">478</div>
       <div class="stat-lbl" data-i18n="stats.apps">Appareils préconfigurés</div>
     </div>
     <div class="stat-sep reveal"></div>
     <div class="stat reveal reveal-d1">
-      <div class="stat-val">34</div>
+      <div class="stat-val">33</div>
       <div class="stat-lbl" data-i18n="stats.bats">Modèles de batteries</div>
     </div>
     <div class="stat-sep reveal"></div>
@@ -549,36 +500,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     </div>
   </div>
 </div>
-
-<!-- ── DEMO ───────────────────────────────────────────────── -->
-<section class="hiw-bg" id="demo">
-  <div class="section-inner">
-    <div class="centered">
-      <div class="section-badge reveal"><i class="ti ti-player-play"></i> <span data-i18n="demo.badge">Démo</span></div>
-      <h2 class="section-title reveal" data-i18n="demo.title">Voyez-le en action</h2>
-      <p class="section-sub reveal" data-i18n="demo.sub">Ajoutez vos appareils, votre batterie et vos panneaux — l'autonomie se calcule en temps réel. Une démo de 30 secondes suffit pour comprendre.</p>
-    </div>
-    <div class="demo-wrap reveal">
-      <div class="demo-frame">
-        <div class="preview-bar">
-          <div class="preview-dot" style="background:#f87171"></div>
-          <div class="preview-dot" style="background:#fbbf24"></div>
-          <div class="preview-dot" style="background:#4ade80"></div>
-          <div class="preview-url">app.offroadwatt.com</div>
-        </div>
-        <div class="demo-stage">
-          <video class="demo-video" autoplay muted loop playsinline preload="metadata"
-                 poster="/demo-poster.png" aria-label="Démonstration du calculateur OffroadWatt">
-            <source src="/demo.webm" type="video/webm">
-            <source src="/demo.mp4" type="video/mp4">
-          </video>
-          <div class="demo-play"><i class="ti ti-player-play-filled"></i></div>
-        </div>
-      </div>
-      <p class="demo-caption"><i class="ti ti-clock"></i> <span data-i18n="demo.caption">Moins de 30 secondes · Aucune installation · Résultat instantané</span></p>
-    </div>
-  </div>
-</section>
 
 <!-- ── FEATURES ──────────────────────────────────────────── -->
 <section id="features">
