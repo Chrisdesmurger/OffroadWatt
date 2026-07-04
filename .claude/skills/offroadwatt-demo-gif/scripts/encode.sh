@@ -16,9 +16,9 @@ IN="$SEQ/f%05d.png"
 LAST="$SEQ/$(ls "$SEQ" | tail -1)"
 
 if [ "$MODE" = "mobile" ]; then
-  HOLD="${HOLD:-20}"; GIF_W=430; GIF_FPS=12; FRATE=22
+  HOLD="${HOLD:-20}"; GIF_W=430; GIF_FPS=12; FRATE=18
 else
-  HOLD="${HOLD:-6}";  GIF_W=760; GIF_FPS=14; FRATE=28
+  HOLD="${HOLD:-6}";  GIF_W=760; GIF_FPS=14; FRATE=23
 fi
 
 # ── Landing videos (desktop) ────────────────────────────────────────────────
