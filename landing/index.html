@@ -161,6 +161,21 @@ section{padding:100px 24px}
 .centered{text-align:center}
 .centered .section-sub{margin-left:auto;margin-right:auto}
 
+/* ── DEMO ────────────────────────────────────────────── */
+.demo-wrap{max-width:920px;margin:0 auto}
+.demo-frame{border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;background:var(--bg2);box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.demo-stage{position:relative;background:var(--bg)}
+.demo-video{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--bg)}
+.demo-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.demo-play i{font-size:60px;color:var(--amber);filter:drop-shadow(0 4px 16px rgba(0,0,0,.6));opacity:.9}
+.demo-caption{text-align:center;color:var(--t3);font-size:13px;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.demo-caption i{color:var(--teal)}
+/* Mobile: portrait phone recording, centered, no browser chrome */
+.demo-frame.is-mobile-demo{background:transparent;border:none;box-shadow:none;overflow:visible}
+.demo-frame.is-mobile-demo .preview-bar{display:none}
+.demo-frame.is-mobile-demo .demo-stage{display:flex;justify-content:center;background:transparent}
+.demo-frame.is-mobile-demo .demo-video{width:auto;height:auto;max-height:68vh;aspect-ratio:390/844;object-fit:cover;border-radius:26px;border:1px solid var(--border2);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+
 /* ── FEATURES ────────────────────────────────────────── */
 .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:900px){.features-grid{grid-template-columns:1fr 1fr}}
@@ -444,73 +459,26 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     <span data-i18n="hero.note2">Données confidentielles</span>
   </p>
 
-  <!-- Fake app preview -->
+  <!-- Live demo (real app, recorded) -->
   <div class="hero-preview reveal">
-    <div class="preview-bar">
-      <div class="preview-dot" style="background:#f87171"></div>
-      <div class="preview-dot" style="background:#fbbf24"></div>
-      <div class="preview-dot" style="background:#4ade80"></div>
-      <div class="preview-url">offroad-watt.vercel.app</div>
-    </div>
-    <div class="preview-screen">
-      <div class="fake-app">
-        <div>
-          <div class="fake-card" style="margin-bottom:10px">
-            <div class="fake-lbl"><i class="ti ti-plug"></i> <span data-i18n="preview.apps">Appareils actifs</span> · 5/9</div>
-            <div class="fake-row">
-              <div class="fake-icon">🧊</div>
-              <span class="fake-name" data-i18n="preview.fridge">Réfrigérateur</span>
-              <span class="fake-wh">5.0 Ah</span>
-              <div class="fake-tog"></div>
-            </div>
-            <div class="fake-row">
-              <div class="fake-icon">💡</div>
-              <span class="fake-name" data-i18n="preview.lights">Éclairage LED</span>
-              <span class="fake-wh">1.6 Ah</span>
-              <div class="fake-tog"></div>
-            </div>
-            <div class="fake-row">
-              <div class="fake-icon">📱</div>
-              <span class="fake-name" data-i18n="preview.chargers">Chargeurs USB</span>
-              <span class="fake-wh">0.8 Ah</span>
-              <div class="fake-tog"></div>
-            </div>
-            <div class="fake-row" style="border:none">
-              <div class="fake-icon" style="opacity:.4">🌀</div>
-              <span class="fake-name" style="opacity:.4" data-i18n="preview.fan">Ventilateur</span>
-              <span class="fake-wh" style="opacity:.4">—</span>
-              <div class="fake-tog" style="background:var(--border)"></div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="fake-card" style="margin-bottom:10px">
-            <div class="fake-lbl" style="color:var(--amber)"><i class="ti ti-battery" style="color:var(--amber)"></i> <span data-i18n="preview.balance">Bilan</span></div>
-            <div class="fake-stat">
-              <div class="fake-stat-val">4.2</div>
-              <div class="fake-stat-lbl" data-i18n="preview.days">jours d'autonomie</div>
-            </div>
-            <div style="margin-top:12px">
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px">
-                <span data-i18n="preview.cons">Consommation</span>
-                <span style="color:var(--t1);font-family:var(--mono)">18 Ah/j</span>
-              </div>
-              <div class="fake-bar"><div class="fake-bar-fill" style="width:45%;background:linear-gradient(90deg,var(--teal),var(--amber))"></div></div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin:8px 0 4px">
-                <span data-i18n="preview.solar">Solaire</span>
-                <span style="color:var(--teal);font-family:var(--mono)">+12 Ah/j</span>
-              </div>
-              <div class="fake-bar"><div class="fake-bar-fill" style="width:30%;background:var(--teal)"></div></div>
-            </div>
-          </div>
-          <div class="fake-card" style="background:rgba(240,160,48,.08);border-color:rgba(240,160,48,.3)">
-            <div class="fake-lbl" style="color:var(--amber)"><i class="ti ti-trophy" style="color:var(--amber)"></i> <span data-i18n="preview.rec">Recommandé</span></div>
-            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Lithium 150 Ah 12V</div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--t2)">~520 €</div>
-          </div>
-        </div>
+    <div class="demo-frame">
+      <div class="preview-bar">
+        <div class="preview-dot" style="background:#f87171"></div>
+        <div class="preview-dot" style="background:#fbbf24"></div>
+        <div class="preview-dot" style="background:#4ade80"></div>
+        <div class="preview-url">app.offroadwatt.com</div>
+      </div>
+      <div class="demo-stage">
+        <video id="demo-video" class="demo-video" autoplay muted loop playsinline preload="metadata"
+               poster="/demo-poster.png" aria-label="Démonstration du calculateur OffroadWatt">
+          <source src="/demo.webm" type="video/webm">
+          <source src="/demo.mp4" type="video/mp4">
+        </video>
+        <div class="demo-play"><i class="ti ti-player-play-filled"></i></div>
       </div>
     </div>
+    <!-- The demo clip is chosen by language + viewport in applyDemoVideo() (see script below). -->
+    <p class="demo-caption"><i class="ti ti-clock"></i> <span data-i18n="demo.caption">Moins de 30 secondes · Aucune installation · Résultat instantané</span></p>
   </div>
 </section>
 
@@ -518,12 +486,12 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
 <div class="stats-strip">
   <div class="stats-inner">
     <div class="stat reveal">
-      <div class="stat-val">33+</div>
+      <div class="stat-val">478</div>
       <div class="stat-lbl" data-i18n="stats.apps">Appareils préconfigurés</div>
     </div>
     <div class="stat-sep reveal"></div>
     <div class="stat reveal reveal-d1">
-      <div class="stat-val">34</div>
+      <div class="stat-val">33</div>
       <div class="stat-lbl" data-i18n="stats.bats">Modèles de batteries</div>
     </div>
     <div class="stat-sep reveal"></div>
@@ -833,7 +801,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY)
 // ── i18n ────────────────────────────────────────────────────
 const DICT = {
 fr:{
-'nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
+'nav.demo':'Démo','nav.features':'Fonctionnalités','nav.hiw':'Comment ça marche','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Se connecter','nav.cta':'Essayer gratuitement',
 'hero.badge':'Calculateur d\'autonomie électrique',
 'hero.t1':'Planifiez votre','hero.t2':'autonomie électrique','hero.t3':'partez l\'esprit léger.',
 'hero.sub':'Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires et trouvez la batterie idéale pour votre camping-car, caravane ou van.',
@@ -842,6 +810,7 @@ fr:{
 'preview.apps':'Appareils actifs','preview.fridge':'Réfrigérateur','preview.lights':'Éclairage LED','preview.chargers':'Chargeurs USB','preview.fan':'Ventilateur',
 'preview.balance':'Bilan','preview.days':'jours d\'autonomie','preview.cons':'Consommation','preview.solar':'Solaire','preview.rec':'Recommandé',
 'stats.apps':'Appareils préconfigurés','stats.bats':'Modèles de batteries','stats.zones':'Zones géographiques','stats.langs':'Langues disponibles',
+'demo.badge':'Démo','demo.title':'Voyez-le en action','demo.sub':'Ajoutez vos appareils, votre batterie et vos panneaux — l\'autonomie se calcule en temps réel. Une démo de 30 secondes suffit pour comprendre.','demo.caption':'Moins de 30 secondes · Aucune installation · Résultat instantané',
 'feat.badge':'Fonctionnalités','feat.title':'Tout ce dont vous avez besoin','feat.sub':'Un outil complet pour dimensionner votre installation électrique off-road avec une précision professionnelle.',
 'f1.t':'Calcul batterie intelligent','f1.d':'34 modèles AGM, GEL et Lithium (12V/24V). Le calculateur recommande la batterie optimale selon votre consommation réelle.',
 'f2.t':'Solaire & Alternateur','f2.d':'Intégrez la production solaire (41 zones mondiales, MPPT) et la recharge alternateur pour calculer l\'autonomie réelle.',
@@ -896,7 +865,7 @@ fr:{
 'blog.5':'Régulateur solaire MPPT vs PWM','blog.6':'Consommation d\'un frigo en camping-car','blog.7':'Coût d\'une installation électrique camping-car','blog.8':'Quelle puissance de convertisseur choisir ?',
 },
 en:{
-'nav.features':'Features','nav.hiw':'How it works','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Sign in','nav.cta':'Try for free',
+'nav.demo':'Demo','nav.features':'Features','nav.hiw':'How it works','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Sign in','nav.cta':'Try for free',
 'hero.badge':'Electrical autonomy calculator',
 'hero.t1':'Plan your','hero.t2':'electrical autonomy','hero.t3':'travel worry-free.',
 'hero.sub':'Calculate your consumption in real time, size your solar panels and find the ideal battery for your motorhome, caravan or van.',
@@ -905,6 +874,7 @@ en:{
 'preview.apps':'Active appliances','preview.fridge':'Refrigerator','preview.lights':'LED Lighting','preview.chargers':'USB Chargers','preview.fan':'Fan',
 'preview.balance':'Balance','preview.days':'days of autonomy','preview.cons':'Consumption','preview.solar':'Solar','preview.rec':'Recommended',
 'stats.apps':'Pre-configured appliances','stats.bats':'Battery models','stats.zones':'Geographic zones','stats.langs':'Available languages',
+'demo.badge':'Demo','demo.title':'See it in action','demo.sub':'Add your appliances, battery and solar panels — autonomy is calculated in real time. A 30-second demo is all it takes to get it.','demo.caption':'Under 30 seconds · No install · Instant result',
 'feat.badge':'Features','feat.title':'Everything you need','feat.sub':'A complete tool to size your off-road electrical installation with professional precision.',
 'f1.t':'Smart battery calculator','f1.d':'34 AGM, GEL and Lithium models (12V/24V). The calculator recommends the optimal battery for your actual consumption.',
 'f2.t':'Solar & Alternator','f2.d':'Integrate solar production (41 global zones, MPPT) and alternator charging to calculate real-world autonomy.',
@@ -959,7 +929,7 @@ en:{
 'blog.5':'MPPT vs PWM solar controller','blog.6':'Campervan fridge power consumption','blog.7':'Campervan electrical system cost','blog.8':'What size inverter for a campervan?',
 },
 es:{
-'nav.features':'Características','nav.hiw':'Cómo funciona','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
+'nav.demo':'Demo','nav.features':'Características','nav.hiw':'Cómo funciona','nav.faq':'FAQ','nav.blog':'Blog','nav.login':'Iniciar sesión','nav.cta':'Probar gratis',
 'hero.badge':'Calculadora de autonomía eléctrica',
 'hero.t1':'Planifica tu','hero.t2':'autonomía eléctrica','hero.t3':'viaja sin preocupaciones.',
 'hero.sub':'Calcula tu consumo en tiempo real, dimensiona tus paneles solares y encuentra la batería ideal para tu autocaravana, caravana o furgoneta.',
@@ -968,6 +938,7 @@ es:{
 'preview.apps':'Aparatos activos','preview.fridge':'Nevera','preview.lights':'Iluminación LED','preview.chargers':'Cargadores USB','preview.fan':'Ventilador',
 'preview.balance':'Balance','preview.days':'días de autonomía','preview.cons':'Consumo','preview.solar':'Solar','preview.rec':'Recomendado',
 'stats.apps':'Aparatos preconfigurados','stats.bats':'Modelos de baterías','stats.zones':'Zonas geográficas','stats.langs':'Idiomas disponibles',
+'demo.badge':'Demo','demo.title':'Míralo en acción','demo.sub':'Añade tus aparatos, tu batería y tus paneles — la autonomía se calcula en tiempo real. Una demo de 30 segundos basta para entenderlo.','demo.caption':'Menos de 30 segundos · Sin instalación · Resultado instantáneo',
 'feat.badge':'Características','feat.title':'Todo lo que necesitas','feat.sub':'Una herramienta completa para dimensionar tu instalación eléctrica off-road con precisión profesional.',
 'f1.t':'Cálculo inteligente de baterías','f1.d':'34 modelos AGM, GEL y Litio (12V/24V). La calculadora recomienda la batería óptima para tu consumo real.',
 'f2.t':'Solar y Alternador','f2.d':'Integra la producción solar (41 zonas globales, MPPT) y la carga por alternador para calcular la autonomía real.',
@@ -1075,14 +1046,37 @@ function buildBlog(){
   }).join('')
 }
 
+// Load the demo clip matching the current language + viewport (desktop 16:9 or
+// mobile portrait). Reloaded on every language change via applyLang().
+let _demoKey = ''
+function applyDemoVideo(){
+  const v = document.getElementById('demo-video')
+  if(!v) return
+  const mobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches
+  const base = (_lang === 'en' ? '/demo' : '/demo-' + _lang) + (mobile ? '-mobile' : '')
+  const key = base
+  if(key === _demoKey) return          // already loaded this exact clip
+  _demoKey = key
+  const frame = v.closest('.demo-frame')
+  if(frame) frame.classList.toggle('is-mobile-demo', !!mobile)
+  v.setAttribute('poster', base + '-poster.png')
+  v.innerHTML = '<source src="' + base + '.webm" type="video/webm"><source src="' + base + '.mp4" type="video/mp4">'
+  v.load()
+  const play = () => v.play().catch(() => {})
+  play()
+}
+
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n) })
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder) })
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === _lang))
   document.documentElement.lang = _lang
+  applyDemoVideo()
   buildFaq()
   buildBlog()
 }
+// Re-pick desktop/mobile clip when crossing the 768px breakpoint (rotate/resize).
+window.addEventListener('resize', () => { applyDemoVideo() }, { passive: true })
 
 document.querySelectorAll('.lang-btn').forEach(b => {
   b.addEventListener('click', () => {
@@ -1138,6 +1132,16 @@ const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target) } })
 }, { threshold: 0.08 })
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+
+// ── DEMO VIDEO — hide play overlay once the clip is actually playing ──
+;(() => {
+  const v = document.querySelector('.demo-video')
+  const overlay = document.querySelector('.demo-play')
+  if(!v || !overlay) return
+  const hide = () => { overlay.style.display = 'none' }
+  v.addEventListener('playing', hide)
+  // If autoplay is blocked or the source is missing, the poster + play icon remain visible.
+})()
 
 // ── NAV SHADOW ON SCROLL ────────────────────────────────────
 window.addEventListener('scroll', () => {
