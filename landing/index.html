@@ -5,15 +5,108 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OffroadWatt — Calculateur d'autonomie électrique</title>
 <meta name="description" content="Planifiez votre installation électrique pour camping-car, caravane ou van. Calcul instantané de l'autonomie batterie, solaire et alternateur.">
+<link rel="canonical" href="https://offroadwatt.com/">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:title" content="OffroadWatt — Votre autonomie électrique maîtrisée">
 <meta property="og:description" content="Calculateur intelligent pour camping-car, caravane et van. Gratuit, sans inscription.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://offroadwatt.com/">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:image" content="https://offroadwatt.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OffroadWatt — Votre autonomie électrique maîtrisée">
+<meta name="twitter:description" content="Calculateur intelligent pour camping-car, caravane et van. Gratuit, sans inscription.">
+<meta name="twitter:image" content="https://offroadwatt.com/og-image.png">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "OffroadWatt",
+  "url": "https://offroadwatt.com/",
+  "logo": "https://offroadwatt.com/og-image.png",
+  "sameAs": ["https://github.com/Chrisdesmurger/OffroadWatt"]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "OffroadWatt",
+  "url": "https://offroadwatt.com/",
+  "inLanguage": ["en", "fr", "es"],
+  "publisher": { "@type": "Organization", "name": "OffroadWatt" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "OffroadWatt — Calculateur d'autonomie électrique",
+  "url": "https://app.offroadwatt.com/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web browser (any)",
+  "browserRequirements": "Requires JavaScript",
+  "description": "Calculez l'autonomie électrique de votre camping-car, caravane ou van — dimensionnement batterie, solaire et alternateur en temps réel.",
+  "inLanguage": ["en", "fr", "es"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "featureList": [
+    "Dimensionnement de la banque de batteries (AGM/GEL/Lithium 12V/24V)",
+    "Production solaire par zone géographique",
+    "Recharge alternateur",
+    "Export PDF",
+    "Comparateur de configurations"
+  ],
+  "publisher": { "@type": "Organization", "name": "OffroadWatt" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Combien de panneaux solaires pour un camping-car ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Pour un camping-car standard consommant 80 à 120 Ah/jour, il faut généralement 2 à 4 panneaux de 200 Wc (soit 400 à 800 Wc total). En Europe du Sud avec 5 h/j de soleil, 400 Wc produisent ~130 Ah/jour. En Europe du Nord, comptez 30 % de plus." }
+    },
+    {
+      "@type": "Question",
+      "name": "Quelle batterie lithium choisir pour un van aménagé ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Pour un van en vie nomade, une batterie lithium LiFePO4 100 Ah 12V offre ~80 Ah utilisables (DoD 80 %) et pèse 3× moins qu'une AGM équivalente. Pour 2 personnes consommant 60-80 Ah/jour, c'est le minimum. Préférez les marques avec BMS intégré. 200 Ah offrent plus de confort avec une autonomie de 2-3 jours sans soleil." }
+    },
+    {
+      "@type": "Question",
+      "name": "Différence entre batterie AGM, GEL et lithium ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "AGM : sans entretien, supporte les décharges profondes (50 %), économique (150-300€). GEL : résiste mieux à la chaleur, décharge 50 %, idéal pour les régions chaudes. Lithium (LiFePO4) : léger, décharge 80-90 %, 2000+ cycles, prix élevé mais coût total inférieur sur 10 ans. Pour la vie nomade, le lithium est désormais le choix de référence." }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment calculer la consommation électrique de mon camping-car ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Multipliez la puissance de chaque appareil (W) par ses heures d'utilisation par jour (h) pour obtenir les Wh, divisez par la tension (12V) pour les Ah. Ex : frigo 45W × 24h / 12V = 90 Ah/j. Additionnez tous vos appareils. OffroadWatt fait ce calcul automatiquement avec 100+ équipements préconfigurés." }
+    },
+    {
+      "@type": "Question",
+      "name": "Quelle capacité de batterie pour 1 semaine en autonomie totale ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Pour 1 semaine sans branchement électrique : multipliez votre consommation journalière × 2 à 3 jours (avec apport solaire, pas 7 jours). Ex : 80 Ah/j × 3 = 240 Ah de capacité lithium. Avec 400 Wc solaires en été, vous maintenez l'équilibre indéfiniment. L'hiver ou par temps couvert, doublez la capacité batterie." }
+    },
+    {
+      "@type": "Question",
+      "name": "Peut-on recharger ses batteries avec l'alternateur du véhicule ?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Oui, c'est la recharge alternateur (ou B2B). Un alternateur délivre en général 20 à 40 A dédiés aux batteries secondaires. Sur 2h de route à 30A : 30 × 2 × 0,7 (rendement) = 42 Ah récupérés. C'est un complément utile mais insuffisant pour remplacer le solaire sur de longues périodes stationnaires." }
+    }
+  ]
+}
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{

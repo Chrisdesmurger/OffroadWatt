@@ -95,6 +95,44 @@ function audit(file) {
   return fileFail;
 }
 
+// Audit the marketing homepage (landing/index.html) — the highest-authority URL.
+function auditHome() {
+  const file = join(ROOT, 'landing', 'index.html');
+  if (!existsSync(file)) { console.log(`\n${C.bold}landing/index.html${C.reset}`); ko('homepage not found'); failures++; return; }
+  const html = readFileSync(file, 'utf8');
+  console.log(`\n${C.bold}landing/index.html (homepage)${C.reset}`);
+  const check = (cond, pass, fail) => { if (cond) ok(pass); else { ko(fail); failures++; } };
+  check(/rel=["']canonical["']/.test(html), 'canonical present', 'missing <link rel="canonical">');
+  check(/property=["']og:image["']/.test(html), 'og:image present', 'missing og:image');
+  check(/property=["']og:url["']/.test(html), 'og:url present', 'missing og:url');
+  check(/name=["']twitter:card["']/.test(html), 'twitter:card present', 'missing twitter:card');
+  check(/"@type":\s*"Organization"/.test(html), 'Organization JSON-LD present', 'missing Organization JSON-LD');
+  check(/"@type":\s*"WebSite"/.test(html), 'WebSite JSON-LD present', 'missing WebSite JSON-LD');
+  check(/"@type":\s*"(Web|Software)Application"/.test(html), 'App JSON-LD present', 'missing WebApplication/SoftwareApplication JSON-LD');
+  check(/"@type":\s*"FAQPage"/.test(html), 'FAQPage JSON-LD present', 'missing FAQPage JSON-LD');
+  const blocks = [...html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)];
+  let jsonOk = blocks.length > 0;
+  for (const b of blocks) { try { JSON.parse(b[1]); } catch { jsonOk = false; } }
+  check(jsonOk, `JSON-LD valid (${blocks.length} blocks)`, 'one or more JSON-LD blocks are invalid JSON');
+}
+
+// Audit the app shell (index.html) — a client-rendered SPA that must be indexable.
+function auditApp() {
+  const file = join(ROOT, 'index.html');
+  if (!existsSync(file)) { console.log(`\n${C.bold}index.html${C.reset}`); ko('app shell not found'); failures++; return; }
+  const html = readFileSync(file, 'utf8');
+  console.log(`\n${C.bold}index.html (app)${C.reset}`);
+  const check = (cond, pass, fail) => { if (cond) ok(pass); else { ko(fail); failures++; } };
+  const noindex = /name=["']robots["'][^>]*noindex/i.test(html);
+  check(/rel=["']canonical["']/.test(html) || noindex, 'app canonical or explicit noindex', 'app has neither canonical nor noindex directive');
+  check(/property=["']og:image["']/.test(html) || noindex, 'og:image present', 'missing og:image');
+  check(/"@type":\s*"(Web|Software)Application"/.test(html) || noindex, 'App JSON-LD present', 'missing WebApplication/SoftwareApplication JSON-LD');
+  // Crawlable fallback: a client-rendered SPA needs static text (an <h1>) inside #root
+  // so non-JS crawlers (and AI answer engines) index what the tool is.
+  const root = html.match(/<div[^>]*id=["']root["'][^>]*>([\s\S]*?)<\/div>\s*<script/i);
+  check((root && /<h1[\s>]/i.test(root[1])) || noindex, 'static crawlable <h1> in #root', 'no static <h1> inside #root (SPA content not crawlable)');
+}
+
 console.log(`${C.bold}OffroadWatt SEO audit${C.reset} ${C.dim}— ${BLOG}${C.reset}`);
 
 if (!existsSync(BLOG)) { console.error('No blog directory found.'); process.exit(1); }
@@ -106,6 +144,9 @@ const sitemapPath = join(ROOT, 'landing', 'sitemap.xml');
 const sitemap = existsSync(sitemapPath) ? readFileSync(sitemapPath, 'utf8') : '';
 
 for (const f of files) audit(f);
+
+auditHome();
+auditApp();
 
 console.log(`\n${C.bold}Sitemap${C.reset}`);
 for (const f of files) {

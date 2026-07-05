@@ -5,14 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OffroadWatt — Electrical autonomy calculator</title>
 <meta name="description" content="Calculate the electrical autonomy of your motorhome, caravan or van. Battery, solar panels, appliances — all in one.">
+<link rel="canonical" href="https://app.offroadwatt.com/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OffroadWatt — Electrical autonomy calculator">
+<meta property="og:description" content="Free calculator for motorhome, caravan & van. Size your battery, solar and alternator in real time — no sign-up.">
+<meta property="og:url" content="https://app.offroadwatt.com/">
+<meta property="og:site_name" content="OffroadWatt">
+<meta property="og:image" content="https://app.offroadwatt.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OffroadWatt — Electrical autonomy calculator">
+<meta name="twitter:description" content="Free calculator for motorhome, caravan & van. Size your battery, solar and alternator in real time.">
+<meta name="twitter:image" content="https://app.offroadwatt.com/og-image.png">
 <meta name="theme-color" content="#141817">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "OffroadWatt — Electrical Autonomy Calculator",
+  "url": "https://app.offroadwatt.com/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web browser (any)",
+  "browserRequirements": "Requires JavaScript",
+  "description": "Calculate the electrical autonomy of a motorhome, caravan or van — battery bank, solar and alternator sizing in real time.",
+  "inLanguage": ["en", "fr", "es"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "featureList": [
+    "Battery bank sizing (AGM/GEL/Lithium 12V/24V)",
+    "Solar production by region",
+    "Alternator charging",
+    "PDF export",
+    "Setup comparison"
+  ],
+  "publisher": { "@type": "Organization", "name": "OffroadWatt", "url": "https://offroadwatt.com/" }
+}
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -435,7 +473,24 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 </style>
 </head>
 <body>
-<div class="app" id="root"></div>
+<div class="app" id="root">
+  <!-- Static, crawlable fallback. Replaced by the app on mount (render() overwrites #root).
+       Present so search engines and AI answer engines that don't execute JS still index
+       what the tool is and does. -->
+  <header style="max-width:760px;margin:0 auto;padding:32px 16px">
+    <p style="font-family:var(--mono);color:var(--am);font-weight:700;font-size:20px">Offroad<span style="color:var(--t3)">Watt</span></p>
+    <h1 style="font-size:26px;margin:14px 0 10px">OffroadWatt — Electrical autonomy calculator for campervans, motorhomes &amp; vans</h1>
+    <p style="color:var(--t2);font-size:15px">Free tool to size your off-grid electrical system in real time. Add your appliances, pick a battery bank (AGM, GEL or Lithium, 12V or 24V), configure your solar panels and alternator charging, and instantly see your daily consumption in Ah, your solar and alternator production, the residual deficit and your autonomy in days.</p>
+    <ul style="color:var(--t2);font-size:14px;margin:14px 0 0 18px;line-height:1.9">
+      <li>Battery bank sizing across 34 real market models (AGM / GEL / Lithium, 12V &amp; 24V)</li>
+      <li>Solar production estimated across 41 geographic sun zones with MPPT efficiency</li>
+      <li>Alternator / DC-DC charging while driving</li>
+      <li>Setup comparison with ROI, appliance catalogue and PDF export</li>
+      <li>Available in English, Français and Español</li>
+    </ul>
+    <p style="margin-top:18px"><a href="https://offroadwatt.com/blog" style="color:var(--te)">Read the campervan electrical guides →</a></p>
+  </header>
+</div>
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
