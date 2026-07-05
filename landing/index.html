@@ -477,23 +477,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
         <div class="demo-play"><i class="ti ti-player-play-filled"></i></div>
       </div>
     </div>
-    <script>
-      /* On mobile, load the portrait (phone) recording instead of the desktop clip. */
-      (function(){
-        try{
-          if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
-            var v = document.getElementById('demo-video');
-            if (v) {
-              var frame = v.closest('.demo-frame');
-              if (frame) frame.classList.add('is-mobile-demo');
-              v.setAttribute('poster', '/demo-mobile-poster.png');
-              v.innerHTML = '<source src="/demo-mobile.webm" type="video/webm"><source src="/demo-mobile.mp4" type="video/mp4">';
-              v.load();
-            }
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <!-- The demo clip is chosen by language + viewport in applyDemoVideo() (see script below). -->
     <p class="demo-caption"><i class="ti ti-clock"></i> <span data-i18n="demo.caption">Moins de 30 secondes · Aucune installation · Résultat instantané</span></p>
   </div>
 </section>
@@ -1062,14 +1046,37 @@ function buildBlog(){
   }).join('')
 }
 
+// Load the demo clip matching the current language + viewport (desktop 16:9 or
+// mobile portrait). Reloaded on every language change via applyLang().
+let _demoKey = ''
+function applyDemoVideo(){
+  const v = document.getElementById('demo-video')
+  if(!v) return
+  const mobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches
+  const base = (_lang === 'en' ? '/demo' : '/demo-' + _lang) + (mobile ? '-mobile' : '')
+  const key = base
+  if(key === _demoKey) return          // already loaded this exact clip
+  _demoKey = key
+  const frame = v.closest('.demo-frame')
+  if(frame) frame.classList.toggle('is-mobile-demo', !!mobile)
+  v.setAttribute('poster', base + '-poster.png')
+  v.innerHTML = '<source src="' + base + '.webm" type="video/webm"><source src="' + base + '.mp4" type="video/mp4">'
+  v.load()
+  const play = () => v.play().catch(() => {})
+  play()
+}
+
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n) })
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder) })
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === _lang))
   document.documentElement.lang = _lang
+  applyDemoVideo()
   buildFaq()
   buildBlog()
 }
+// Re-pick desktop/mobile clip when crossing the 768px breakpoint (rotate/resize).
+window.addEventListener('resize', () => { applyDemoVideo() }, { passive: true })
 
 document.querySelectorAll('.lang-btn').forEach(b => {
   b.addEventListener('click', () => {

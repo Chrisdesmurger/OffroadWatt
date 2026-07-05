@@ -1,8 +1,13 @@
 // OffroadWatt demo recorder — drives the real app and captures a numbered PNG
 // sequence (frame-by-frame, deterministic pacing). Assemble with encode.sh.
 //
-//   MODE=desktop OUTDIR=.demo-tmp/seq_desktop node record.mjs
-//   MODE=mobile  OUTDIR=.demo-tmp/seq_mobile  node record.mjs
+//   MODE=desktop LANG=en OUTDIR=.demo-tmp/seq_en_desktop node record.mjs
+//   MODE=mobile  LANG=fr OUTDIR=.demo-tmp/seq_fr_mobile  node record.mjs
+//
+// MODE = desktop|mobile.  LANG = en|es|fr|de|it|pt (sets the app language via
+// localStorage 'ow_lang'). All UI actions use language-independent selectors
+// (ids/classes/indices/brand names/numbers), so the SAME scenario records
+// identically in every language.
 //
 // Requires: `npm run preview` serving the built app on http://127.0.0.1:4173/
 // and `playwright-core` installed. See ../SKILL.md for the full runbook.
@@ -11,14 +16,16 @@ import { chromium } from 'playwright-core';
 import { mkdirSync, rmSync } from 'fs';
 
 const MODE = process.env.MODE || 'desktop';
-const DIR  = process.env.OUTDIR || `.demo-tmp/seq_${MODE}`;
+const LANG = process.env.LANG_CODE || process.env.LANG || 'en';
+const DIR  = process.env.OUTDIR || `.demo-tmp/seq_${LANG}_${MODE}`;
 const URL  = process.env.APP_URL || 'http://127.0.0.1:4173/';
 const EXE  = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 rmSync(DIR, { recursive: true, force: true }); mkdirSync(DIR, { recursive: true });
 const VP = MODE === 'mobile' ? { width: 390, height: 844 } : { width: 1280, height: 720 };
 
 // ── Mock catalog: appliances injected into the "add from catalog" flow.
-// Effective watts (no modes) → exact totals. Edit for a new scenario.
+// Effective watts (no modes) → exact totals (134 Ah/day). BRANDS is the order
+// the brand filters are clicked (brand names are the same in every language).
 const CATALOG = [
   { name: 'Laptop',                icon: '💻', watts: 65,  hours: 4,    category: 'Tech',      brand: 'Dell' },
   { name: 'Smartphone ×2',         icon: '📱', watts: 15,  hours: 3,    category: 'Tech',      brand: 'Samsung' },
@@ -32,10 +39,12 @@ const CATALOG = [
   { name: 'MPPT regulator',        icon: '⚡', watts: 5,   hours: 24,   category: 'Système',   brand: 'Victron' },
   { name: 'Lithium battery BMS',   icon: '🔋', watts: 3,   hours: 24,   category: 'Système',   brand: 'Victron' },
 ];
+const BRANDS = [...new Set(CATALOG.map(c => c.brand))]; // unique, in first-seen order
 
 const b = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] });
 const ctx = await b.newContext({ viewport: VP, deviceScaleFactor: MODE === 'mobile' ? 2 : 1,
   isMobile: MODE === 'mobile', hasTouch: MODE === 'mobile' });
+await ctx.addInitScript((lang) => { try { localStorage.setItem('ow_lang', lang); } catch (e) {} }, LANG);
 const p = await ctx.newPage();
 await p.route(/equipment_catalog/i, r => r.fulfill({ status: 200, contentType: 'application/json',
   headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(CATALOG) }));
@@ -43,9 +52,11 @@ await p.goto(URL, { waitUntil: 'load', timeout: 40000 });
 await p.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
 await p.waitForTimeout(1200);
 
-// dismiss onboarding wizard + cookie banner
+// dismiss onboarding wizard + cookie banner (language-independent id + multi-text)
 let el = await p.$('#wiz-skip'); if (el) { await el.click().catch(() => {}); await p.waitForTimeout(250); }
-el = await p.$('text=Accept'); if (el) { await el.click().catch(() => {}); await p.waitForTimeout(250); }
+for (const t of ['Accept', 'Accepter', 'Aceptar', 'Akzeptieren', 'Accetta', 'Aceitar']) {
+  const c = await p.$(`text=${t}`); if (c) { await c.click().catch(() => {}); await p.waitForTimeout(200); break; }
+}
 // empty the appliance list (off-camera)
 for (let i = 0; i < 40; i++) { const d = await p.$('.delbtn'); if (!d) break; await d.click().catch(() => {}); await p.waitForTimeout(90); }
 
@@ -91,20 +102,32 @@ async function hold(n) { await snap(n); }
 // ── SCENARIO (edit this block for a new storyline) ────────────────────────
 await hold(6);                                                   // empty list
 await tap(p.locator('#open-catalog')); await hold(6);            // open catalog
-try { await p.locator('.cat-mode-btn', { hasText: /type/i }).first().click({ timeout: 2000 }); await snap(3); } catch (e) {}
-for (const d of CATALOG) { await tap(p.locator('.cin', { hasText: d.name }).first(), { scroll: true }); await hold(1); }
+// show the two sort modes (Par type / Par marque) — index-based, lang-independent
+await tap(p.locator('.cat-mode-btn').nth(1), { scroll: false }); await hold(5);  // By type
+await tap(p.locator('.cat-mode-btn').nth(0), { scroll: false }); await hold(4);  // By brand
+// pick equipment by clicking each brand filter, then selecting its item(s)
+for (const brand of BRANDS) {
+  const chip = p.locator('.cat-brand-card', { hasText: brand }).first();
+  await tap(chip, { scroll: false }); await hold(1);
+  const items = p.locator('.cin');
+  const n = await items.count();
+  for (let j = 0; j < n; j++) { await tap(items.nth(j), { scroll: false }); await hold(1); }
+}
 await hold(3);
-await tap(p.getByText(/Add \d+ item/i).first(), { scroll: false }); await hold(8);   // confirm add
+await tap(p.locator('#catalog-confirm'), { scroll: false }); await hold(8);      // confirm add
 await smoothScrollTo(0); await hold(4);
-await tap(p.locator('.btf', { hasText: 'AGM' }).first()); await hold(3);             // battery AGM
-await tap(p.locator('.bah', { hasText: '140Ah' }).first()); await hold(4);          // model 140Ah
+await tap(p.locator('.btf').nth(0)); await hold(3);                              // battery AGM (1st type)
+await tap(p.locator('.bah', { hasText: '140Ah' }).first()); await hold(4);      // model 140Ah
 await tap(p.locator('.nb-btns').getByText('2', { exact: true }).first()); await hold(5); // ×2 parallel
-await type(p.locator('#alt-amps'), 50); await hold(2);                               // alternator 50A
-await type(p.locator('#alt-hours'), 2); await hold(5);                               // 2h/day
-await tap(p.locator('.spo', { hasText: '200' }).first()); await hold(3);            // solar 200 Wc
-await type(p.locator('#sol-nb'), 2); await hold(5);                                  // ×2 panels
-// zoom on the consumption-detail card + settle (long hold added at encode time)
-const card = p.locator('.card').filter({ hasText: 'Total consumed' }).first();
+await type(p.locator('#alt-amps'), 50); await hold(2);                          // alternator 50A
+await type(p.locator('#alt-hours'), 2); await hold(5);                          // 2h/day
+await tap(p.locator('.spo', { hasText: '200' }).first()); await hold(3);        // solar 200 Wc
+await type(p.locator('#sol-nb'), 2); await hold(5);                             // ×2 panels
+// zoom on the consumption-detail card. Use the exact per-language "Total consumed"
+// label (detail.totalConsumed) — NOT a /Total cons/ regex, which would also match
+// the autonomy card's "Total consumption".
+const CONSUMED = { en: 'Total consumed', fr: 'Total consommé', es: 'Total consumido', de: 'Gesamt verbraucht', it: 'Totale consumato', pt: 'Total consumido' };
+const card = p.locator('.card').filter({ hasText: CONSUMED[LANG] || CONSUMED.en }).first();
 await center(card); await hold(3);
 await card.evaluate((el, vw) => {
   const bb = el.getBoundingClientRect(); const dx = Math.round(vw / 2 - (bb.x + bb.width / 2));
@@ -116,5 +139,5 @@ await card.evaluate((el, vw) => {
 await snap(5); await hold(24);
 // ──────────────────────────────────────────────────────────────────────────
 
-console.log('MODE', MODE, 'FRAMES', fi, 'OUT', DIR);
+console.log('MODE', MODE, 'LANG', LANG, 'FRAMES', fi, 'OUT', DIR);
 await b.close();
