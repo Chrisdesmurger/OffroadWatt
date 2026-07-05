@@ -1,4 +1,21 @@
 User-agent: *
 Allow: /
 
+# Reputable AI crawlers — allowed (drives AI-answer citations & referral traffic)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Bulk scraper, no referral value
+User-agent: CCBot
+Disallow: /
+
 Sitemap: https://offroadwatt.com/sitemap.xml
