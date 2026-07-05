@@ -91,6 +91,9 @@ function audit(file) {
   const words = (text.match(/\S+/g) || []).length;
   check(words >= 600, `word count ok (~${words} words)`, `content looks thin (~${words} words, want >=600)`);
 
+  // Freshness signal: a visible, localized "updated" date (class="art-updated").
+  check(/class=["']art-updated["']/.test(html), 'visible freshness date present', 'no visible "updated" freshness date (run scripts/gen-freshness.mjs)');
+
   failures += fileFail;
   return fileFail;
 }

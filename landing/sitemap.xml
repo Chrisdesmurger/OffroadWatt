@@ -3,10 +3,16 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://offroadwatt.com/</loc>
-    <lastmod>2026-06-26</lastmod>
+    <lastmod>2026-07-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/"/>
+  </url>
+  <url>
+    <loc>https://offroadwatt.com/about</loc>
+    <lastmod>2026-07-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://offroadwatt.com/blog</loc>
