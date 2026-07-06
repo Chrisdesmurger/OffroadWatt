@@ -13,16 +13,18 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--t1);font-family:var(--sans);line-height:1.7;overflow-x:hidden}
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;background:rgba(9,11,10,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+/* NAV — scope the fixed header to the top-level <nav> only, so the in-article
+   <nav class="breadcrumb"> and <nav class="related"> are NOT pulled to the top. */
+body>nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;background:rgba(9,11,10,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .logo{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--amber);text-decoration:none}
 .logo em{color:var(--t3);font-style:normal}
 .nav-links{display:flex;gap:24px;margin-left:auto;align-items:center}
 .nav-link{color:var(--t2);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
 .nav-link:hover{color:var(--t1)}
 .lang-sel{display:flex;gap:3px}
-.lang-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--t3);cursor:pointer;text-decoration:none;transition:all .2s}
-.lang-btn.on,.lang-btn:hover{border-color:var(--amber);color:var(--amber)}
+.lang-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:3px 6px;font-size:15px;line-height:1;color:var(--t3);cursor:pointer;text-decoration:none;transition:all .2s;opacity:.5;filter:grayscale(.4)}
+.lang-btn.on{border-color:var(--amber);background:var(--amber3);opacity:1;filter:none}
+.lang-btn:hover{border-color:var(--amber);opacity:1;filter:none}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--r);font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;text-decoration:none;border:none;font-family:var(--sans)}
 .btn-primary{background:var(--amber);color:#090b0a}
 .btn-primary:hover{background:var(--amber2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(240,160,48,.25)}
@@ -30,10 +32,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .btn-teal:hover{background:var(--teal2);transform:translateY(-1px)}
 .btn-ghost{background:var(--bg3);border:1px solid var(--border2);color:var(--t1)}
 .btn-ghost:hover{border-color:var(--amber);background:var(--amber3)}
-@media(max-width:600px){.nav-link{display:none}}
+@media(max-width:600px){.nav-link{display:none}body>nav{padding:0 16px;gap:10px}.nav-links{gap:8px}.btn{white-space:nowrap;padding:9px 14px}}
 
 /* ARTICLE LAYOUT */
 .wrap{max-width:760px;margin:0 auto;padding:120px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;color:var(--t2);text-decoration:none;border:1px solid var(--border2);border-radius:100px;padding:7px 15px;margin-bottom:18px;transition:all .2s}
+.back-link:hover{border-color:var(--amber);color:var(--amber)}
+.back-link i{font-size:15px}
 .breadcrumb{font-size:12px;font-family:var(--mono);color:var(--t3);margin-bottom:24px;display:flex;gap:8px;flex-wrap:wrap}
 .breadcrumb a{color:var(--t2);text-decoration:none}
 .breadcrumb a:hover{color:var(--amber)}
