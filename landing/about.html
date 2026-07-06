@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>About OffroadWatt — how the calculator works</title>
+<meta name="description" content="OffroadWatt is a free, independent electrical-autonomy calculator for campervans, motorhomes and vans. How it works, the data behind it, and why it's brand-neutral.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://offroadwatt.com/about">
+<link rel="alternate" hreflang="en" href="https://offroadwatt.com/about">
+<link rel="alternate" hreflang="x-default" href="https://offroadwatt.com/about">
+<meta property="og:type" content="website">
+<meta property="og:title" content="About OffroadWatt — how the calculator works">
+<meta property="og:description" content="A free, independent electrical-autonomy calculator for campervans, motorhomes and vans. How it works and the data behind it.">
+<meta property="og:url" content="https://offroadwatt.com/about">
+<meta property="og:image" content="https://offroadwatt.com/og-image-en.png">
+<meta property="og:site_name" content="OffroadWatt">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://offroadwatt.com/og-image-en.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/blog/blog.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "About OffroadWatt",
+  "url": "https://offroadwatt.com/about",
+  "mainEntity": {
+    "@type": "Organization",
+    "name": "OffroadWatt",
+    "url": "https://offroadwatt.com/",
+    "logo": "https://offroadwatt.com/og-image.png",
+    "description": "Free, independent electrical-autonomy calculator for campervans, motorhomes and vans.",
+    "sameAs": ["https://github.com/Chrisdesmurger/OffroadWatt"],
+    "knowsAbout": ["campervan electrical systems", "leisure batteries", "solar power", "battery autonomy", "DC-DC chargers", "power inverters"]
+  }
+}
+</script>
+<script src="/analytics.js" defer></script>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Offroad<em>Watt</em></a>
+  <div class="nav-links">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/#features" class="nav-link">Features</a>
+    <a href="https://app.offroadwatt.com" class="btn btn-primary" target="_blank"><i class="ti ti-bolt"></i> <span>Try free</span></a>
+  </div>
+</nav>
+
+<main style="max-width:760px;margin:0 auto;padding:110px 24px 40px">
+  <article>
+    <span class="eyebrow"><i class="ti ti-info-circle"></i> About</span>
+    <h1>About OffroadWatt</h1>
+    <div class="article-meta">
+      <span>Independent project</span><span class="dot"></span>
+      <time datetime="2026-07-05" class="art-updated">Updated Jul 5, 2026</time>
+    </div>
+
+    <p class="lede">OffroadWatt is a free, independent tool that helps you size and understand the electrical system of a campervan, motorhome, caravan or van — before you spend a euro on batteries, panels or a charger.</p>
+
+    <h2>What it does</h2>
+    <p>You enter your appliances (with their power and daily hours), your battery bank (AGM, GEL or lithium, 12&nbsp;V or 24&nbsp;V), your solar panels and your alternator charging. OffroadWatt then calculates, in real time, your daily consumption, your solar and alternator production, the residual deficit and your autonomy in days — all expressed in amp-hours (Ah), the way leisure batteries are actually sold in Europe.</p>
+
+    <h2>How the numbers are calculated</h2>
+    <p>The engine is deliberately transparent — the same arithmetic any installer would do by hand:</p>
+    <ul>
+      <li><strong>Consumption:</strong> each appliance's watts &times; hours/day = watt-hours, summed, then divided by the pack voltage to give Ah/day.</li>
+      <li><strong>Battery:</strong> usable capacity = rated Ah &times; depth of discharge (50&nbsp;% for lead-acid AGM/GEL, 80&nbsp;% for LiFePO4).</li>
+      <li><strong>Solar:</strong> panel watts &times; peak-sun-hours for your region &times; MPPT efficiency, converted to Ah/day.</li>
+      <li><strong>Alternator:</strong> dedicated amps &times; driving hours &times; a 0.7 cable/regulator efficiency factor.</li>
+    </ul>
+
+    <h2>The data behind it</h2>
+    <p>OffroadWatt ships with 34 real battery models (AGM, GEL and lithium, 12&nbsp;V and 24&nbsp;V), 41 geographic sun zones worldwide, and a community appliance catalogue that grows as people search for real components and their measured consumption. The blog documents the methodology in depth, with worked examples and comparison tables.</p>
+
+    <h2>Why it's brand-neutral</h2>
+    <p>OffroadWatt has no battery, panel or charger to sell. Recommendations are driven by your numbers, not by an affiliate quota — the opposite of a manufacturer's sizing wizard. It's built and maintained by a solo van-electrics enthusiast, and the source is public on <a href="https://github.com/Chrisdesmurger/OffroadWatt" target="_blank" rel="noopener">GitHub</a>.</p>
+
+    <h2>Languages</h2>
+    <p>The calculator and the blog are available in English, French and Spanish, with region-aware vocabulary (campervan / fourgon / autocaravana) and solar production tuned to your part of the world.</p>
+
+    <div class="cta-box">
+      <h2 style="margin-top:0">Try the calculator</h2>
+      <p>Size your battery, solar and alternator in a couple of minutes — free, no sign-up.</p>
+      <a href="https://app.offroadwatt.com" class="btn btn-primary btn-lg" target="_blank"><i class="ti ti-bolt"></i> Open OffroadWatt</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="footer-logo">Offroad<em>Watt</em></div>
+  <p><a href="/">Home</a> · <a href="/blog">Blog</a> · <a href="/about">About</a> · <a href="https://app.offroadwatt.com" target="_blank">Open the app</a></p>
+  <p style="margin-top:10px">© 2026 OffroadWatt. The electrical autonomy calculator for motorhomes, caravans and vans.</p>
+</footer>
+
+</body>
+</html>
