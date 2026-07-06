@@ -13,6 +13,13 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--t1);font-family:var(--sans);line-height:1.7;overflow-x:hidden}
 
+/* Tabler icons — self-hosted subset (25 glyphs used across the blog) instead of
+   the full ~250 KB CDN stylesheet + ~820 KB webfont. font-display:swap so icons
+   never block text paint. */
+@font-face{font-family:"tabler-icons";font-style:normal;font-weight:400;font-display:swap;src:url("/blog/tabler-icons-subset.woff2") format("woff2")}
+.ti{font-family:"tabler-icons"!important;speak:none;font-style:normal;font-weight:400;font-variant:normal;text-transform:none;line-height:1;display:inline-block;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.ti-alert-triangle::before{content:"\ea06"}.ti-arrow-left::before{content:"\ea19"}.ti-atom-2::before{content:"\ebdf"}.ti-battery-4::before{content:"\ea32"}.ti-battery-charging::before{content:"\ea33"}.ti-battery-charging-2::before{content:"\ef3b"}.ti-bolt::before{content:"\ea38"}.ti-brand-facebook::before{content:"\ec1a"}.ti-brand-whatsapp::before{content:"\ec74"}.ti-brand-x::before{content:"\fc0f"}.ti-bulb::before{content:"\ea51"}.ti-calculator::before{content:"\eb80"}.ti-caravan::before{content:"\ec7c"}.ti-check::before{content:"\ea5e"}.ti-cloud::before{content:"\ea76"}.ti-coin::before{content:"\eb82"}.ti-fridge::before{content:"\f1fa"}.ti-info-circle::before{content:"\eac5"}.ti-news::before{content:"\eafd"}.ti-plug::before{content:"\ebd9"}.ti-plug-connected::before{content:"\f00a"}.ti-refresh::before{content:"\eb13"}.ti-snowflake::before{content:"\ec0b"}.ti-solar-panel::before{content:"\f7bf"}.ti-sun::before{content:"\eb30"}
+
 /* NAV — scope the fixed header to the top-level <nav> only, so the in-article
    <nav class="breadcrumb"> and <nav class="related"> are NOT pulled to the top. */
 body>nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:16px;padding:0 32px;height:64px;background:rgba(9,11,10,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
