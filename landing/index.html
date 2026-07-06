@@ -23,15 +23,15 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- Non-blocking CSS: load stylesheets asynchronously so text can paint immediately
      (font-display:swap is set on the Google Fonts request). -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 </noscript>
+<!-- Tabler icons: self-hosted subset (27 glyphs, ~5.6 KB) instead of the full
+     ~250 KB CDN stylesheet + ~820 KB webfont. See the @font-face + .ti rules below. -->
+<link rel="preload" as="font" type="font/woff2" href="/tabler-icons-subset.woff2" crossorigin>
 <!-- Supabase SDK is loaded lazily on first signup interaction (see loadSupabase() below),
      keeping ~120 KB of JS off the critical rendering path. -->
 
@@ -116,6 +116,11 @@
 }
 </script>
 <style>
+/* Tabler icons — self-hosted subset. Only the 27 glyphs used on this page,
+   with font-display:swap so icons never block text paint. */
+@font-face{font-family:"tabler-icons";font-style:normal;font-weight:400;font-display:swap;src:url("/tabler-icons-subset.woff2") format("woff2")}
+.ti{font-family:"tabler-icons"!important;speak:none;font-style:normal;font-weight:400;font-variant:normal;text-transform:none;line-height:1;display:inline-block;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.ti-arrow-right::before{content:"\ea1f"}.ti-arrows-diff::before{content:"\f296"}.ti-article::before{content:"\f1e2"}.ti-battery-charging::before{content:"\ea33"}.ti-bolt::before{content:"\ea38"}.ti-bulb::before{content:"\ea51"}.ti-car::before{content:"\ebbb"}.ti-check::before{content:"\ea5e"}.ti-clock::before{content:"\ea70"}.ti-database::before{content:"\ea88"}.ti-device-laptop::before{content:"\eb64"}.ti-file-description::before{content:"\f028"}.ti-flame::before{content:"\ec2c"}.ti-fridge::before{content:"\f1fa"}.ti-help-circle::before{content:"\f91d"}.ti-list-numbers::before{content:"\ef11"}.ti-loader::before{content:"\eca3"}.ti-mail::before{content:"\eae5"}.ti-mail-check::before{content:"\f939"}.ti-player-play::before{content:"\ed46"}.ti-player-play-filled::before{content:"\f691"}.ti-plus::before{content:"\eb0b"}.ti-send::before{content:"\eb1e"}.ti-shield-check::before{content:"\eb22"}.ti-sparkles::before{content:"\f6d7"}.ti-sun::before{content:"\eb30"}.ti-world::before{content:"\eb54"}
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#090b0a;--bg2:#0f1310;--bg3:#141a16;
