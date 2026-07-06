@@ -23,15 +23,15 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <!-- Non-blocking CSS: load stylesheets asynchronously so text can paint immediately
      (font-display:swap is set on the Google Fonts request). -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 </noscript>
+<!-- Tabler icons: self-hosted subset (27 glyphs, ~5.6 KB) instead of the full
+     ~250 KB CDN stylesheet + ~820 KB webfont. See the @font-face + .ti rules below. -->
+<link rel="preload" as="font" type="font/woff2" href="/tabler-icons-subset.woff2" crossorigin>
 <!-- Supabase SDK is loaded lazily on first signup interaction (see loadSupabase() below),
      keeping ~120 KB of JS off the critical rendering path. -->
 
@@ -116,6 +116,11 @@
 }
 </script>
 <style>
+/* Tabler icons — self-hosted subset. Only the 27 glyphs used on this page,
+   with font-display:swap so icons never block text paint. */
+@font-face{font-family:"tabler-icons";font-style:normal;font-weight:400;font-display:swap;src:url("/tabler-icons-subset.woff2") format("woff2")}
+.ti{font-family:"tabler-icons"!important;speak:none;font-style:normal;font-weight:400;font-variant:normal;text-transform:none;line-height:1;display:inline-block;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.ti-arrow-right::before{content:"\ea1f"}.ti-arrows-diff::before{content:"\f296"}.ti-article::before{content:"\f1e2"}.ti-battery-charging::before{content:"\ea33"}.ti-bolt::before{content:"\ea38"}.ti-bulb::before{content:"\ea51"}.ti-car::before{content:"\ebbb"}.ti-check::before{content:"\ea5e"}.ti-clock::before{content:"\ea70"}.ti-database::before{content:"\ea88"}.ti-device-laptop::before{content:"\eb64"}.ti-file-description::before{content:"\f028"}.ti-flame::before{content:"\ec2c"}.ti-fridge::before{content:"\f1fa"}.ti-help-circle::before{content:"\f91d"}.ti-list-numbers::before{content:"\ef11"}.ti-loader::before{content:"\eca3"}.ti-mail::before{content:"\eae5"}.ti-mail-check::before{content:"\f939"}.ti-player-play::before{content:"\ed46"}.ti-player-play-filled::before{content:"\f691"}.ti-plus::before{content:"\eb0b"}.ti-send::before{content:"\eb1e"}.ti-shield-check::before{content:"\eb22"}.ti-sparkles::before{content:"\f6d7"}.ti-sun::before{content:"\eb30"}.ti-world::before{content:"\eb54"}
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#090b0a;--bg2:#0f1310;--bg3:#141a16;
@@ -145,8 +150,9 @@ nav{
 .nav-link{color:var(--t2);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
 .nav-link:hover{color:var(--t1)}
 .lang-sel{display:flex;gap:3px}
-.lang-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--t3);cursor:pointer;transition:all .2s}
-.lang-btn.on,.lang-btn:hover{border-color:var(--amber);color:var(--amber)}
+.lang-btn{background:none;border:1px solid var(--border);border-radius:var(--r);padding:3px 6px;font-size:15px;line-height:1;color:var(--t3);cursor:pointer;transition:all .2s;opacity:.5;filter:grayscale(.4)}
+.lang-btn.on{border-color:var(--amber);background:var(--amber3);opacity:1;filter:none}
+.lang-btn:hover{border-color:var(--amber);opacity:1;filter:none}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--r);font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;text-decoration:none;border:none;font-family:var(--sans)}
 .btn-outline{background:none;border:1px solid var(--border2);color:var(--t2)}
 .btn-outline:hover{border-color:var(--amber);color:var(--amber)}
@@ -158,7 +164,7 @@ nav{
 .btn-ghost{background:var(--bg3);border:1px solid var(--border2);color:var(--t1)}
 .btn-ghost:hover{border-color:var(--amber);background:var(--amber3)}
 @media(max-width:768px){.nav-link{display:none}.nav-links{gap:8px}#nav-login{display:none}}
-@media(max-width:420px){.lang-sel{display:none}.nav-links .btn{padding:9px 14px;font-size:13px}}
+@media(max-width:420px){.nav-links .btn{padding:9px 12px;font-size:13px}.lang-btn{font-size:14px;padding:3px 5px}}
 
 /* ── HERO ────────────────────────────────────────────── */
 .hero{
@@ -197,11 +203,23 @@ nav{
   margin-bottom:40px;position:relative;z-index:1;
 }
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.hero-desc{margin-top:36px;position:relative;z-index:1}
 .hero-sub{margin-top:18px;font-size:12px;color:var(--t3);position:relative;z-index:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
 .hero-sub i{font-size:14px;color:var(--green)}
 
 /* App preview */
-.hero-preview{margin-top:60px;position:relative;z-index:1;max-width:860px;width:100%}
+.hero-preview{margin-top:40px;position:relative;z-index:1;max-width:860px;width:100%}
+
+/* Mobile: start the hero at the top and tighten spacing so the live demo
+   is already visible above the fold on open. */
+@media(max-width:768px){
+  .hero{justify-content:flex-start;padding:80px 20px 48px}
+  .hero-badge{margin-bottom:14px}
+  .hero h1{margin-bottom:16px}
+  .hero-ctas{gap:10px}
+  .hero-preview{margin-top:22px}
+  .hero-desc{margin-top:24px}
+}
 .preview-bar{
   background:var(--bg3);border:1px solid var(--border2);
   border-radius:var(--r2) var(--r2) 0 0;
@@ -507,17 +525,17 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
   <a href="#" class="logo">Offroad<em>Watt</em></a>
   <div class="nav-links">
     <a href="#features" class="nav-link" data-i18n="nav.features">Fonctionnalités</a>
-    <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>    <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
-    <a href="/blog" class="nav-link" data-i18n="nav.blog">Blog</a>
+    <a href="#hiw" class="nav-link" data-i18n="nav.hiw">Comment ça marche</a>
+    <a href="#faq" class="nav-link" data-i18n="nav.faq">FAQ</a>
     <div class="lang-sel">
-      <button class="lang-btn" data-lang="fr">FR</button>
-      <button class="lang-btn" data-lang="en">EN</button>
-      <button class="lang-btn" data-lang="es">ES</button>
+      <button class="lang-btn" data-lang="fr" aria-label="Français" title="Français">🇫🇷</button>
+      <button class="lang-btn" data-lang="en" aria-label="English" title="English">🇬🇧</button>
+      <button class="lang-btn" data-lang="es" aria-label="Español" title="Español">🇪🇸</button>
     </div>
     <a href="#" class="btn btn-outline" id="nav-login" data-i18n="nav.login">Se connecter</a>
-    <a href="#signup" class="btn btn-primary" data-i18n="nav.cta">
-      <i class="ti ti-bolt"></i>
-      <span data-i18n="nav.cta">Essayer gratuitement</span>
+    <a href="/blog" class="btn btn-primary" id="nav-blog">
+      <i class="ti ti-article"></i>
+      <span data-i18n="nav.blog">Blog</span>
     </a>
   </div>
 </nav>
@@ -538,11 +556,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     <span data-i18n="hero.t3">partez l'esprit léger.</span>
   </h1>
 
-  <p class="reveal" data-i18n="hero.sub">
-    Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires
-    et trouvez la batterie idéale pour votre camping-car, caravane ou van.
-  </p>
-
   <div class="hero-ctas reveal">
     <a href="#signup" class="btn btn-primary btn-lg">
       <i class="ti ti-bolt"></i>
@@ -553,12 +566,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       <span data-i18n="hero.cta2">Voir l'application</span>
     </a>
   </div>
-
-  <p class="hero-sub reveal">
-    <i class="ti ti-shield-check"></i>
-    <span data-i18n="hero.note1">Gratuit · Sans installation ·</span>
-    <span data-i18n="hero.note2">Données confidentielles</span>
-  </p>
 
   <!-- Live demo (real app, recorded) -->
   <div class="hero-preview reveal">
@@ -581,6 +588,17 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
     <!-- The demo clip is chosen by language + viewport in applyDemoVideo() (see script below). -->
     <p class="demo-caption"><i class="ti ti-clock"></i> <span data-i18n="demo.caption">Moins de 30 secondes · Aucune installation · Résultat instantané</span></p>
   </div>
+
+  <p class="hero-desc reveal" data-i18n="hero.sub">
+    Calculez en temps réel votre consommation, dimensionnez vos panneaux solaires
+    et trouvez la batterie idéale pour votre camping-car, caravane ou van.
+  </p>
+
+  <p class="hero-sub reveal">
+    <i class="ti ti-shield-check"></i>
+    <span data-i18n="hero.note1">Gratuit · Sans installation ·</span>
+    <span data-i18n="hero.note2">Données confidentielles</span>
+  </p>
 </section>
 
 <!-- ── STATS ──────────────────────────────────────────────── -->
