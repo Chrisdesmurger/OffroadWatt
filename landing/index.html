@@ -571,7 +571,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       </div>
       <div class="demo-stage">
         <video id="demo-video" class="demo-video" autoplay muted loop playsinline preload="metadata"
-               poster="/demo-poster.png" aria-label="Démonstration du calculateur OffroadWatt">
+               aria-label="Démonstration du calculateur OffroadWatt">
           <source src="/demo.webm" type="video/webm">
           <source src="/demo.mp4" type="video/mp4">
         </video>
@@ -1176,7 +1176,6 @@ function applyDemoVideo(){
   _demoKey = key
   const frame = v.closest('.demo-frame')
   if(frame) frame.classList.toggle('is-mobile-demo', !!mobile)
-  v.setAttribute('poster', base + '-poster.png')
   v.innerHTML = '<source src="' + base + '.webm" type="video/webm"><source src="' + base + '.mp4" type="video/mp4">'
   v.load()
   const play = () => v.play().catch(() => {})
@@ -1263,7 +1262,7 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
   if(!v || !overlay) return
   const hide = () => { overlay.style.display = 'none' }
   v.addEventListener('playing', hide)
-  // If autoplay is blocked or the source is missing, the poster + play icon remain visible.
+  // If autoplay is blocked or the source is missing, the dark stage + play icon remain visible.
 })()
 
 // ── NAV SHADOW ON SCROLL ────────────────────────────────────
