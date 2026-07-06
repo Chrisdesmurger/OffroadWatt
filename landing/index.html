@@ -24,8 +24,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<!-- Non-blocking CSS: load stylesheets asynchronously so text can paint immediately
+     (font-display:swap is set on the Google Fonts request). -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+</noscript>
+<!-- Supabase SDK is loaded lazily on first signup interaction (see loadSupabase() below),
+     keeping ~120 KB of JS off the critical rendering path. -->
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -562,7 +571,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
       </div>
       <div class="demo-stage">
         <video id="demo-video" class="demo-video" autoplay muted loop playsinline preload="metadata"
-               poster="/demo-poster.png" aria-label="Démonstration du calculateur OffroadWatt">
+               aria-label="Démonstration du calculateur OffroadWatt">
           <source src="/demo.webm" type="video/webm">
           <source src="/demo.mp4" type="video/mp4">
         </video>
@@ -578,7 +587,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
 <div class="stats-strip">
   <div class="stats-inner">
     <div class="stat reveal">
-      <div class="stat-val">478</div>
+      <div class="stat-val">532</div>
       <div class="stat-lbl" data-i18n="stats.apps">Appareils préconfigurés</div>
     </div>
     <div class="stat-sep reveal"></div>
@@ -889,22 +898,22 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:56px 32px
 const APP_URL = 'https://app.offroadwatt.com/'
 const SB_URL  = 'https://ofjpskrjlwfebaqomijm.supabase.co'
 const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9manBza3JqbHdmZWJhcW9taWptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODIzMTMsImV4cCI6MjA5NTY1ODMxM30.R2hqPwmvihdgVv7rwLp0r--Jo0Qp6m6ORc-PU4M58n8'
-// Supabase SDK is loaded on demand (first signup) instead of render-blocking the
-// whole landing page — it is only needed for the magic-link signup below.
-let sb = null
-async function ensureSb(){
-  if(sb) return sb
-  if(!window.supabase){
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script')
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'
-      s.onload = resolve
-      s.onerror = () => reject(new Error('supabase-load-failed'))
-      document.head.appendChild(s)
-    })
-  }
-  sb = window.supabase.createClient(SB_URL, SB_KEY)
-  return sb
+
+// Supabase is only needed for the Magic Link signup. Load its SDK on demand so it
+// stays off the critical path. loadSupabase() is idempotent and warmed up on email focus.
+let _sb = null, _sbPromise = null
+function loadSupabase(){
+  if(_sb) return Promise.resolve(_sb)
+  if(_sbPromise) return _sbPromise
+  _sbPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'
+    s.async = true
+    s.onload = () => { _sb = window.supabase.createClient(SB_URL, SB_KEY); resolve(_sb) }
+    s.onerror = () => { _sbPromise = null; reject(new Error('Supabase SDK failed to load')) }
+    document.head.appendChild(s)
+  })
+  return _sbPromise
 }
 
 // ── i18n ────────────────────────────────────────────────────
@@ -1168,7 +1177,6 @@ function applyDemoVideo(){
   _demoKey = key
   const frame = v.closest('.demo-frame')
   if(frame) frame.classList.toggle('is-mobile-demo', !!mobile)
-  v.setAttribute('poster', base + '-poster.png')
   v.innerHTML = '<source src="' + base + '.webm" type="video/webm"><source src="' + base + '.mp4" type="video/mp4">'
   v.load()
   const play = () => v.play().catch(() => {})
@@ -1216,7 +1224,7 @@ async function doSignup(){
   btn.innerHTML = '<i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:16px"></i>'
 
   try {
-    const client = await ensureSb()
+    const client = await loadSupabase()
     const { error } = await client.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: APP_URL, shouldCreateUser: true }
@@ -1237,6 +1245,11 @@ document.getElementById('signup-email').addEventListener('keydown', e => {
   document.getElementById('signup-email').classList.remove('err')
 })
 
+// Warm up the Supabase SDK as soon as the user shows signup intent, so the
+// Magic Link request feels instant despite the lazy load.
+document.getElementById('signup-email').addEventListener('focus', () => { loadSupabase().catch(() => {}) }, { once: true })
+document.getElementById('signup-btn').addEventListener('pointerenter', () => { loadSupabase().catch(() => {}) }, { once: true })
+
 // ── SCROLL ANIMATIONS ──────────────────────────────────────
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target) } })
@@ -1250,7 +1263,7 @@ document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
   if(!v || !overlay) return
   const hide = () => { overlay.style.display = 'none' }
   v.addEventListener('playing', hide)
-  // If autoplay is blocked or the source is missing, the poster + play icon remain visible.
+  // If autoplay is blocked or the source is missing, the dark stage + play icon remain visible.
 })()
 
 // ── NAV SHADOW ON SCROLL ────────────────────────────────────
