@@ -94,6 +94,9 @@ function audit(file) {
   // Freshness signal: a visible, localized "updated" date (class="art-updated").
   check(/class=["']art-updated["']/.test(html), 'visible freshness date present', 'no visible "updated" freshness date (run scripts/gen-freshness.mjs)');
 
+  // E-E-A-T: a named Person author (not the Organization) in the Article JSON-LD.
+  check(/"author":\s*\{\s*"@type":\s*"Person"/.test(html), 'named Person author present', 'author is not a named Person (run scripts/gen-author.mjs)');
+
   failures += fileFail;
   return fileFail;
 }
