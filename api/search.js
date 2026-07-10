@@ -1,9 +1,11 @@
+import { checkRateLimit } from './_rate-limit.js'
+
 export const config = { runtime: 'edge' }
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 const system = `Tu es un expert en équipements électriques 12V pour camping-car, van et caravane.
@@ -29,6 +31,9 @@ export default async function handler(req) {
 
   const { query } = body || {}
   if (!query) return new Response(JSON.stringify({ error: 'Missing query' }), { status: 400, headers: CORS })
+
+  const blocked = await checkRateLimit(req, 'search', CORS)
+  if (blocked) return blocked
 
   const apiKey = process.env.ANTHROPIC_KEY || process.env.VITE_ANTHROPIC_KEY
   if (!apiKey) return new Response(JSON.stringify({ error: 'API key not configured on server' }), { status: 500, headers: CORS })
