@@ -381,7 +381,7 @@ async function signInWithEmail(email) {
   set({ authLoading: true })
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.origin },
+    options: { emailRedirectTo: window.location.origin + '?lang=' + getLang() },
   })
   if (error) { set({ authLoading: false }); alert(t('alert.error') + error.message); return }
   set({ authLoading: false, modal: { type: 'auth-sent', email } })
@@ -2729,6 +2729,15 @@ async function loadCatalogFromDB() {
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initLang()
+// Magic link redirect may carry ?lang=xx — override detected language
+;(() => {
+  const lp = new URLSearchParams(window.location.search).get('lang')
+  if (lp && ['en', 'es', 'fr'].includes(lp)) {
+    setLang(lp)
+    const url = new URL(window.location); url.searchParams.delete('lang')
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash)
+  }
+})()
 loadPersistedState()
 // Une config partagée (?c= base64 ou ?s= lien court) a priorité sur le localStorage (#13)
 const sharedLoaded = loadStateFromURL()
