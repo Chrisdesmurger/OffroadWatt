@@ -66,6 +66,15 @@ const BAT_TYPES = [
 
 const DOD = { AGM: 0.5, GEL: 0.5, LI: 0.8 }
 const PANELS = [80, 100, 150, 200, 250, 300, 400, 500]
+const INVERTERS = [
+  { w: 300,  eur: 80 },
+  { w: 600,  eur: 150 },
+  { w: 1000, eur: 250 },
+  { w: 1500, eur: 400 },
+  { w: 2000, eur: 600 },
+  { w: 3000, eur: 1000 },
+]
+const INV_EFF = 0.88
 
 // Seasonal solar coefficients by latitude band (ratio vs annual average)
 // Index 0 = Jan, 11 = Dec. Values derived from PVGIS monthly irradiance data.
@@ -182,7 +191,7 @@ const VTYPE_PRESETS = {
     altOn: true, batMinAh: 200,
     apps: [
       { n: 'Réfrigérateur compresseur 12V 75L', icon: 'ti-fridge',         w: 55,  h: 24,   cat: 'Cuisine'   },
-      { n: 'Micro-ondes',                       icon: 'ti-microwave',      w: 900, h: 0.25, cat: 'Cuisine'   },
+      { n: 'Micro-ondes',                       icon: 'ti-microwave',      w: 900, h: 0.25, cat: 'Cuisine', ac: true },
       { n: 'Télévision 24" LED',                icon: 'ti-device-tv',      w: 25,  h: 3,    cat: 'Tech'      },
       { n: 'Plafonnier LED 12V principal',      icon: 'ti-bulb',           w: 12,  h: 5,    cat: 'Éclairage' },
       { n: 'Spots LED encastrés ×6',            icon: 'ti-lamp',           w: 18,  h: 4,    cat: 'Éclairage' },
@@ -231,6 +240,7 @@ function instantiatePresetApps(vtype) {
   return preset.apps.map((a, i) => ({
     id: base + i,
     n: a.n, icon: a.icon, w: a.w, h: a.h, on: true, cat: a.cat,
+    ...(a.ac ? { ac: true } : {}),
     ...(a.modes ? { modes: a.modes.map(m => ({ ...m })), activeMode: a.activeMode ?? 0 } : {}),
   }))
 }
@@ -435,7 +445,7 @@ let S = {
     { id: 4,             n: 'Laptop',                   icon: 'ti-device-laptop',  w: 65,  h: 4,    on: true, cat: 'Tech'      },
     { id: 5,             n: 'Smartphone ×2',            icon: 'ti-device-mobile',  w: 15,  h: 3,    on: true, cat: 'Tech'      },
     { id: 6,             n: 'Pompe à eau',              icon: 'ti-droplet',        w: 50,  h: 0.5,  on: true, cat: 'Eau'       },
-    { id: 7,             n: 'Micro-ondes',              icon: 'ti-microwave',      w: 900, h: 0.25, on: true, cat: 'Cuisine'   },
+    { id: 7,             n: 'Micro-ondes',              icon: 'ti-microwave',      w: 900, h: 0.25, on: true, cat: 'Cuisine', ac: true },
     { id: 8,             n: 'Routeur 4G',               icon: 'ti-wifi',           w: 10,  h: 24,   on: true, cat: 'Tech'      },
     { id: 1780115079731, n: 'Dometic RDC 70 (Dometic)', icon: 'ti-bowl-spoon',     w: 45,  h: 24,   on: true, cat: 'Cuisine',
       modes: [
@@ -777,7 +787,12 @@ const ALT_EFF = 0.7 // rendement régulateur/pertes câbles
 
 function calc(st = S) {
   const active = st.apps.filter(a => a.on)
-  const cons = active.reduce((s, a) => s + a.w * a.h, 0)
+  const rawCons = active.reduce((s, a) => s + a.w * a.h, 0)
+  const acApps = active.filter(a => a.ac)
+  const acWh = acApps.reduce((s, a) => s + a.w * a.h, 0)
+  const invLoss = acWh > 0 ? acWh * (1 / INV_EFF - 1) : 0
+  const cons = rawCons + invLoss
+  const acPeakW = acApps.reduce((s, a) => s + a.w, 0) * 1.2
   const solar = st.solOn === false ? 0 : st.solW * st.solNb * sunHOf(st) * st.solEff
   const alt = st.altOn ? st.altAmps * st.bat.v * st.altHours * ALT_EFF : 0
   const recharge = solar + alt
@@ -787,7 +802,7 @@ function calc(st = S) {
   const usable = batWhTotal * st.dod
   const autDays = net > 0 ? usable / net : Infinity
   const solCovPct = cons > 0 ? Math.min(100, recharge / cons * 100) : 100
-  return { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
+  return { cons, rawCons, invLoss, acWh, acPeakW, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown: active.map(a => ({ ...a, wh: Math.round(a.w * a.h) })) }
 }
 
 // Coût du système énergétique (batteries + solaire + alternateur)
@@ -970,7 +985,7 @@ function buildAppRow(a) {
   if (hasModes) {
     return `
     <div class="arow has-modes">
-      <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
+      <span class="an" title="${ta(a.n)}">${ta(a.n)}${a.ac ? ' <span class="ac-badge">AC</span>' : ''}</span>
       <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
       <span class="wh">${a.on ? toAh(a.w * a.h) : 0} Ah</span>
       <button class="delbtn" data-del="${a.id}"><i class="ti ti-trash" style="font-size:12px"></i></button>
@@ -985,7 +1000,7 @@ function buildAppRow(a) {
   }
   return `
   <div class="arow">
-    <span class="an" title="${ta(a.n)}">${ta(a.n)}</span>
+    <span class="an" title="${ta(a.n)}">${ta(a.n)}${a.ac ? ' <span class="ac-badge">AC</span>' : ''}</span>
     <div class="wf"><input type="number" min="0" max="5000" value="${a.w}" data-id="${a.id}" data-field="w" class="fi"><span>W</span></div>
     <div class="hf"><input type="number" min="0" max="24" step="0.5" value="${a.h}" data-id="${a.id}" data-field="h" class="fi"><span>${t('unit.hday')}</span></div>
     <span class="wh">${toAh(a.w * a.h)} Ah</span>
@@ -1155,8 +1170,50 @@ function buildDischargeChart(usable, net, recharge, cons) {
   </div>`
 }
 
+function buildInverterCard(acPeakW, acWh, invLoss, breakdown) {
+  const acApps = breakdown.filter(a => a.ac)
+  if (acApps.length === 0) {
+    return `<div class="card">
+      <div class="ct te"><i class="ti ti-current-ac"></i>${t('inv.title')}</div>
+      <div style="font-size:12px;color:var(--t3);padding:4px 0">${t('inv.noAc')}</div>
+      <div style="font-size:10px;color:var(--t3)">${t('inv.noAcHint')}</div>
+    </div>`
+  }
+  const contW = Math.round(acApps.reduce((s, a) => s + a.w, 0))
+  const peakW = Math.round(acPeakW)
+  const rec = INVERTERS.find(inv => inv.w >= peakW) || INVERTERS[INVERTERS.length - 1]
+  const batW = S.bat.ah * S.bat.v * S.batNb
+  const peakMinutes = batW > 0 ? Math.round(S.bat.ah * S.batNb * S.dod * S.bat.v / peakW * 60) : 0
+  const showWarn = peakW > batW / 3
+  const lossPct = Math.round((1 - INV_EFF) * 100)
+
+  return `<div class="card">
+    <div class="ct te"><i class="ti ti-current-ac"></i>${t('inv.title')}</div>
+    <div class="inv-list">
+      ${acApps.map(a => `<div class="inv-row">
+        <span class="inv-name">${ta(a.n)}</span>
+        <span class="inv-w">${a.w} W</span>
+      </div>`).join('')}
+    </div>
+    <div class="bkdown" style="margin-top:8px">
+      <div class="bkrow"><span>${t('inv.continuous')}</span><span class="bkv">${contW} W</span></div>
+      <div class="bkrow"><span>${t('inv.peak')}</span><span class="bkv" style="color:var(--am)">${peakW} W</span></div>
+      <div class="bkrow"><span>${t('inv.recommended')}</span><span class="bkv inv-rec">${rec.w} W <span style="font-size:9px;color:var(--t3)">(~${rec.eur} €)</span></span></div>
+      <div class="bkrow"><span>${t('inv.losses')}</span><span class="bkv" style="color:var(--rd)">+ ${toAh(invLoss)} Ah/j</span></div>
+    </div>
+    <div style="font-size:10px;color:var(--t3);margin-top:4px">${t('inv.lossesHint', { pct: Math.round(INV_EFF * 100) })}</div>
+    ${showWarn ? `<div class="inv-warn">
+      <i class="ti ti-alert-triangle" style="font-size:12px"></i>
+      <div>
+        <div>${t('inv.warning', { peakW, batAh: S.bat.ah * S.batNb, batV: S.bat.v })}</div>
+        <div style="font-size:10px;opacity:.8">${t('inv.warningHint', { minutes: peakMinutes })}</div>
+      </div>
+    </div>` : ''}
+  </div>`
+}
+
 function buildEnergyTab() {
-  const { cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
+  const { cons, rawCons, invLoss, acWh, acPeakW, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown } = calc()
   const isDanger = net > usable
   const autStr = isFinite(autDays) ? (autDays < 1 ? (autDays * 24).toFixed(1) + ' h' : autDays.toFixed(1) + ' j') : '∞'
 
@@ -1353,6 +1410,8 @@ function buildEnergyTab() {
         </div>
       </div>
 
+      ${buildInverterCard(acPeakW, acWh, invLoss, breakdown)}
+
       ${buildDischargeChart(usable, net, recharge, cons)}
 
       <div class="card">
@@ -1360,7 +1419,8 @@ function buildEnergyTab() {
         <div class="bkdown">
           ${breakdown.slice(0, 6).map(a => `<div class="bkrow"><span class="bkn">${ta(a.n)}</span><span class="bkv">${toAh(a.wh)} Ah/j</span></div>`).join('')}
           ${breakdown.length > 6 ? `<div class="bkrow"><span class="bkn">${t('detail.others', { n: breakdown.length - 6 })}</span><span class="bkv">${toAh(breakdown.slice(6).reduce((s, a) => s + a.wh, 0))} Ah/j</span></div>` : ''}
-          <div class="bkrow"><span>${t('detail.totalConsumed')}</span><span class="bkv" style="color:var(--am)">${toAh(cons)} Ah/j</span></div>
+          <div class="bkrow"><span>${t('detail.totalConsumed')}</span><span class="bkv" style="color:var(--am)">${toAh(rawCons)} Ah/j</span></div>
+          ${invLoss > 0 ? `<div class="bkrow"><span>${t('detail.inverterLoss', { pct: Math.round((1 - INV_EFF) * 100) })}</span><span class="bkv" style="color:var(--rd)">+ ${toAh(invLoss)} Ah/j</span></div>` : ''}
           <div class="bkrow"><span>${t('detail.solarProduction')}</span><span class="bkv" style="color:var(--so)">− ${toAh(Math.min(solar, cons))} Ah/j</span></div>
           ${S.altOn ? `<div class="bkrow"><span>${t('detail.altCharge')}</span><span class="bkv" style="color:var(--pu)">− ${toAh(Math.min(alt, Math.max(0, cons - solar)))} Ah/j</span></div>` : ''}
           <div class="bkrow" style="border-top:1px solid var(--b2);margin-top:2px">
@@ -1397,11 +1457,11 @@ function buildEnergyTab() {
   </div>
 
   <div class="print-report" id="print-report">
-    ${buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr })}
+    ${buildPrintReport({ cons, rawCons, invLoss, acWh, acPeakW, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr })}
   </div>`
 }
 
-function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr }) {
+function buildPrintReport({ cons, rawCons, invLoss, acWh, acPeakW, solar, alt, recharge, net, batWhUnit, batWhTotal, usable, autDays, solCovPct, breakdown, isDanger, autStr }) {
   const now = new Date()
   const dateStr = now.toLocaleDateString(localeCode(), { day: '2-digit', month: 'long', year: 'numeric' })
   const vtypeLabel = t('vt.' + S.vtype)
@@ -1478,6 +1538,18 @@ function buildPrintReport({ cons, solar, alt, recharge, net, batWhUnit, batWhTot
       </table>
     </div>` : ''}
   </div>
+
+  ${acPeakW > 0 ? (() => {
+    const rec = INVERTERS.find(inv => inv.w >= acPeakW) || INVERTERS[INVERTERS.length - 1]
+    return `<div class="pr-section">
+      <div class="pr-sh">${t('pr.inverter')}</div>
+      <table class="pr-kv">
+        <tr><td>${t('pr.invRecommended')}</td><td>${rec.w} W (~${rec.eur} €)</td></tr>
+        <tr><td>${t('pr.invPeak')}</td><td>${Math.round(acPeakW)} W</td></tr>
+        <tr class="pr-hi"><td>${t('pr.invLosses')}</td><td>+ ${toAh(invLoss)} Ah/j</td></tr>
+      </table>
+    </div>`
+  })() : ''}
 
   <div class="pr-section">
     <div class="pr-sh">${t('pr.balance')}</div>
