@@ -3,6 +3,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { t, ta, getLang, setLang, initLang, localeCode, LANGS } from './i18n.js'
 import { initGA, gaEvent, gaIdentify } from './analytics.js'
+import { inject } from '@vercel/analytics'
 
 // Traduction des catégories et régions (les clés internes restent en français)
 const tcat = (c) => t('cat.' + c)
@@ -2741,6 +2742,7 @@ try {
 } catch (_) {}
 render()
 initGA()
+inject()
 track('session_started', {
   isNewUser: !localStorage.getItem(ONBOARDED_KEY),
   fromShare: sharedLoaded || hasShortParam,
